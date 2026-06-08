@@ -22,30 +22,6 @@ func WithThemes(light, dark string) Option {
 	}
 }
 
-func WithCopyButton(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.CopyButton = enabled }
-}
-
-func WithFullscreenButton(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.FullscreenButton = enabled }
-}
-
-func WithLineNumbers(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.LineNumbers = enabled }
-}
-
-func WithFrameDetection(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.FrameDetection = enabled }
-}
-
-func WithFileNameExtraction(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.FileNameExtraction = enabled }
-}
-
-func WithLanguageBadge(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.LanguageBadge = enabled }
-}
-
 func WithDarkMode(dm DarkMode) Option {
 	return func(b *engineBuilder) {
 		switch v := dm.(type) {
@@ -73,18 +49,6 @@ func WithTabWidth(n int) Option {
 
 func WithStyleReset(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.StyleReset = enabled }
-}
-
-func WithThemedScrollbars(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.ThemedScrollbars = enabled }
-}
-
-func WithThemedSelectionColors(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.ThemedSelection = enabled }
-}
-
-func WithContentExclusion(enabled bool) Option {
-	return func(b *engineBuilder) { b.cfg.ContentExclusion = enabled }
 }
 
 func WithDefaults(d BlockDefaults) Option {
@@ -115,25 +79,6 @@ func WithLanguageDefaults(m map[string]BlockDefaults) Option {
 	}
 }
 
-func WithCollapsible(c CollapsibleConfig) Option {
-	return func(b *engineBuilder) {
-		b.cfg.Collapsible = &config.CollapsibleConfig{
-			LineThreshold:         c.LineThreshold,
-			PreviewLines:          c.PreviewLines,
-			DefaultCollapsed:      c.DefaultCollapsed,
-			PreserveIndent:        c.PreserveIndent,
-			ExpandButtonText:      c.ExpandButtonText,
-			CollapseButtonText:    c.CollapseButtonText,
-			ExpandedAnnouncement:  c.ExpandedAnnouncement,
-			CollapsedAnnouncement: c.CollapsedAnnouncement,
-		}
-	}
-}
-
-func WithMinSyntaxHighlightingColorContrast(ratio float64) Option {
-	return func(b *engineBuilder) { b.cfg.MinContrast = ratio }
-}
-
 func WithMinify(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.Minify = enabled }
 }
@@ -144,5 +89,24 @@ func WithCascadeLayer(name string) Option {
 
 func WithLanguageAliases(m map[string]string) Option {
 	return func(b *engineBuilder) { b.cfg.LanguageAliases = m }
+}
+
+func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {
+	bo := &config.BlockOptions{
+		Lang:            opts.Lang,
+		Title:           opts.Title,
+		StartLineNumber: opts.StartLineNumber,
+	}
+	if opts.Frame != nil {
+		f := int(*opts.Frame)
+		bo.Frame = &f
+	}
+	if opts.LineNumbers != nil {
+		bo.LineNumbers = opts.LineNumbers
+	}
+	if opts.Wrap != nil {
+		bo.Wrap = opts.Wrap
+	}
+	return bo
 }
 

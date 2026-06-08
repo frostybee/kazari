@@ -536,3 +536,184 @@ func TestJS_EmptyWhenNoFeatures(t *testing.T) {
 		t.Error("JS should be empty when no features enabled")
 	}
 }
+
+// --- Line number tests ---
+
+func TestRender_NoLineNumbers_Default(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "gutter") {
+		t.Error("gutter should not be present when line numbers disabled")
+	}
+	if strings.Contains(html, `class="ln"`) {
+		t.Error("ln should not be present when line numbers disabled")
+	}
+}
+
+func TestRender_LineNumbers_Enabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+			{{Content: "c", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	html, err := engine.Render("a\nb\nc", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<div class="gutter">`) {
+		t.Error("missing gutter div")
+	}
+	if !strings.Contains(html, `aria-hidden="true">1</div>`) {
+		t.Error("missing line number 1")
+	}
+	if !strings.Contains(html, `aria-hidden="true">2</div>`) {
+		t.Error("missing line number 2")
+	}
+	if !strings.Contains(html, `aria-hidden="true">3</div>`) {
+		t.Error("missing line number 3")
+	}
+}
+
+func TestRender_LineNumbers_StartLineNumber(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	ln := true
+	html, err := engine.Render("a\nb", Options{Lang: "go", LineNumbers: &ln, StartLineNumber: 42})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `aria-hidden="true">42</div>`) {
+		t.Error("missing line number 42")
+	}
+	if !strings.Contains(html, `aria-hidden="true">43</div>`) {
+		t.Error("missing line number 43")
+	}
+}
+
+func TestRender_LineNumbers_DynamicWidth(t *testing.T) {
+	tokens := make([][]Token, 150)
+	for i := range tokens {
+		tokens[i] = []Token{{Content: "x", Color: "#000"}}
+	}
+	hl := &mockHighlighter{
+		lightTokens: tokens,
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	code := strings.Repeat("x\n", 149) + "x"
+	html, err := engine.Render(code, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "--kz-ln-width:3ch") {
+		t.Error("should set --kz-ln-width:3ch for 150 lines")
+	}
+}
+
+func TestRender_LineNumbers_NoWidthOverrideForSmallBlocks(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	html, err := engine.Render("a\nb", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "--kz-ln-width") {
+		t.Error("should not set --kz-ln-width for small blocks (≤2 digits)")
+	}
+}
+
+func TestRender_LineNumbers_AriaHidden(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `aria-hidden="true"`) {
+		t.Error("line numbers should have aria-hidden=\"true\"")
+	}
+}
+
+func TestRender_LineNumbers_TerminalFrame(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "echo hi", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	html, err := engine.Render("echo hi", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "is-terminal") {
+		t.Error("should render terminal frame")
+	}
+	if !strings.Contains(html, `<div class="gutter">`) {
+		t.Error("gutter should render inside terminal frame")
+	}
+}
+
+func TestRenderWithMeta_LineNumbers(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("a\nb", `go showLineNumbers startLineNumber=10`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<div class="gutter">`) {
+		t.Error("missing gutter from meta showLineNumbers")
+	}
+	if !strings.Contains(html, `aria-hidden="true">10</div>`) {
+		t.Error("missing line number 10 from meta startLineNumber=10")
+	}
+	if !strings.Contains(html, `aria-hidden="true">11</div>`) {
+		t.Error("missing line number 11")
+	}
+}

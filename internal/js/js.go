@@ -12,7 +12,10 @@ import (
 var staticFS embed.FS
 
 func readJS(name string) string {
-	data, _ := staticFS.ReadFile("static/" + name)
+	data, err := staticFS.ReadFile("static/" + name)
+	if err != nil {
+		panic("kazari: missing embedded JS: " + name)
+	}
 	return string(data)
 }
 

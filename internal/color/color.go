@@ -82,6 +82,11 @@ func GetLuminance(hex string) float64 {
 	return 0.2126*linearize(r) + 0.7152*linearize(g) + 0.0722*linearize(b)
 }
 
+// IsLight returns true if the hex color has a relative luminance above 0.5.
+func IsLight(hex string) bool {
+	return GetLuminance(hex) > 0.5
+}
+
 // GetColorContrast returns the WCAG contrast ratio between two hex colors (1-21).
 func GetColorContrast(color1, color2 string) float64 {
 	l1 := GetLuminance(color1)

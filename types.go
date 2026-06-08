@@ -1,5 +1,10 @@
 package kazari
 
+import (
+	"fmt"
+	"hash/fnv"
+)
+
 // Highlighter abstracts syntax highlighting. The default implementation wraps Nuri,
 // but any implementation (including mocks) can be used.
 type Highlighter interface {
@@ -147,4 +152,15 @@ type AssetFile struct {
 	Content  string
 	Hash     string // 8-char hex (FNV-1a)
 	Filename string // e.g. "kazari-a1b2c3d4.css"
+}
+
+func makeAssetFile(content, ext string) AssetFile {
+	h := fnv.New32a()
+	h.Write([]byte(content))
+	hash := fmt.Sprintf("%08x", h.Sum32())
+	return AssetFile{
+		Content:  content,
+		Hash:     hash,
+		Filename: fmt.Sprintf("kazari-%s.%s", hash, ext),
+	}
 }

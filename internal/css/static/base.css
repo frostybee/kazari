@@ -25,11 +25,13 @@
   padding: var(--kz-code-padding-block) 0;
 }
 .kazari-code .kz-line {
-  display: flex;
+  display: grid;
+  grid-template-areas: 'gutter code';
+  grid-template-columns: auto 1fr;
   min-height: 1lh;
 }
 .kazari-code .kz-line .code {
-  flex: 1;
+  grid-area: code;
   padding-inline: var(--kz-code-padding-inline);
   white-space: pre;
 }

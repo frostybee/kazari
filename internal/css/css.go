@@ -18,7 +18,10 @@ import (
 var staticFS embed.FS
 
 func readCSS(name string) string {
-	data, _ := staticFS.ReadFile("static/" + name)
+	data, err := staticFS.ReadFile("static/" + name)
+	if err != nil {
+		panic("kazari: missing embedded CSS: " + name)
+	}
 	return string(data)
 }
 
@@ -33,6 +36,7 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	// Static: always included
 	sb.WriteString(readCSS("font-style.css"))
 	sb.WriteString(readCSS("base.css"))
+	sb.WriteString(readCSS("line-numbers.css"))
 
 	// Static: conditional on config
 	if cfg.StyleReset {

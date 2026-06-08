@@ -2,9 +2,9 @@ package theme
 
 import (
 	"fmt"
-	"math"
 	"strings"
 
+	"github.com/frostybee/kazari/internal/color"
 	"github.com/frostybee/kazari/internal/config"
 )
 
@@ -40,6 +40,8 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-code-padding-inline", "1.35rem"},
 		{"--kz-title-font-size", "0.8rem"},
 		{"--kz-title-padding", "0.5rem 1rem"},
+		{"--kz-ln-padding-inline", "2ch"},
+		{"--kz-gutter-border-width", "1px"},
 	}
 
 	// Light theme variables.
@@ -123,8 +125,27 @@ func buildThemeVars(tc ThemeColors) []struct{ name, value string } {
 		vars = append(vars, struct{ name, value string }{"--kz-ln-fg", tc.LineNumberFG})
 	}
 
+	// Line number and gutter colors derived from theme luminance.
+	if color.IsLight(tc.EditorBG) {
+		if tc.LineNumberFG == "" {
+			vars = append(vars, nv("--kz-ln-fg", "#6e7781"))
+		}
+		vars = append(vars,
+			nv("--kz-ln-highlight-fg", "#24292f"),
+			nv("--kz-gutter-border-color", "rgba(0,0,0,0.1)"),
+		)
+	} else {
+		if tc.LineNumberFG == "" {
+			vars = append(vars, nv("--kz-ln-fg", "#6e7681"))
+		}
+		vars = append(vars,
+			nv("--kz-ln-highlight-fg", "#e6edf3"),
+			nv("--kz-gutter-border-color", "rgba(255,255,255,0.1)"),
+		)
+	}
+
 	// Toolbar, badge, and copy button colors derived from theme luminance.
-	if isLightTheme(tc.EditorBG) {
+	if color.IsLight(tc.EditorBG) {
 		vars = append(vars,
 			nv("--kz-toolbar-bg", "rgba(229, 231, 235, 0.15)"),
 			nv("--kz-toolbar-border", "rgba(209, 213, 219, 0.5)"),
@@ -155,55 +176,6 @@ func buildThemeVars(tc ThemeColors) []struct{ name, value string } {
 
 func nv(name, value string) struct{ name, value string } {
 	return struct{ name, value string }{name, value}
-}
-
-func isLightTheme(bg string) bool {
-	if bg == "" {
-		return false
-	}
-	r, g, b, _, err := parseHexSimple(bg)
-	if err {
-		return false
-	}
-	lum := 0.2126*linearize(r) + 0.7152*linearize(g) + 0.0722*linearize(b)
-	return lum > 0.5
-}
-
-func linearize(c float64) float64 {
-	if c <= 0.04045 {
-		return c / 12.92
-	}
-	return math.Pow((c+0.055)/1.055, 2.4)
-}
-
-func parseHexSimple(hex string) (r, g, b, a float64, fail bool) {
-	if len(hex) > 0 && hex[0] == '#' {
-		hex = hex[1:]
-	}
-	a = 1.0
-	switch len(hex) {
-	case 3:
-		var ri, gi, bi uint8
-		_, err := fmt.Sscanf(hex, "%1x%1x%1x", &ri, &gi, &bi)
-		if err != nil {
-			return 0, 0, 0, 0, true
-		}
-		r = float64(ri*17) / 255
-		g = float64(gi*17) / 255
-		b = float64(bi*17) / 255
-	case 6:
-		var ri, gi, bi uint8
-		_, err := fmt.Sscanf(hex, "%02x%02x%02x", &ri, &gi, &bi)
-		if err != nil {
-			return 0, 0, 0, 0, true
-		}
-		r = float64(ri) / 255
-		g = float64(gi) / 255
-		b = float64(bi) / 255
-	default:
-		return 0, 0, 0, 0, true
-	}
-	return r, g, b, a, false
 }
 
 func writeVars(sb *strings.Builder, vars []struct{ name, value string }) {

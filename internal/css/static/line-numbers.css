@@ -1,0 +1,22 @@
+.kazari-code .gutter {
+  grid-area: gutter;
+  border-right: var(--kz-gutter-border-width) solid var(--kz-gutter-border-color);
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+.kazari-code .gutter .ln {
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  box-sizing: content-box;
+  min-width: var(--kz-ln-width, 2ch);
+  padding-inline: var(--kz-ln-padding-inline, 2ch);
+  font-variant-numeric: tabular-nums;
+  color: var(--kz-ln-fg);
+  opacity: var(--kz-ln-opacity, 0.4);
+}
+.kazari-code .highlight .gutter .ln {
+  color: var(--kz-ln-highlight-fg);
+  opacity: var(--kz-ln-highlight-opacity, 0.8);
+}

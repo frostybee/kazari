@@ -4,8 +4,6 @@ package kazari
 
 import (
 	"fmt"
-	"hash/fnv"
-	"strings"
 
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
@@ -67,15 +65,7 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 	blockOpts := mapOptionsToBlockOpts(opts)
 	lang := e.cfg.ResolveLanguage(opts.Lang)
 	resolved := e.cfg.Resolve(lang, blockOpts)
-
-	code = e.preprocess(code, resolved)
-
-	lines, err := e.tokenize(code, resolved.Lang)
-	if err != nil {
-		return "", err
-	}
-
-	return render.RenderBlock(lines, resolved, e.cfg), nil
+	return e.renderResolved(code, resolved)
 }
 
 // RenderWithMeta parses a meta string and renders the code block.
@@ -84,7 +74,10 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	lang := e.cfg.ResolveLanguage(parsed.BlockOptions.Lang)
 	parsed.BlockOptions.Lang = lang
 	resolved := e.cfg.Resolve(lang, &parsed.BlockOptions)
+	return e.renderResolved(code, resolved)
+}
 
+func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock) (string, error) {
 	code = e.preprocess(code, resolved)
 
 	lines, err := e.tokenize(code, resolved.Lang)
@@ -150,7 +143,6 @@ func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
 		return plaintextLines(code), nil
 	}
 
-	// Normalize tabs.
 	if e.cfg.TabWidth > 0 {
 		code = expandTabs(code, e.cfg.TabWidth)
 	}
@@ -169,159 +161,4 @@ func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
 	}
 
 	return mergeTokens(lightTokens, darkTokens), nil
-}
-
-// mergeTokens pairs light and dark tokens into MergedToken lines.
-func mergeTokens(light, dark [][]Token) []render.TokenLine {
-	lines := make([]render.TokenLine, len(light))
-
-	for i, lightLine := range light {
-		var darkLine []Token
-		if dark != nil && i < len(dark) {
-			darkLine = dark[i]
-		}
-
-		if darkLine == nil || len(lightLine) == len(darkLine) {
-			// Fast path: boundaries match (common case).
-			tokens := make([]render.MergedToken, len(lightLine))
-			for j, lt := range lightLine {
-				mt := render.MergedToken{
-					Content:    lt.Content,
-					LightColor: lt.Color,
-					LightBG:    lt.BgColor,
-					FontStyle:  lt.FontStyle,
-				}
-				if darkLine != nil && j < len(darkLine) {
-					mt.DarkColor = darkLine[j].Color
-					mt.DarkBG = darkLine[j].BgColor
-				}
-				tokens[j] = mt
-			}
-			lines[i] = render.TokenLine{Tokens: tokens}
-		} else {
-			// Slow path: boundaries differ — align by character position.
-			lines[i] = render.TokenLine{Tokens: alignTokens(lightLine, darkLine)}
-		}
-	}
-
-	return lines
-}
-
-// alignTokens handles the rare case where light and dark tokens have different boundaries.
-func alignTokens(lightLine, darkLine []Token) []render.MergedToken {
-	var result []render.MergedToken
-	li, di := 0, 0   // token indices
-	lo, do := 0, 0   // character offsets within current token
-
-	for li < len(lightLine) && di < len(darkLine) {
-		lt := lightLine[li]
-		dt := darkLine[di]
-		lRemain := len(lt.Content) - lo
-		dRemain := len(dt.Content) - do
-		take := lRemain
-		if dRemain < take {
-			take = dRemain
-		}
-
-		result = append(result, render.MergedToken{
-			Content:    lt.Content[lo : lo+take],
-			LightColor: lt.Color,
-			DarkColor:  dt.Color,
-			LightBG:    lt.BgColor,
-			DarkBG:     dt.BgColor,
-			FontStyle:  lt.FontStyle,
-		})
-
-		lo += take
-		do += take
-		if lo >= len(lt.Content) {
-			li++
-			lo = 0
-		}
-		if do >= len(dt.Content) {
-			di++
-			do = 0
-		}
-	}
-
-	// Remaining light tokens (no dark counterpart).
-	for li < len(lightLine) {
-		lt := lightLine[li]
-		content := lt.Content[lo:]
-		if content != "" {
-			result = append(result, render.MergedToken{
-				Content:    content,
-				LightColor: lt.Color,
-				LightBG:    lt.BgColor,
-				FontStyle:  lt.FontStyle,
-			})
-		}
-		li++
-		lo = 0
-	}
-
-	return result
-}
-
-// plaintextLines returns single-token lines for code with no highlighter.
-func plaintextLines(code string) []render.TokenLine {
-	rawLines := splitLines(code)
-	lines := make([]render.TokenLine, len(rawLines))
-	for i, content := range rawLines {
-		lines[i] = render.TokenLine{
-			Tokens: []render.MergedToken{{Content: content}},
-		}
-	}
-	return lines
-}
-
-// splitLines splits code into lines, handling the trailing newline correctly.
-func splitLines(code string) []string {
-	if code == "" {
-		return []string{""}
-	}
-	lines := strings.Split(code, "\n")
-	// If code ends with \n, the Split produces a trailing empty string — remove it.
-	if strings.HasSuffix(code, "\n") && len(lines) > 0 && lines[len(lines)-1] == "" {
-		lines = lines[:len(lines)-1]
-	}
-	return lines
-}
-
-func expandTabs(code string, tabWidth int) string {
-	if !strings.Contains(code, "\t") {
-		return code
-	}
-	spaces := strings.Repeat(" ", tabWidth)
-	return strings.ReplaceAll(code, "\t", spaces)
-}
-
-func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {
-	bo := &config.BlockOptions{
-		Lang:            opts.Lang,
-		Title:           opts.Title,
-		StartLineNumber: opts.StartLineNumber,
-	}
-	if opts.Frame != nil {
-		f := int(*opts.Frame)
-		bo.Frame = &f
-	}
-	if opts.LineNumbers != nil {
-		bo.LineNumbers = opts.LineNumbers
-	}
-	if opts.Wrap != nil {
-		bo.Wrap = opts.Wrap
-	}
-	return bo
-}
-
-func makeAssetFile(content, ext string) AssetFile {
-	h := fnv.New32a()
-	h.Write([]byte(content))
-	hash := fmt.Sprintf("%08x", h.Sum32())
-	return AssetFile{
-		Content:  content,
-		Hash:     hash,
-		Filename: fmt.Sprintf("kazari-%s.%s", hash, ext),
-	}
 }
