@@ -1,0 +1,14 @@
+.kazari-code pre::-webkit-scrollbar {
+  width: var(--kz-scrollbar-width, 8px);
+  height: var(--kz-scrollbar-width, 8px);
+}
+.kazari-code pre::-webkit-scrollbar-thumb {
+  background: var(--kz-scrollbar-thumb, rgba(255,255,255,0.15));
+  border-radius: 4px;
+}
+.kazari-code pre::-webkit-scrollbar-thumb:hover {
+  background: var(--kz-scrollbar-thumb-hover, rgba(255,255,255,0.3));
+}
+.kazari-code pre::-webkit-scrollbar-track {
+  background: var(--kz-scrollbar-track, transparent);
+}

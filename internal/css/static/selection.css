@@ -1,0 +1,4 @@
+.kazari-code ::selection {
+  background: var(--kz-selection-bg, rgba(0,122,204,0.3));
+  color: var(--kz-selection-fg, inherit);
+}

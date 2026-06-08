@@ -1,0 +1,18 @@
+.kazari-code .kz-fs-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.2rem;
+  background: var(--kz-fs-bg, rgba(255,255,255,0.08));
+  color: var(--kz-fs-fg, rgba(255,255,255,0.6));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.kazari-code .kz-fs-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.9);
+}

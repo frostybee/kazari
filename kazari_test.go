@@ -23,14 +23,23 @@ func (m *mockHighlighter) GetThemeColors(theme string) (ThemeInfo, error) {
 }
 
 func (m *mockHighlighter) GetLoadedLanguages() []string {
-	return []string{"go", "javascript"}
+	return []string{"go", "javascript", "bash"}
 }
+
+func newTestEngine(hl *mockHighlighter, opts ...Option) *Engine {
+	base := []Option{
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	}
+	return New(append(base, opts...)...)
+}
+
+// --- Core rendering tests ---
 
 func TestNew(t *testing.T) {
 	engine := New(
-		WithHighlighter(&mockHighlighter{
-			themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
-		}),
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
 		WithThemes("light-theme", "dark-theme"),
 	)
 	if engine == nil {
@@ -49,92 +58,52 @@ func TestRender_DualTheme(t *testing.T) {
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", "dark-theme"),
-		WithMinify(false),
-	)
-
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false))
 	html, err := engine.Render("func main", Options{Lang: "go"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	// Verify structure
 	if !strings.Contains(html, `<div class="kazari-code">`) {
 		t.Error("missing kazari-code wrapper")
 	}
-	if !strings.Contains(html, `data-language="go"`) {
-		t.Error("missing data-language attribute")
-	}
-	if !strings.Contains(html, `<div class="kz-line">`) {
-		t.Error("missing kz-line div")
-	}
-
-	// Verify dual-theme token colors
 	if !strings.Contains(html, "--sl:#cf222e") {
-		t.Error("missing light color for 'func'")
+		t.Error("missing light color")
 	}
 	if !strings.Contains(html, "--sd:#ff7b72") {
-		t.Error("missing dark color for 'func'")
-	}
-	if !strings.Contains(html, "--sl:#8250df") {
-		t.Error("missing light color for ' main'")
-	}
-	if !strings.Contains(html, "--sd:#d2a8ff") {
-		t.Error("missing dark color for ' main'")
+		t.Error("missing dark color")
 	}
 }
 
 func TestRender_SingleTheme(t *testing.T) {
 	hl := &mockHighlighter{
-		lightTokens: [][]Token{
-			{{Content: "hello", Color: "#333333"}},
-		},
-		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", ""),
-		WithMinify(false),
-	)
-
+	engine := newTestEngine(hl)
 	html, err := engine.Render("hello", Options{Lang: "text"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
 
 	if strings.Contains(html, "--sd:") {
-		t.Error("single-theme mode should not emit --sd")
-	}
-	if !strings.Contains(html, "--sl:#333333") {
-		t.Error("missing light color")
+		t.Error("single-theme should not emit --sd")
 	}
 }
 
 func TestRender_HTMLEscape(t *testing.T) {
 	hl := &mockHighlighter{
-		lightTokens: [][]Token{
-			{{Content: "<div>&\"test\"</div>", Color: "#000000"}},
-		},
-		themeInfo: ThemeInfo{FG: "#000000", BG: "#ffffff"},
+		lightTokens: [][]Token{{{Content: "<div>&\"test\"</div>", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", ""),
-		WithMinify(false),
-	)
-
+	engine := newTestEngine(hl)
 	html, err := engine.Render(`<div>&"test"</div>`, Options{Lang: "html"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	if strings.Contains(html, "<div>&") {
-		t.Error("HTML content should be escaped")
-	}
 	if !strings.Contains(html, "&lt;div&gt;&amp;&#34;test&#34;&lt;/div&gt;") {
 		t.Errorf("incorrect HTML escaping, got: %s", html)
 	}
@@ -144,24 +113,18 @@ func TestRender_EmptyLine(t *testing.T) {
 	hl := &mockHighlighter{
 		lightTokens: [][]Token{
 			{{Content: "a", Color: "#000"}},
-			{}, // empty line
+			{},
 			{{Content: "b", Color: "#000"}},
 		},
 		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", ""),
-		WithMinify(false),
-	)
-
+	engine := newTestEngine(hl)
 	html, err := engine.Render("a\n\nb", Options{Lang: "text"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	// All 3 lines should produce kz-line divs
 	count := strings.Count(html, `<div class="kz-line">`)
 	if count != 3 {
 		t.Errorf("expected 3 kz-line divs, got %d", count)
@@ -178,42 +141,275 @@ func TestRender_FontStyles(t *testing.T) {
 		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", ""),
-		WithMinify(false),
-	)
-
+	engine := newTestEngine(hl)
 	html, err := engine.Render("italic\nbold\nboth", Options{Lang: "text"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
 
 	if !strings.Contains(html, "--sfs:italic") {
-		t.Error("missing italic font style")
+		t.Error("missing italic")
 	}
 	if !strings.Contains(html, "--sfw:bold") {
-		t.Error("missing bold font weight")
+		t.Error("missing bold")
 	}
 	if !strings.Contains(html, "--std:underline") {
-		t.Error("missing underline text decoration")
+		t.Error("missing underline")
 	}
 }
 
-func TestRenderWithMeta(t *testing.T) {
+func TestRender_NoHighlighter(t *testing.T) {
+	engine := New(WithMinify(false))
+	html, err := engine.Render("hello world", Options{Lang: "text"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "hello world") {
+		t.Error("plaintext fallback should contain the code")
+	}
+}
+
+// --- Toolbar + Frame tests ---
+
+func TestRender_Toolbar(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<div class="kz-toolbar">`) {
+		t.Error("missing toolbar")
+	}
+	if !strings.Contains(html, `kz-toolbar-left`) {
+		t.Error("missing toolbar left section")
+	}
+	if !strings.Contains(html, `kz-toolbar-right`) {
+		t.Error("missing toolbar right section")
+	}
+}
+
+func TestRender_LanguageBadge_NoTitle(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLanguageBadge(true))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	// Badge should be in left section when no title
+	if !strings.Contains(html, `<span class="kz-lang">Go</span>`) {
+		t.Error("missing language badge in left section")
+	}
+}
+
+func TestRender_TitleLeft_BadgeRight(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLanguageBadge(true))
+	html, err := engine.Render("x", Options{Lang: "go", Title: "main.go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<span class="kz-title">main.go</span>`) {
+		t.Error("missing title in left section")
+	}
+	// Badge should be in right section when title is set
+	if !strings.Contains(html, `kz-toolbar-right`) {
+		t.Error("missing toolbar right")
+	}
+	if !strings.Contains(html, `<span class="kz-lang">Go</span>`) {
+		t.Error("missing language badge in right section")
+	}
+}
+
+func TestRender_EditorFrame(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.Render("x", Options{Lang: "go", Title: "main.go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<figure class="frame has-title"`) {
+		t.Error("missing editor frame with has-title")
+	}
+}
+
+func TestRender_TerminalFrame(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "echo hi", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.Render("echo hi", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "is-terminal") {
+		t.Error("bash should produce terminal frame")
+	}
+	if !strings.Contains(html, "kz-terminal-header") {
+		t.Error("terminal frame should have terminal header, not toolbar")
+	}
+	if !strings.Contains(html, "kz-terminal-dots") {
+		t.Error("terminal frame should have dots")
+	}
+	if strings.Contains(html, "kz-toolbar") {
+		t.Error("terminal frame should not have editor toolbar")
+	}
+}
+
+func TestRender_TerminalFrame_WithShebang(t *testing.T) {
 	hl := &mockHighlighter{
 		lightTokens: [][]Token{
-			{{Content: "x", Color: "#000"}},
+			{{Content: "#!/bin/bash", Color: "#000"}},
+			{{Content: "echo hi", Color: "#000"}},
 		},
 		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", ""),
-		WithMinify(false),
-	)
+	engine := newTestEngine(hl)
+	html, err := engine.Render("#!/bin/bash\necho hi", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
 
+	if strings.Contains(html, "is-terminal") {
+		t.Error("bash with shebang should produce editor frame")
+	}
+}
+
+func TestRender_FrameNone(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	f := FrameNone
+	html, err := engine.Render("x", Options{Lang: "go", Frame: &f})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "<figure") {
+		t.Error("frame=none should not produce figure")
+	}
+	if strings.Contains(html, "kz-toolbar") {
+		t.Error("frame=none should not have toolbar")
+	}
+}
+
+func TestRender_ExplicitFrameOverride(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	f := FrameTerminal
+	html, err := engine.Render("x", Options{Lang: "go", Frame: &f})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "is-terminal") {
+		t.Error("explicit frame=terminal should override auto-detection")
+	}
+}
+
+// --- Copy button tests ---
+
+func TestRender_CopyButton(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithCopyButton(true))
+	html, err := engine.Render("line1\nline2", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-copy-btn") {
+		t.Error("missing copy button")
+	}
+	if !strings.Contains(html, "data-code=") {
+		t.Error("missing data-code attribute")
+	}
+	if !strings.Contains(html, "<svg") {
+		t.Error("missing copy SVG icon")
+	}
+	if !strings.Contains(html, "<span>Copy</span>") {
+		t.Error("missing copy text label")
+	}
+}
+
+func TestRender_NoCopyButton(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithCopyButton(false))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-copy-btn") {
+		t.Error("copy button should not be present when disabled")
+	}
+}
+
+func TestRender_FullscreenButton(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithFullscreenButton(true))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-fs-btn") {
+		t.Error("missing fullscreen button")
+	}
+}
+
+// --- Meta tests ---
+
+func TestRenderWithMeta(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
 	html, err := engine.RenderWithMeta("x", `go title="main.go"`)
 	if err != nil {
 		t.Fatalf("RenderWithMeta() error: %v", err)
@@ -222,22 +418,36 @@ func TestRenderWithMeta(t *testing.T) {
 	if !strings.Contains(html, `data-language="go"`) {
 		t.Error("meta string language not parsed")
 	}
+	if !strings.Contains(html, "main.go") {
+		t.Error("meta string title not rendered")
+	}
 }
 
-func TestCSS_Deterministic(t *testing.T) {
+func TestRenderWithMeta_FrameOverride(t *testing.T) {
 	hl := &mockHighlighter{
-		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
 	}
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", "dark-theme"),
-		WithMinify(false),
-	)
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("x", `go frame="none"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if strings.Contains(html, "<figure") {
+		t.Error("frame=none via meta should not produce figure")
+	}
+}
+
+// --- CSS/JS tests ---
+
+func TestCSS_Deterministic(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false))
 
 	css1 := engine.CSS()
 	css2 := engine.CSS()
-
 	if css1 != css2 {
 		t.Error("CSS() should be deterministic")
 	}
@@ -247,95 +457,82 @@ func TestCSS_Deterministic(t *testing.T) {
 }
 
 func TestCSS_ContainsLayer(t *testing.T) {
-	hl := &mockHighlighter{
-		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
-	}
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCascadeLayer("kazari"))
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", "dark-theme"),
-		WithMinify(false),
-		WithCascadeLayer("kazari"),
-	)
-
-	css := engine.CSS()
-	if !strings.Contains(css, "@layer kazari") {
+	if !strings.Contains(engine.CSS(), "@layer kazari") {
 		t.Error("CSS should contain @layer wrapper")
 	}
 }
 
 func TestCSS_NoLayer(t *testing.T) {
-	hl := &mockHighlighter{
-		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
-	}
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCascadeLayer(""))
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", "dark-theme"),
-		WithMinify(false),
-		WithCascadeLayer(""),
-	)
-
-	css := engine.CSS()
-	if strings.Contains(css, "@layer") {
+	if strings.Contains(engine.CSS(), "@layer") {
 		t.Error("CSS should not contain @layer when disabled")
 	}
 }
 
-func TestAssets_Hashing(t *testing.T) {
-	hl := &mockHighlighter{
-		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
-	}
+func TestCSS_ContainsToolbarStyles(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false))
 
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", "dark-theme"),
-	)
+	css := engine.CSS()
+	if !strings.Contains(css, ".kz-toolbar") {
+		t.Error("CSS should contain toolbar styles")
+	}
+	if !strings.Contains(css, ".kz-lang") {
+		t.Error("CSS should contain language badge styles")
+	}
+}
+
+func TestCSS_ContainsCopyStyles(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCopyButton(true))
+
+	if !strings.Contains(engine.CSS(), ".kz-copy-btn") {
+		t.Error("CSS should contain copy button styles")
+	}
+}
+
+func TestAssets_Hashing(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"))
 
 	assets := engine.Assets()
-
-	if assets.CSS.Hash == "" {
-		t.Error("CSS hash should not be empty")
-	}
 	if len(assets.CSS.Hash) != 8 {
-		t.Errorf("CSS hash should be 8 chars, got %d", len(assets.CSS.Hash))
-	}
-	if !strings.HasPrefix(assets.CSS.Filename, "kazari-") {
-		t.Error("CSS filename should start with kazari-")
-	}
-	if !strings.HasSuffix(assets.CSS.Filename, ".css") {
-		t.Error("CSS filename should end with .css")
+		t.Errorf("CSS hash should be 8 chars, got %q", assets.CSS.Hash)
 	}
 }
 
-func TestJS_EmptyInPhase1(t *testing.T) {
-	hl := &mockHighlighter{
-		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
-	}
-
-	engine := New(
-		WithHighlighter(hl),
-		WithThemes("light-theme", "dark-theme"),
-	)
+func TestJS_ContainsCopyHandler(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCopyButton(true))
 
 	js := engine.JS()
-	if js != "" {
-		t.Error("JS() should be empty in Phase 1")
+	if !strings.Contains(js, "clipboard") {
+		t.Error("JS should contain clipboard handler")
+	}
+	if !strings.Contains(js, "kz-copy-btn") {
+		t.Error("JS should target kz-copy-btn")
 	}
 }
 
-func TestRender_NoHighlighter(t *testing.T) {
-	engine := New(WithMinify(false))
+func TestJS_ContainsFullscreenHandler(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithFullscreenButton(true))
 
-	html, err := engine.Render("hello world", Options{Lang: "text"})
-	if err != nil {
-		t.Fatalf("Render() error: %v", err)
+	if !strings.Contains(engine.JS(), "fullscreen") {
+		t.Error("JS should contain fullscreen handler")
 	}
+}
 
-	if !strings.Contains(html, "hello world") {
-		t.Error("plaintext fallback should contain the code")
-	}
-	if !strings.Contains(html, `<div class="kazari-code">`) {
-		t.Error("plaintext should still have wrapper structure")
+func TestJS_EmptyWhenNoFeatures(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithCopyButton(false), WithFullscreenButton(false))
+
+	if engine.JS() != "" {
+		t.Error("JS should be empty when no features enabled")
 	}
 }

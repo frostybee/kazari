@@ -11,11 +11,11 @@ import (
 // MergedToken holds both light and dark colors for a single token.
 type MergedToken struct {
 	Content    string
-	LightColor string // --sl value
-	DarkColor  string // --sd value (empty in single-theme mode)
-	LightBG    string // --slbg (rare)
-	DarkBG     string // --sdbg (rare)
-	FontStyle  int    // bitmask: Italic=1, Bold=2, Underline=4, Strikethrough=8
+	LightColor string
+	DarkColor  string
+	LightBG    string
+	DarkBG     string
+	FontStyle  int
 }
 
 // TokenLine represents one line of merged tokens.
@@ -23,22 +23,136 @@ type TokenLine struct {
 	Tokens []MergedToken
 }
 
+const copySVG = `<svg class="kz-copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`
+
 // RenderBlock produces the full HTML for a code block.
-func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock) string {
+func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config) string {
 	var sb strings.Builder
 	dualTheme := hasDualTheme(lines)
 
 	sb.WriteString("<div class=\"kazari-code\">\n")
-	sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\"><code>", html.EscapeString(resolved.Lang)))
 
-	for _, line := range lines {
-		renderLine(&sb, line, dualTheme)
+	if resolved.Frame == config.FrameNone {
+		renderNoFrame(&sb, lines, resolved, cfg, dualTheme)
+	} else {
+		renderFramedBlock(&sb, lines, resolved, cfg, dualTheme)
 	}
 
-	sb.WriteString("</code></pre>\n")
+	sb.WriteString("</div>")
+	return sb.String()
+}
+
+func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
+	if resolved.Frame == config.FrameTerminal {
+		renderTerminalFrame(sb, lines, resolved, cfg, dualTheme)
+		return
+	}
+
+	classes := "frame"
+	if resolved.Title != "" {
+		classes += " has-title"
+	}
+	sb.WriteString(fmt.Sprintf("<figure class=\"%s\" data-lang=\"%s\">", classes, html.EscapeString(resolved.Lang)))
+
+	renderToolbar(sb, resolved, cfg)
+	renderPreCode(sb, lines, resolved, dualTheme)
+
+	sb.WriteString("</figure>\n")
+}
+
+func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
+	classes := "frame is-terminal"
+	if resolved.Title != "" {
+		classes += " has-title"
+	}
+	sb.WriteString(fmt.Sprintf("<figure class=\"%s\" data-lang=\"%s\">", classes, html.EscapeString(resolved.Lang)))
+
+	sb.WriteString("<div class=\"kz-terminal-header\">")
+	sb.WriteString("<span class=\"kz-terminal-dots\"><span></span><span></span><span></span></span>")
+	if resolved.Title != "" {
+		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
+	}
+	if cfg.CopyButton {
+		sb.WriteString("<div class=\"kz-terminal-actions\">")
+		renderCopyButton(sb, resolved.RawCode)
+		sb.WriteString("</div>")
+	}
 	sb.WriteString("</div>")
 
-	return sb.String()
+	renderPreCode(sb, lines, resolved, dualTheme)
+
+	sb.WriteString("</figure>\n")
+}
+
+func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
+	sb.WriteString("<div class=\"kz-toolbar\">")
+
+	// Left section
+	sb.WriteString("<div class=\"kz-toolbar-left\">")
+	if resolved.Title != "" {
+		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
+	} else if cfg.LanguageBadge && resolved.Lang != "" {
+		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
+	}
+	sb.WriteString("</div>")
+
+	// Right section
+	sb.WriteString("<div class=\"kz-toolbar-right\">")
+	if resolved.Title != "" && cfg.LanguageBadge && resolved.Lang != "" {
+		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
+	}
+	if cfg.FullscreenButton {
+		sb.WriteString("<button class=\"kz-fs-btn\" aria-label=\"Fullscreen\"></button>")
+	}
+	if cfg.CopyButton {
+		renderCopyButton(sb, resolved.RawCode)
+	}
+	sb.WriteString("</div>")
+
+	sb.WriteString("</div>")
+}
+
+func renderCopyButton(sb *strings.Builder, rawCode string) {
+	encoded := encodeForDataCode(rawCode)
+	sb.WriteString(fmt.Sprintf(
+		"<button class=\"kz-copy-btn\" title=\"Copy to clipboard\" data-copied=\"Copied!\" data-code=\"%s\">",
+		html.EscapeString(encoded),
+	))
+	sb.WriteString(copySVG)
+	sb.WriteString("<span>Copy</span>")
+	sb.WriteString("</button>")
+}
+
+func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
+	renderPreCode(sb, lines, resolved, dualTheme)
+}
+
+func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, dualTheme bool) {
+	sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\"><code>", html.EscapeString(resolved.Lang)))
+	for _, line := range lines {
+		renderLine(sb, line, dualTheme)
+	}
+	sb.WriteString("</code></pre>")
+}
+
+func encodeForDataCode(code string) string {
+	return strings.ReplaceAll(code, "\n", "\x7f")
+}
+
+func displayLang(lang string) string {
+	upper := map[string]string{
+		"javascript": "JavaScript", "typescript": "TypeScript",
+		"css": "CSS", "html": "HTML", "json": "JSON", "yaml": "YAML",
+		"sql": "SQL", "php": "PHP", "xml": "XML", "svg": "SVG",
+		"jsx": "JSX", "tsx": "TSX", "graphql": "GraphQL",
+	}
+	if display, ok := upper[strings.ToLower(lang)]; ok {
+		return display
+	}
+	if len(lang) > 0 {
+		return strings.ToUpper(lang[:1]) + lang[1:]
+	}
+	return lang
 }
 
 func renderLine(sb *strings.Builder, line TokenLine, dualTheme bool) {
@@ -79,14 +193,13 @@ func buildTokenStyle(tok MergedToken, dualTheme bool) string {
 		parts = append(parts, fmt.Sprintf("--sdbg:%s", tok.DarkBG))
 	}
 
-	// Font style bitmask
-	if tok.FontStyle&1 != 0 { // Italic
+	if tok.FontStyle&1 != 0 {
 		parts = append(parts, "--sfs:italic")
 	}
-	if tok.FontStyle&2 != 0 { // Bold
+	if tok.FontStyle&2 != 0 {
 		parts = append(parts, "--sfw:bold")
 	}
-	if tok.FontStyle&(4|8) != 0 { // Underline and/or Strikethrough
+	if tok.FontStyle&(4|8) != 0 {
 		var decs []string
 		if tok.FontStyle&4 != 0 {
 			decs = append(decs, "underline")

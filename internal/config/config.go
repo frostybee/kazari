@@ -127,6 +127,7 @@ type ResolvedBlock struct {
 	Wrap            bool
 	PreserveIndent  bool
 	HangingIndent   int
+	RawCode         string // code for copy button (post file-name extraction)
 }
 
 // Resolve applies the config cascade for a specific block:

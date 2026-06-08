@@ -1,11 +1,39 @@
 package js
 
-import "github.com/frostybee/kazari/internal/config"
+import (
+	"embed"
+	"strings"
+
+	"github.com/frostybee/kazari/internal/config"
+	"github.com/frostybee/kazari/internal/minify"
+)
+
+//go:embed static/*.js
+var staticFS embed.FS
+
+func readJS(name string) string {
+	data, _ := staticFS.ReadFile("static/" + name)
+	return string(data)
+}
 
 // Generate produces the JavaScript module output for the engine configuration.
-// Phase 1: returns empty string (no interactive features yet).
-// Later phases add copy button, collapsible, and fullscreen handlers.
 func Generate(cfg *config.Config) string {
-	_ = cfg
-	return ""
+	var sb strings.Builder
+
+	if cfg.CopyButton {
+		sb.WriteString(readJS("copy.js"))
+	}
+	if cfg.FullscreenButton {
+		sb.WriteString(readJS("fullscreen.js"))
+	}
+
+	content := sb.String()
+	if content == "" {
+		return ""
+	}
+
+	if cfg.Minify {
+		return minify.JS(content)
+	}
+	return content
 }

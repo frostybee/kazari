@@ -1,0 +1,35 @@
+.kazari-code .kz-terminal-header {
+  display: flex;
+  align-items: center;
+  padding: var(--kz-toolbar-padding, 0.625rem 1rem);
+  background: var(--kz-terminal-titlebar-bg, var(--kz-toolbar-bg));
+  border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
+  position: relative;
+}
+.kazari-code .kz-terminal-dots {
+  display: flex;
+  gap: 0.4rem;
+  z-index: 1;
+}
+.kazari-code .kz-terminal-dots span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+.kazari-code .kz-terminal-dots span:nth-child(1) { background: var(--kz-terminal-dot-red, #ff5f57); }
+.kazari-code .kz-terminal-dots span:nth-child(2) { background: var(--kz-terminal-dot-yellow, #febc2e); }
+.kazari-code .kz-terminal-dots span:nth-child(3) { background: var(--kz-terminal-dot-green, #28c840); }
+.kazari-code .kz-terminal-header .kz-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  font-family: var(--kz-ui-font-family);
+  color: var(--kz-editor-fg);
+  pointer-events: none;
+}
+.kazari-code .kz-terminal-actions {
+  margin-inline-start: auto;
+  z-index: 1;
+}

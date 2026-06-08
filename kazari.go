@@ -9,6 +9,7 @@ import (
 
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
+	"github.com/frostybee/kazari/internal/frame"
 	"github.com/frostybee/kazari/internal/js"
 	"github.com/frostybee/kazari/internal/meta"
 	"github.com/frostybee/kazari/internal/render"
@@ -67,12 +68,14 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 	lang := e.cfg.ResolveLanguage(opts.Lang)
 	resolved := e.cfg.Resolve(lang, blockOpts)
 
+	code = e.preprocess(code, resolved)
+
 	lines, err := e.tokenize(code, resolved.Lang)
 	if err != nil {
 		return "", err
 	}
 
-	return render.RenderBlock(lines, resolved), nil
+	return render.RenderBlock(lines, resolved, e.cfg), nil
 }
 
 // RenderWithMeta parses a meta string and renders the code block.
@@ -82,12 +85,35 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	parsed.BlockOptions.Lang = lang
 	resolved := e.cfg.Resolve(lang, &parsed.BlockOptions)
 
+	code = e.preprocess(code, resolved)
+
 	lines, err := e.tokenize(code, resolved.Lang)
 	if err != nil {
 		return "", err
 	}
 
-	return render.RenderBlock(lines, resolved), nil
+	return render.RenderBlock(lines, resolved, e.cfg), nil
+}
+
+func (e *Engine) preprocess(code string, resolved *config.ResolvedBlock) string {
+	if e.cfg.FileNameExtraction && resolved.Title == "" {
+		title, modified := frame.ExtractFileName(code, resolved.Lang)
+		if title != "" {
+			resolved.Title = title
+			code = modified
+		}
+	}
+
+	if resolved.Frame == config.FrameAuto {
+		if e.cfg.FrameDetection {
+			resolved.Frame = frame.DetectFrameType(code, resolved.Lang, resolved.Frame)
+		} else {
+			resolved.Frame = config.FrameCode
+		}
+	}
+
+	resolved.RawCode = code
+	return code
 }
 
 // Tokenize returns raw tokens for consumers building custom HTML.

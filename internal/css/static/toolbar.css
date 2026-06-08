@@ -1,0 +1,32 @@
+.kazari-code .kz-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--kz-toolbar-padding, 0.625rem 1rem);
+  background: var(--kz-toolbar-bg, rgba(39, 39, 42, 0.6));
+  border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
+}
+.kazari-code .kz-toolbar-left,
+.kazari-code .kz-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.kazari-code .kz-lang {
+  font-size: var(--kz-lang-font-size, 0.75rem);
+  font-family: var(--kz-ui-font-family);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--kz-lang-radius, 0.25rem);
+  color: var(--kz-lang-fg, #a1a1aa);
+  background: var(--kz-lang-bg, rgba(51, 51, 55, 0.8));
+}
+.kazari-code .kz-title {
+  font-size: 0.875rem;
+  font-family: var(--kz-ui-font-family);
+  color: var(--kz-editor-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

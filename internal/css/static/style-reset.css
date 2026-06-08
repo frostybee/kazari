@@ -1,0 +1,9 @@
+.kazari-code figure {
+  all: revert;
+  position: relative;
+  margin: 0;
+  border-radius: var(--kz-radius);
+  box-shadow: var(--kz-shadow);
+  border: var(--kz-border);
+  overflow: hidden;
+}

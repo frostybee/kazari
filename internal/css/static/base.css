@@ -1,0 +1,39 @@
+.kazari-code {
+  position: relative;
+  margin: 1rem 0;
+}
+.kazari-code pre {
+  margin: 0;
+  padding: 0;
+  background: var(--kz-editor-bg);
+  color: var(--kz-editor-fg);
+  font-family: var(--kz-font-family);
+  font-size: var(--kz-font-size);
+  font-weight: var(--kz-font-weight);
+  line-height: var(--kz-line-height);
+  border-radius: var(--kz-radius);
+  overflow-x: auto;
+}
+.kazari-code .frame pre {
+  border-radius: 0;
+}
+.kazari-code .frame.is-terminal pre {
+  background: var(--kz-terminal-bg, var(--kz-editor-bg));
+}
+.kazari-code pre code {
+  display: block;
+  padding: var(--kz-code-padding-block) 0;
+}
+.kazari-code .kz-line {
+  display: flex;
+  min-height: 1lh;
+}
+.kazari-code .kz-line .code {
+  flex: 1;
+  padding-inline: var(--kz-code-padding-inline);
+  white-space: pre;
+}
+.kazari-code pre.wrap .kz-line .code {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
