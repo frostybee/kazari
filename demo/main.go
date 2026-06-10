@@ -1,14 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/frostybee/kazari"
+	kazarimd "github.com/frostybee/kazari/goldmark"
 	"github.com/frostybee/nuri"
 	"github.com/frostybee/nuri/bundle/core"
+	"github.com/yuin/goldmark"
 )
 
 func main() {
@@ -401,6 +404,23 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Render csAuto: %v", err)
 	}
 
+	// --- Code group example (via Goldmark) ---
+	// Use collapseEngine for code groups too (single engine = single CSS/JS output).
+
+	codeGroupMD := []byte(":::code-group\n\n```go title=\"main.go\"\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello from Go!\")\n}\n```\n\n```python title=\"main.py\"\ndef main():\n    print(\"Hello from Python!\")\n\nif __name__ == \"__main__\":\n    main()\n```\n\n```javascript title=\"index.js\"\nfunction main() {\n  console.log(\"Hello from JavaScript!\");\n}\n\nmain();\n```\n\n:::\n")
+
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			kazarimd.New(collapseEngine),
+			kazarimd.CodeGroups(collapseEngine),
+		),
+	)
+	var codeGroupBuf bytes.Buffer
+	if err := md.Convert(codeGroupMD, &codeGroupBuf); err != nil {
+		log.Fatalf("goldmark.Convert: %v", err)
+	}
+	codeGroupHTML := codeGroupBuf.String()
+
 	css := collapseEngine.CSS()
 	js := collapseEngine.JS()
 
@@ -488,6 +508,9 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <h2>Collapsible: collapsible-auto (auto start/end based on position)</h2>
 %s
 
+<h2>Code Group (tabbed code blocks via Goldmark)</h2>
+%s
+
 <script type="module">
 %s
 </script>
@@ -495,7 +518,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 </html>`, css, goHTML, jsHTML, bashHTML, psHTML, lnHTML, lnStartHTML, plainHTML,
 		markerHTML, labelHTML, focusHTML, inlineHTML, combinedHTML,
 		thresholdHTML, rangeHTML, multiRangeHTML, gapHTML,
-		csStartHTML, csEndHTML, csAutoHTML, js)
+		csStartHTML, csEndHTML, csAutoHTML, codeGroupHTML, js)
 
 	if err := os.WriteFile("showcase.html", []byte(page), 0644); err != nil {
 		log.Fatalf("WriteFile: %v", err)

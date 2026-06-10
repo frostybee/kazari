@@ -65,6 +65,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	if cfg.Collapsible != nil {
 		sb.WriteString(readCSS("collapsible.css"))
 	}
+	if cfg.CodeGroups {
+		sb.WriteString(readCSS("codegroup.css"))
+	}
 
 	content := sb.String()
 

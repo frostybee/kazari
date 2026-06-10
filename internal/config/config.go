@@ -147,6 +147,7 @@ type Config struct {
 	Minify             bool
 	CascadeLayer       string
 	LanguageAliases    map[string]string
+	CodeGroups         bool
 }
 
 // DefaultConfig returns the engine configuration with all documented defaults.

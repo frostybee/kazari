@@ -158,6 +158,12 @@ func (e *Engine) Assets() Assets {
 	}
 }
 
+// EnableCodeGroups enables code group CSS/JS in engine output.
+// Called automatically by kazarimd.CodeGroups().
+func (e *Engine) EnableCodeGroups() {
+	e.cfg.CodeGroups = true
+}
+
 func convertLineMarkers(markers []LineMarker) []config.LineMarker {
 	if len(markers) == 0 {
 		return nil

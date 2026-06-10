@@ -97,10 +97,22 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		)
 	}
 
+	// Code group defaults (conditional)
+	if cfg.CodeGroups {
+		staticVars = append(staticVars,
+			nv("--kz-group-tab-bg", "transparent"),
+			nv("--kz-group-tab-fg", "inherit"),
+			nv("--kz-group-tab-active-border", "#007acc"),
+			nv("--kz-group-tab-padding", "0.5rem 1rem"),
+			nv("--kz-group-border-width", "1px"),
+			nv("--kz-group-radius", "var(--kz-radius)"),
+		)
+	}
+
 	// Light theme variables.
-	lightVars := buildThemeVars(light)
+	lightVars := buildThemeVars(light, cfg)
 	// Dark theme variables.
-	darkVars := buildThemeVars(dark)
+	darkVars := buildThemeVars(dark, cfg)
 
 	switch cfg.DarkMode.Kind {
 	case config.DarkModeSelectorKind:
@@ -166,7 +178,7 @@ func TokenSwitchingCSS(cfg *config.Config) string {
 	return sb.String()
 }
 
-func buildThemeVars(tc ThemeColors) []struct{ name, value string } {
+func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value string } {
 	vars := []struct{ name, value string }{
 		{"--kz-editor-bg", tc.EditorBG},
 		{"--kz-editor-fg", tc.EditorFG},
@@ -222,6 +234,23 @@ func buildThemeVars(tc ThemeColors) []struct{ name, value string } {
 			nv("--kz-copy-fg-hover", "#ffffff"),
 			nv("--kz-copy-bg-hover", "rgba(63, 63, 70, 0.8)"),
 		)
+	}
+
+	// Code group tab colors derived from theme luminance.
+	if cfg.CodeGroups {
+		if color.IsLight(tc.EditorBG) {
+			vars = append(vars,
+				nv("--kz-group-tab-active-bg", "rgba(255,255,255,0.8)"),
+				nv("--kz-group-tab-active-fg", "#24292f"),
+				nv("--kz-group-border", "rgba(0,0,0,0.1)"),
+			)
+		} else {
+			vars = append(vars,
+				nv("--kz-group-tab-active-bg", "rgba(255,255,255,0.1)"),
+				nv("--kz-group-tab-active-fg", "#e6edf3"),
+				nv("--kz-group-border", "rgba(255,255,255,0.1)"),
+			)
+		}
 	}
 
 	return vars

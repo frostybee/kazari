@@ -32,6 +32,9 @@ func Generate(cfg *config.Config) string {
 	if cfg.Collapsible != nil {
 		sb.WriteString(readJS("collapsible.js"))
 	}
+	if cfg.CodeGroups {
+		sb.WriteString(readJS("codegroup.js"))
+	}
 
 	content := sb.String()
 	if content == "" {
