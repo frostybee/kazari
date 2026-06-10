@@ -75,7 +75,7 @@ func Parse(meta string) *ParseResult {
 		case strings.HasPrefix(tok, "startLineNumber="):
 			val := strings.TrimPrefix(tok, "startLineNumber=")
 			if n, err := strconv.Atoi(val); err == nil {
-				result.BlockOptions.StartLineNumber = n
+				result.BlockOptions.StartLineNumber = &n
 			}
 
 		case strings.HasPrefix(tok, "focus="):

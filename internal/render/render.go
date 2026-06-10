@@ -419,18 +419,20 @@ func buildTokenStyle(tok MergedToken, dualTheme bool) string {
 }
 
 func digitCount(n int) int {
+	extra := 0
 	if n < 0 {
+		extra = 1
 		n = -n
 	}
 	if n == 0 {
-		return 1
+		return 1 + extra
 	}
 	count := 0
 	for n > 0 {
 		count++
 		n /= 10
 	}
-	return count
+	return count + extra
 }
 
 func hasDualTheme(lines []TokenLine) bool {

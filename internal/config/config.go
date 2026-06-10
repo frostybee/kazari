@@ -192,7 +192,7 @@ type BlockOptions struct {
 	Title           string
 	Frame           *int  // nil = use default
 	LineNumbers     *bool // nil = use default
-	StartLineNumber int
+	StartLineNumber *int  // nil = use default (1)
 	Wrap            *bool // nil = use default
 }
 
@@ -259,8 +259,8 @@ func (c *Config) Resolve(lang string, blockOpts *BlockOptions) *ResolvedBlock {
 		if blockOpts.LineNumbers != nil {
 			resolved.LineNumbers = *blockOpts.LineNumbers
 		}
-		if blockOpts.StartLineNumber > 0 {
-			resolved.StartLineNumber = blockOpts.StartLineNumber
+		if blockOpts.StartLineNumber != nil {
+			resolved.StartLineNumber = *blockOpts.StartLineNumber
 		}
 		if blockOpts.Wrap != nil {
 			resolved.Wrap = *blockOpts.Wrap

@@ -600,7 +600,8 @@ func TestRender_LineNumbers_StartLineNumber(t *testing.T) {
 
 	engine := newTestEngine(hl, WithLineNumbers(true))
 	ln := true
-	html, err := engine.Render("a\nb", Options{Lang: "go", LineNumbers: &ln, StartLineNumber: 42})
+	start := 42
+	html, err := engine.Render("a\nb", Options{Lang: "go", LineNumbers: &ln, StartLineNumber: &start})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
@@ -715,6 +716,136 @@ func TestRenderWithMeta_LineNumbers(t *testing.T) {
 	}
 	if !strings.Contains(html, `aria-hidden="true">11</div>`) {
 		t.Error("missing line number 11")
+	}
+}
+
+func TestRender_LineNumbers_StartLineNumber_Zero(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+			{{Content: "c", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	ln := true
+	start := 0
+	html, err := engine.Render("a\nb\nc", Options{Lang: "go", LineNumbers: &ln, StartLineNumber: &start})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `aria-hidden="true">0</div>`) {
+		t.Error("missing line number 0")
+	}
+	if !strings.Contains(html, `aria-hidden="true">1</div>`) {
+		t.Error("missing line number 1")
+	}
+	if !strings.Contains(html, `aria-hidden="true">2</div>`) {
+		t.Error("missing line number 2")
+	}
+}
+
+func TestRender_LineNumbers_StartLineNumber_Negative(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+			{{Content: "c", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	ln := true
+	start := -5
+	html, err := engine.Render("a\nb\nc", Options{Lang: "go", LineNumbers: &ln, StartLineNumber: &start})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `aria-hidden="true">-5</div>`) {
+		t.Error("missing line number -5")
+	}
+	if !strings.Contains(html, `aria-hidden="true">-4</div>`) {
+		t.Error("missing line number -4")
+	}
+	if !strings.Contains(html, `aria-hidden="true">-3</div>`) {
+		t.Error("missing line number -3")
+	}
+}
+
+func TestRender_LineNumbers_NegativeWidth(t *testing.T) {
+	tokens := make([][]Token, 5)
+	for i := range tokens {
+		tokens[i] = []Token{{Content: "x", Color: "#000"}}
+	}
+	hl := &mockHighlighter{
+		lightTokens: tokens,
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithLineNumbers(true))
+	ln := true
+	start := -100
+	code := strings.Repeat("x\n", 4) + "x"
+	html, err := engine.Render(code, Options{Lang: "go", LineNumbers: &ln, StartLineNumber: &start})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "--kz-ln-width:4ch") {
+		t.Error("should set --kz-ln-width:4ch for start=-100 (4 chars including minus sign)")
+	}
+}
+
+func TestRenderWithMeta_StartLineNumber_Zero(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+			{{Content: "c", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("a\nb\nc", `go showLineNumbers startLineNumber=0`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `aria-hidden="true">0</div>`) {
+		t.Error("missing line number 0 from meta startLineNumber=0")
+	}
+	if !strings.Contains(html, `aria-hidden="true">1</div>`) {
+		t.Error("missing line number 1")
+	}
+}
+
+func TestRenderWithMeta_StartLineNumber_Negative(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#000"}},
+			{{Content: "b", Color: "#000"}},
+			{{Content: "c", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("a\nb\nc", `go showLineNumbers startLineNumber=-5`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `aria-hidden="true">-5</div>`) {
+		t.Error("missing line number -5 from meta startLineNumber=-5")
+	}
+	if !strings.Contains(html, `aria-hidden="true">-4</div>`) {
+		t.Error("missing line number -4")
 	}
 }
 

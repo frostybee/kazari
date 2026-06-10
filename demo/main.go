@@ -108,7 +108,8 @@ with no frame wrapper.`
 		log.Fatalf("Render ln: %v", err)
 	}
 
-	lnStartHTML, err := engine.Render(lnStartCode, kazari.Options{Lang: "go", Title: "main.go (lines 15-17)", LineNumbers: &lnEnabled, StartLineNumber: 15})
+	lnStart := 15
+	lnStartHTML, err := engine.Render(lnStartCode, kazari.Options{Lang: "go", Title: "main.go (lines 15-17)", LineNumbers: &lnEnabled, StartLineNumber: &lnStart})
 	if err != nil {
 		log.Fatalf("Render lnStart: %v", err)
 	}

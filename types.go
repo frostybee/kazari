@@ -83,7 +83,7 @@ type Options struct {
 	Title           string
 	Frame           *Frame // nil = use default
 	LineNumbers     *bool  // nil = use default
-	StartLineNumber int
+	StartLineNumber *int  // nil = use default (1)
 	Wrap            *bool // nil = use default
 	LineMarkers     []LineMarker
 	InlineMarkers   []InlineMarker
