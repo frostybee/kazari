@@ -13,6 +13,17 @@ type Highlighter interface {
 	GetLoadedLanguages() []string
 }
 
+// DualThemeTokenizer is an optional capability for highlighters that can
+// resolve two themes from a single tokenization pass. TextMate scanning is
+// theme-independent, so a capable highlighter halves dual-theme work.
+// The two returned streams MUST have identical token boundaries (same line
+// count, same per-line token count and Content). The engine type-asserts
+// this interface on its Highlighter and falls back to two Tokenize calls
+// when it is absent.
+type DualThemeTokenizer interface {
+	TokenizeDual(code, lang, lightTheme, darkTheme string) (light, dark [][]Token, err error)
+}
+
 // ThemeInfo holds colors extracted from a syntax theme for CSS variable generation.
 type ThemeInfo struct {
 	FG           string // default foreground (e.g. "#24292f")

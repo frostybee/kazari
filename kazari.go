@@ -236,6 +236,19 @@ func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
 		code = expandTabs(code, e.cfg.TabWidth)
 	}
 
+	// Dual-theme fast path: capable highlighters resolve both themes from a
+	// single tokenization pass (identical token boundaries by construction,
+	// so mergeTokens takes its 1:1 fast path).
+	if e.cfg.DarkTheme != "" {
+		if dual, ok := e.hl.(DualThemeTokenizer); ok {
+			light, dark, err := dual.TokenizeDual(code, lang, e.cfg.LightTheme, e.cfg.DarkTheme)
+			if err != nil {
+				return nil, err
+			}
+			return mergeTokens(light, dark), nil
+		}
+	}
+
 	lightTokens, err := e.hl.Tokenize(code, lang, e.cfg.LightTheme)
 	if err != nil {
 		return nil, err

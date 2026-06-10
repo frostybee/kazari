@@ -38,6 +38,24 @@ func (m *mockHighlighter) GetLoadedLanguages() []string {
 	return []string{"go", "javascript", "bash"}
 }
 
+// dualMockHighlighter wraps mockHighlighter with the DualThemeTokenizer
+// capability and counts calls on both paths.
+type dualMockHighlighter struct {
+	mockHighlighter
+	dualCalls     int
+	tokenizeCalls int
+}
+
+func (d *dualMockHighlighter) Tokenize(code, lang, theme string) ([][]Token, error) {
+	d.tokenizeCalls++
+	return d.mockHighlighter.Tokenize(code, lang, theme)
+}
+
+func (d *dualMockHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string) ([][]Token, [][]Token, error) {
+	d.dualCalls++
+	return d.lightTokens, d.darkTokens, nil
+}
+
 func newTestEngine(hl *mockHighlighter, opts ...Option) *Engine {
 	base := []Option{
 		WithHighlighter(hl),
@@ -84,6 +102,64 @@ func TestRender_DualTheme(t *testing.T) {
 	}
 	if !strings.Contains(html, "--sd:#ff7b72") {
 		t.Error("missing dark color")
+	}
+}
+
+func TestRender_DualThemeCapability(t *testing.T) {
+	hl := &dualMockHighlighter{
+		mockHighlighter: mockHighlighter{
+			lightTokens: [][]Token{
+				{{Content: "func", Color: "#cf222e"}, {Content: " main", Color: "#8250df"}},
+			},
+			darkTokens: [][]Token{
+				{{Content: "func", Color: "#ff7b72"}, {Content: " main", Color: "#d2a8ff"}},
+			},
+			themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		},
+	}
+
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false))
+	html, err := engine.Render("func main", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if hl.dualCalls != 1 {
+		t.Errorf("TokenizeDual calls: got %d, want 1", hl.dualCalls)
+	}
+	if hl.tokenizeCalls != 0 {
+		t.Errorf("Tokenize calls: got %d, want 0 (capability path must replace both passes)", hl.tokenizeCalls)
+	}
+	if !strings.Contains(html, "--sl:#cf222e") {
+		t.Error("missing light color")
+	}
+	if !strings.Contains(html, "--sd:#ff7b72") {
+		t.Error("missing dark color")
+	}
+}
+
+func TestRender_SingleThemeSkipsCapability(t *testing.T) {
+	hl := &dualMockHighlighter{
+		mockHighlighter: mockHighlighter{
+			lightTokens: [][]Token{{{Content: "hello", Color: "#333333"}}},
+			themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		},
+	}
+
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", ""), WithMinify(false))
+	html, err := engine.Render("hello", Options{Lang: "text"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if hl.dualCalls != 0 {
+		t.Errorf("TokenizeDual calls: got %d, want 0 (single-theme must not use the capability)", hl.dualCalls)
+	}
+	if hl.tokenizeCalls != 1 {
+		t.Errorf("Tokenize calls: got %d, want 1", hl.tokenizeCalls)
+	}
+	if strings.Contains(html, "--sd:") {
+		t.Error("single-theme should not emit --sd")
 	}
 }
 
