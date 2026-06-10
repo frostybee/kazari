@@ -8,47 +8,19 @@ import (
 	"github.com/frostybee/kazari/internal/config"
 )
 
-// MarkerType identifies the kind of marker.
-type MarkerType int
-
-const (
-	MarkerMark MarkerType = iota
-	MarkerIns
-	MarkerDel
-)
-
-// LineRange is an inclusive 1-based line range.
-type LineRange struct {
-	Start int
-	End   int
-}
-
-// LineMarker represents a line-level marker with optional label.
-type LineMarker struct {
-	Type  MarkerType
-	Lines []LineRange
-	Label string
-}
-
-// InlineMarker represents an inline text marker.
-type InlineMarker struct {
-	Type MarkerType
-	Text string
-}
-
 // CollapseSpec holds per-block collapse info from meta.
 type CollapseSpec struct {
 	Enabled  bool
 	Disabled bool
-	Ranges   []LineRange
+	Ranges   []config.LineRange
 }
 
 // ParseResult contains the full parsed meta string output.
 type ParseResult struct {
 	BlockOptions  config.BlockOptions
-	LineMarkers   []LineMarker
-	InlineMarkers []InlineMarker
-	FocusLines    []LineRange
+	LineMarkers   []config.LineMarker
+	InlineMarkers []config.InlineMarker
+	FocusLines    []config.LineRange
 	Collapse      *CollapseSpec
 }
 
@@ -119,19 +91,19 @@ func Parse(meta string) *ParseResult {
 
 		case strings.HasPrefix(tok, "ins="):
 			remainder := strings.TrimPrefix(tok, "ins=")
-			parseMarkerToken(remainder, MarkerIns, result)
+			parseMarkerToken(remainder, config.MarkerIns, result)
 
 		case strings.HasPrefix(tok, "del="):
 			remainder := strings.TrimPrefix(tok, "del=")
-			parseMarkerToken(remainder, MarkerDel, result)
+			parseMarkerToken(remainder, config.MarkerDel, result)
 
 		case strings.HasPrefix(tok, "add="):
 			remainder := strings.TrimPrefix(tok, "add=")
-			parseMarkerToken(remainder, MarkerIns, result)
+			parseMarkerToken(remainder, config.MarkerIns, result)
 
 		case strings.HasPrefix(tok, "rem="):
 			remainder := strings.TrimPrefix(tok, "rem=")
-			parseMarkerToken(remainder, MarkerDel, result)
+			parseMarkerToken(remainder, config.MarkerDel, result)
 
 		case strings.HasPrefix(tok, "collapse="):
 			rangeStr := extractBraces(strings.TrimPrefix(tok, "collapse="))
@@ -141,17 +113,24 @@ func Parse(meta string) *ParseResult {
 			result.Collapse.Ranges = parseRanges(rangeStr)
 
 		case strings.HasPrefix(tok, "{") && strings.HasSuffix(tok, "}"):
-			// Bare highlight ranges: {3-5,8}
-			rangeStr := tok[1 : len(tok)-1]
-			result.LineMarkers = append(result.LineMarkers, LineMarker{
-				Type:  MarkerMark,
-				Lines: parseRanges(rangeStr),
-			})
+			inner := tok[1 : len(tok)-1]
+			if label, ranges, ok := parseLabeledRange(inner); ok {
+				result.LineMarkers = append(result.LineMarkers, config.LineMarker{
+					Type:  config.MarkerMark,
+					Lines: ranges,
+					Label: label,
+				})
+			} else {
+				result.LineMarkers = append(result.LineMarkers, config.LineMarker{
+					Type:  config.MarkerMark,
+					Lines: parseRanges(inner),
+				})
+			}
 
 		case isQuotedString(tok):
 			// Inline text marker: "text"
-			result.InlineMarkers = append(result.InlineMarkers, InlineMarker{
-				Type: MarkerMark,
+			result.InlineMarkers = append(result.InlineMarkers, config.InlineMarker{
+				Type: config.MarkerMark,
 				Text: unquote(tok),
 			})
 		}
@@ -161,10 +140,10 @@ func Parse(meta string) *ParseResult {
 }
 
 // parseMarkerToken handles ins="text", ins={lines}, ins={"label":lines}
-func parseMarkerToken(remainder string, mtype MarkerType, result *ParseResult) {
+func parseMarkerToken(remainder string, mtype config.MarkerType, result *ParseResult) {
 	if isQuotedString(remainder) {
 		// Inline text marker: ins="text"
-		result.InlineMarkers = append(result.InlineMarkers, InlineMarker{
+		result.InlineMarkers = append(result.InlineMarkers, config.InlineMarker{
 			Type: mtype,
 			Text: unquote(remainder),
 		})
@@ -172,13 +151,13 @@ func parseMarkerToken(remainder string, mtype MarkerType, result *ParseResult) {
 		inner := extractBraces(remainder)
 		// Check for labeled range: {"A":6-10}
 		if label, ranges, ok := parseLabeledRange(inner); ok {
-			result.LineMarkers = append(result.LineMarkers, LineMarker{
+			result.LineMarkers = append(result.LineMarkers, config.LineMarker{
 				Type:  mtype,
 				Lines: ranges,
 				Label: label,
 			})
 		} else {
-			result.LineMarkers = append(result.LineMarkers, LineMarker{
+			result.LineMarkers = append(result.LineMarkers, config.LineMarker{
 				Type:  mtype,
 				Lines: parseRanges(inner),
 			})
@@ -187,7 +166,7 @@ func parseMarkerToken(remainder string, mtype MarkerType, result *ParseResult) {
 }
 
 // parseLabeledRange handles "A":6-10 inside braces.
-func parseLabeledRange(s string) (string, []LineRange, bool) {
+func parseLabeledRange(s string) (string, []config.LineRange, bool) {
 	if !strings.HasPrefix(s, "\"") {
 		return "", nil, false
 	}
@@ -207,8 +186,8 @@ func parseLabeledRange(s string) (string, []LineRange, bool) {
 }
 
 // parseRanges parses "3-5,8,10-12" into LineRange slices.
-func parseRanges(s string) []LineRange {
-	var ranges []LineRange
+func parseRanges(s string) []config.LineRange {
+	var ranges []config.LineRange
 	for _, part := range strings.Split(s, ",") {
 		part = strings.TrimSpace(part)
 		if part == "" {
@@ -218,11 +197,11 @@ func parseRanges(s string) []LineRange {
 			start, err1 := strconv.Atoi(strings.TrimSpace(part[:dash]))
 			end, err2 := strconv.Atoi(strings.TrimSpace(part[dash+1:]))
 			if err1 == nil && err2 == nil {
-				ranges = append(ranges, LineRange{Start: start, End: end})
+				ranges = append(ranges, config.LineRange{Start: start, End: end})
 			}
 		} else {
 			if n, err := strconv.Atoi(part); err == nil {
-				ranges = append(ranges, LineRange{Start: n, End: n})
+				ranges = append(ranges, config.LineRange{Start: n, End: n})
 			}
 		}
 	}

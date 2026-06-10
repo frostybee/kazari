@@ -6,22 +6,12 @@ import (
 	"strings"
 
 	"github.com/frostybee/kazari/internal/config"
+	"github.com/frostybee/kazari/internal/marker"
 )
 
-// MergedToken holds both light and dark colors for a single token.
-type MergedToken struct {
-	Content    string
-	LightColor string
-	DarkColor  string
-	LightBG    string
-	DarkBG     string
-	FontStyle  int
-}
-
-// TokenLine represents one line of merged tokens.
-type TokenLine struct {
-	Tokens []MergedToken
-}
+// Type aliases for backward compatibility within the package.
+type MergedToken = config.MergedToken
+type TokenLine = config.TokenLine
 
 const (
 	fontStyleItalic        = 1
@@ -138,23 +128,54 @@ func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 	renderPreCode(sb, lines, resolved, dualTheme)
 }
 
+type lineContext struct {
+	resolved        *config.ResolvedBlock
+	dualTheme       bool
+	resolvedMarkers map[int]marker.ResolvedLine
+	focusSet        map[int]bool
+	hasFocus        bool
+}
+
 func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, dualTheme bool) {
+	lctx := &lineContext{
+		resolved:        resolved,
+		dualTheme:       dualTheme,
+		resolvedMarkers: marker.ResolveLineMarkers(resolved.LineMarkers),
+		focusSet:        marker.ResolveFocusSet(resolved.FocusLines),
+		hasFocus:        len(resolved.FocusLines) > 0,
+	}
+
 	if resolved.LineNumbers {
 		endNum := resolved.StartLineNumber + len(lines) - 1
 		maxDigits := max(digitCount(resolved.StartLineNumber), digitCount(endNum))
 		if maxDigits > 2 {
-			sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\"><code style=\"--kz-ln-width:%dch\">", html.EscapeString(resolved.Lang), maxDigits))
+			sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
+			renderCodeOpen(sb, lctx, maxDigits)
 		} else {
-			sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\"><code>", html.EscapeString(resolved.Lang)))
+			sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
+			renderCodeOpen(sb, lctx, 0)
 		}
 	} else {
-		sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\"><code>", html.EscapeString(resolved.Lang)))
+		sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
+		renderCodeOpen(sb, lctx, 0)
 	}
 	for i, line := range lines {
 		lineNum := resolved.StartLineNumber + i
-		renderLine(sb, line, lineNum, resolved, dualTheme)
+		renderLine(sb, line, lineNum, lctx)
 	}
 	sb.WriteString("</code></pre>")
+}
+
+func renderCodeOpen(sb *strings.Builder, lctx *lineContext, lnWidth int) {
+	classes := ""
+	if lctx.hasFocus {
+		classes = " class=\"has-focus\""
+	}
+	if lnWidth > 0 {
+		sb.WriteString(fmt.Sprintf("<code%s style=\"--kz-ln-width:%dch\">", classes, lnWidth))
+	} else {
+		sb.WriteString(fmt.Sprintf("<code%s>", classes))
+	}
 }
 
 func encodeForDataCode(code string) string {
@@ -177,19 +198,124 @@ func displayLang(lang string) string {
 	return lang
 }
 
-func renderLine(sb *strings.Builder, line TokenLine, lineNum int, resolved *config.ResolvedBlock, dualTheme bool) {
-	sb.WriteString("<div class=\"kz-line\">")
-	if resolved.LineNumbers {
+func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineContext) {
+	classes := "kz-line"
+	labelAttr := ""
+
+	if entry, ok := lctx.resolvedMarkers[lineNum]; ok && entry.HasMark {
+		classes += " highlight"
+		switch entry.Type {
+		case config.MarkerMark:
+			classes += " mark"
+		case config.MarkerDel:
+			classes += " del"
+		case config.MarkerIns:
+			classes += " ins"
+		}
+		if entry.Label != "" {
+			classes += " tm-label"
+			labelAttr = fmt.Sprintf(" data-label=\"%s\"", html.EscapeString(entry.Label))
+		}
+	}
+
+	if lctx.hasFocus && lctx.focusSet[lineNum] {
+		classes += " focused"
+	}
+
+	sb.WriteString(fmt.Sprintf("<div class=\"%s\">", classes))
+	if lctx.resolved.LineNumbers {
 		sb.WriteString(fmt.Sprintf("<div class=\"gutter\"><div class=\"ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
 	}
-	sb.WriteString("<div class=\"code\">")
-	for _, tok := range line.Tokens {
-		if tok.Content == "" {
-			continue
+	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s>", labelAttr))
+	if len(lctx.resolved.InlineMarkers) > 0 {
+		annotated := marker.ProcessInlineMarkers(line.Tokens, lctx.resolved.InlineMarkers)
+		for _, at := range annotated {
+			if at.Token.Content == "" {
+				continue
+			}
+			renderAnnotatedToken(sb, at, lctx.dualTheme)
 		}
-		renderToken(sb, tok, dualTheme)
+	} else {
+		for _, tok := range line.Tokens {
+			if tok.Content == "" {
+				continue
+			}
+			renderToken(sb, tok, lctx.dualTheme)
+		}
 	}
 	sb.WriteString("</div></div>")
+}
+
+func markerElement(mtype config.MarkerType) string {
+	switch mtype {
+	case config.MarkerIns:
+		return "ins"
+	case config.MarkerDel:
+		return "del"
+	default:
+		return "mark"
+	}
+}
+
+func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, dualTheme bool) {
+	hasInlineMarker := false
+	for _, seg := range at.Segments {
+		if seg.Marker != nil {
+			hasInlineMarker = true
+			break
+		}
+	}
+
+	if !hasInlineMarker {
+		renderToken(sb, at.Token, dualTheme)
+		return
+	}
+
+	allOneSegmentSpanning := len(at.Segments) == 1 && at.Segments[0].Marker != nil &&
+		(at.Segments[0].Marker.OpenStart || at.Segments[0].Marker.OpenEnd)
+
+	if allOneSegmentSpanning {
+		// Multi-token span: mark wraps the span.
+		seg := at.Segments[0]
+		elem := markerElement(seg.Marker.Type)
+		var classes []string
+		if seg.Marker.OpenStart {
+			classes = append(classes, "open-start")
+		}
+		if seg.Marker.OpenEnd {
+			classes = append(classes, "open-end")
+		}
+		sb.WriteString(fmt.Sprintf("<%s class=\"%s\">", elem, strings.Join(classes, " ")))
+		style := buildTokenStyle(at.Token, dualTheme)
+		if style != "" {
+			sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
+		} else {
+			sb.WriteString("<span>")
+		}
+		sb.WriteString(html.EscapeString(seg.Content))
+		sb.WriteString("</span>")
+		sb.WriteString(fmt.Sprintf("</%s>", elem))
+		return
+	}
+
+	// Partial match or standalone: mark goes inside the span.
+	style := buildTokenStyle(at.Token, dualTheme)
+	if style != "" {
+		sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
+	} else {
+		sb.WriteString("<span>")
+	}
+	for _, seg := range at.Segments {
+		if seg.Marker != nil {
+			elem := markerElement(seg.Marker.Type)
+			sb.WriteString(fmt.Sprintf("<%s>", elem))
+			sb.WriteString(html.EscapeString(seg.Content))
+			sb.WriteString(fmt.Sprintf("</%s>", elem))
+		} else {
+			sb.WriteString(html.EscapeString(seg.Content))
+		}
+	}
+	sb.WriteString("</span>")
 }
 
 func renderToken(sb *strings.Builder, tok MergedToken, dualTheme bool) {

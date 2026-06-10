@@ -37,6 +37,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	sb.WriteString(readCSS("font-style.css"))
 	sb.WriteString(readCSS("base.css"))
 	sb.WriteString(readCSS("line-numbers.css"))
+	sb.WriteString(readCSS("markers.css"))
+	sb.WriteString(readCSS("inline-markers.css"))
+	sb.WriteString(readCSS("focus.css"))
 
 	// Static: conditional on config
 	if cfg.StyleReset {

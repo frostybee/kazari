@@ -1,0 +1,76 @@
+/* Line marker backgrounds */
+.kazari-code .kz-line.highlight.mark {
+  background: var(--kz-mark-bg);
+}
+.kazari-code .kz-line.highlight.ins {
+  background: var(--kz-ins-bg);
+}
+.kazari-code .kz-line.highlight.del {
+  background: var(--kz-del-bg);
+}
+
+/* Left accent bar via inset box-shadow (no layout shift) */
+.kazari-code .kz-line.highlight {
+  box-shadow: inset var(--kz-mark-accent-width) 0 0 0 var(--kz-mark-border);
+}
+.kazari-code .kz-line.highlight.ins {
+  box-shadow: inset var(--kz-mark-accent-width) 0 0 0 var(--kz-ins-border);
+}
+.kazari-code .kz-line.highlight.del {
+  box-shadow: inset var(--kz-mark-accent-width) 0 0 0 var(--kz-del-border);
+}
+
+/* Line number opacity bump on highlighted lines */
+.kazari-code .kz-line.highlight .ln {
+  opacity: 0.6;
+}
+
+/* Diff indicators via ::before on .code */
+.kazari-code .kz-line.ins .code,
+.kazari-code .kz-line.del .code {
+  position: relative;
+}
+.kazari-code .kz-line.ins .code::before {
+  content: var(--kz-ins-indicator);
+  color: var(--kz-ins-indicator-color);
+  position: absolute;
+  left: 0;
+  margin-left: var(--kz-diff-indicator-margin);
+  white-space: pre;
+  pointer-events: none;
+}
+.kazari-code .kz-line.del .code::before {
+  content: var(--kz-del-indicator);
+  color: var(--kz-del-indicator-color);
+  position: absolute;
+  left: 0;
+  margin-left: var(--kz-diff-indicator-margin);
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* Labeled ranges — inline badge before code content on the first line.
+   data-label on .code div, read via attr() (avoids CSS injection).
+   On ins/del lines, this overrides the diff indicator ::before. */
+.kazari-code .kz-line.tm-label .code::before {
+  content: attr(data-label);
+  color: var(--kz-label-fg);
+  padding: var(--kz-label-padding);
+  font-size: var(--kz-label-font-size);
+  border-radius: var(--kz-label-radius);
+  margin-right: 0.75em;
+  position: static;
+  left: auto;
+  margin-left: 0;
+  display: inline;
+  white-space: nowrap;
+}
+.kazari-code .kz-line.mark.tm-label .code::before {
+  background: var(--kz-mark-border);
+}
+.kazari-code .kz-line.ins.tm-label .code::before {
+  background: var(--kz-ins-border);
+}
+.kazari-code .kz-line.del.tm-label .code::before {
+  background: var(--kz-del-border);
+}

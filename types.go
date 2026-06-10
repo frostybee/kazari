@@ -57,10 +57,11 @@ type Range struct {
 // MarkerType identifies the kind of line or inline marker.
 type MarkerType int
 
+// Priority order: mark(0) < del(1) < ins(2). Higher value wins in overlap resolution.
 const (
-	MarkerMark MarkerType = iota // highlight (default)
-	MarkerIns                    // inserted
+	MarkerMark MarkerType = iota // highlight (default, lowest priority)
 	MarkerDel                    // deleted
+	MarkerIns                    // inserted (highest priority)
 )
 
 // LineMarker represents a line-level marker with optional label.

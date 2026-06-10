@@ -65,6 +65,9 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 	blockOpts := mapOptionsToBlockOpts(opts)
 	lang := e.cfg.ResolveLanguage(opts.Lang)
 	resolved := e.cfg.Resolve(lang, blockOpts)
+	resolved.LineMarkers = convertLineMarkers(opts.LineMarkers)
+	resolved.InlineMarkers = convertInlineMarkers(opts.InlineMarkers)
+	resolved.FocusLines = convertRanges(opts.FocusLines)
 	return e.renderResolved(code, resolved)
 }
 
@@ -74,6 +77,9 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	lang := e.cfg.ResolveLanguage(parsed.BlockOptions.Lang)
 	parsed.BlockOptions.Lang = lang
 	resolved := e.cfg.Resolve(lang, &parsed.BlockOptions)
+	resolved.LineMarkers = parsed.LineMarkers
+	resolved.InlineMarkers = parsed.InlineMarkers
+	resolved.FocusLines = parsed.FocusLines
 	return e.renderResolved(code, resolved)
 }
 
@@ -136,6 +142,46 @@ func (e *Engine) Assets() Assets {
 		CSS: makeAssetFile(cssContent, "css"),
 		JS:  makeAssetFile(jsContent, "js"),
 	}
+}
+
+func convertLineMarkers(markers []LineMarker) []config.LineMarker {
+	if len(markers) == 0 {
+		return nil
+	}
+	out := make([]config.LineMarker, len(markers))
+	for i, m := range markers {
+		out[i] = config.LineMarker{
+			Type:  config.MarkerType(m.Type),
+			Lines: convertRanges(m.Lines),
+			Label: m.Label,
+		}
+	}
+	return out
+}
+
+func convertInlineMarkers(markers []InlineMarker) []config.InlineMarker {
+	if len(markers) == 0 {
+		return nil
+	}
+	out := make([]config.InlineMarker, len(markers))
+	for i, m := range markers {
+		out[i] = config.InlineMarker{
+			Type: config.MarkerType(m.Type),
+			Text: m.Text,
+		}
+	}
+	return out
+}
+
+func convertRanges(ranges []Range) []config.LineRange {
+	if len(ranges) == 0 {
+		return nil
+	}
+	out := make([]config.LineRange, len(ranges))
+	for i, r := range ranges {
+		out[i] = config.LineRange{Start: r.Start, End: r.End}
+	}
+	return out
 }
 
 func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {

@@ -42,6 +42,37 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-title-padding", "0.5rem 1rem"},
 		{"--kz-ln-padding-inline", "2ch"},
 		{"--kz-gutter-border-width", "1px"},
+		// Line marker defaults
+		{"--kz-mark-bg", "rgba(255,200,0,0.12)"},
+		{"--kz-mark-border", "rgba(255,200,0,0.5)"},
+		{"--kz-mark-accent-width", "3px"},
+		{"--kz-ins-bg", "rgba(46,160,67,0.12)"},
+		{"--kz-ins-border", "rgba(46,160,67,0.5)"},
+		{"--kz-ins-indicator", "'+'"},
+		{"--kz-del-bg", "rgba(248,81,73,0.12)"},
+		{"--kz-del-border", "rgba(248,81,73,0.5)"},
+		{"--kz-del-indicator", "'-'"},
+		{"--kz-mark-accent-margin", "0rem"},
+		{"--kz-diff-indicator-margin", "0.3rem"},
+		{"--kz-ins-indicator-color", "rgba(46,160,67,0.8)"},
+		{"--kz-del-indicator-color", "rgba(248,81,73,0.8)"},
+		// Label defaults
+		{"--kz-label-fg", "#ffffff"},
+		{"--kz-label-padding", "0.1rem 0.3rem"},
+		{"--kz-label-font-size", "0.75rem"},
+		{"--kz-label-radius", "0.2rem"},
+		// Inline marker defaults
+		{"--kz-inline-mark-bg", "rgba(255,200,0,0.2)"},
+		{"--kz-inline-mark-border", "rgba(255,200,0,0.5)"},
+		{"--kz-inline-mark-radius", "0.2rem"},
+		{"--kz-inline-mark-padding", "0.15rem"},
+		{"--kz-inline-mark-border-width", "1.5px"},
+		{"--kz-inline-ins-bg", "rgba(46,160,67,0.2)"},
+		{"--kz-inline-ins-border", "rgba(46,160,67,0.5)"},
+		{"--kz-inline-del-bg", "rgba(248,81,73,0.2)"},
+		{"--kz-inline-del-border", "rgba(248,81,73,0.5)"},
+		// Focus defaults
+		{"--kz-focus-dimmed-opacity", "0.35"},
 	}
 
 	// Light theme variables.

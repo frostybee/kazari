@@ -25,6 +25,50 @@ const (
 	FrameNone     = 3
 )
 
+// MarkerType identifies the kind of line or inline marker.
+type MarkerType int
+
+// Priority order: mark(0) < del(1) < ins(2). Higher value wins in overlap resolution.
+const (
+	MarkerMark MarkerType = iota // highlight (default, lowest priority)
+	MarkerDel                    // deleted
+	MarkerIns                    // inserted (highest priority)
+)
+
+// LineRange is an inclusive 1-based line range.
+type LineRange struct {
+	Start int
+	End   int
+}
+
+// LineMarker represents a line-level marker with optional label.
+type LineMarker struct {
+	Type  MarkerType
+	Lines []LineRange
+	Label string
+}
+
+// InlineMarker represents an inline text marker.
+type InlineMarker struct {
+	Type MarkerType
+	Text string
+}
+
+// MergedToken holds both light and dark colors for a single token.
+type MergedToken struct {
+	Content    string
+	LightColor string
+	DarkColor  string
+	LightBG    string
+	DarkBG     string
+	FontStyle  int
+}
+
+// TokenLine represents one line of merged tokens.
+type TokenLine struct {
+	Tokens []MergedToken
+}
+
 // BlockDefaults holds default block rendering properties.
 type BlockDefaults struct {
 	Wrap           bool
@@ -127,7 +171,10 @@ type ResolvedBlock struct {
 	Wrap            bool
 	PreserveIndent  bool
 	HangingIndent   int
-	RawCode         string // code for copy button (post file-name extraction)
+	RawCode       string // code for copy button (post file-name extraction)
+	LineMarkers   []LineMarker
+	InlineMarkers []InlineMarker
+	FocusLines    []LineRange
 }
 
 // Resolve applies the config cascade for a specific block:

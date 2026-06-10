@@ -717,3 +717,320 @@ func TestRenderWithMeta_LineNumbers(t *testing.T) {
 		t.Error("missing line number 11")
 	}
 }
+
+// --- Text marker tests ---
+
+func threeLineMock() *mockHighlighter {
+	return &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "line one", Color: "#000"}},
+			{{Content: "line two", Color: "#000"}},
+			{{Content: "line three", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+}
+
+func fiveLineMock() *mockHighlighter {
+	return &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "line one", Color: "#000"}},
+			{{Content: "line two", Color: "#000"}},
+			{{Content: "line three", Color: "#000"}},
+			{{Content: "line four", Color: "#000"}},
+			{{Content: "line five", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+}
+
+func TestRenderWithMeta_LineMarkers_Mark(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go {2}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `class="kz-line highlight mark"`) {
+		t.Error("line 2 should have highlight mark class")
+	}
+	if strings.Count(html, "highlight") != 1 {
+		t.Error("only line 2 should be highlighted")
+	}
+}
+
+func TestRenderWithMeta_LineMarkers_Ins(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go ins={1}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `class="kz-line highlight ins"`) {
+		t.Error("line 1 should have highlight ins class")
+	}
+}
+
+func TestRenderWithMeta_LineMarkers_Del(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go del={3}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `class="kz-line highlight del"`) {
+		t.Error("line 3 should have highlight del class")
+	}
+}
+
+func TestRenderWithMeta_LineMarkers_Combined(t *testing.T) {
+	engine := newTestEngine(fiveLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three\nline four\nline five", `go {1} ins={3} del={5}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `highlight mark`) {
+		t.Error("missing mark class")
+	}
+	if !strings.Contains(html, `highlight ins`) {
+		t.Error("missing ins class")
+	}
+	if !strings.Contains(html, `highlight del`) {
+		t.Error("missing del class")
+	}
+}
+
+func TestRenderWithMeta_LineMarkers_UnmarkedLinesPlain(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go {2}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(html, `class="kz-line"`) != 2 {
+		t.Errorf("expected 2 plain kz-line divs, got %d", strings.Count(html, `class="kz-line"`))
+	}
+}
+
+func TestRenderWithMeta_LabeledRange(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go ins={"A":1-3}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `tm-label`) {
+		t.Error("first line should have tm-label class")
+	}
+	if !strings.Contains(html, `data-label="A"`) {
+		t.Error("first line should have data-label attribute")
+	}
+	if strings.Count(html, "tm-label") != 1 {
+		t.Error("only the first line of the range should have the label")
+	}
+}
+
+func TestRenderWithMeta_FocusLines_HasFocusOnCode(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go focus={2}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `class="has-focus"`) {
+		t.Error("code element should have has-focus class")
+	}
+}
+
+func TestRenderWithMeta_FocusLines_FocusedClass(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go focus={2}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `kz-line focused`) {
+		t.Error("focused line should have focused class")
+	}
+	if strings.Count(html, `kz-line focused`) != 1 {
+		t.Errorf("only 1 line should be focused, got %d", strings.Count(html, `kz-line focused`))
+	}
+}
+
+func TestRenderWithMeta_NoFocus_NoHasFocusClass(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.RenderWithMeta("line one\nline two\nline three", `go`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(html, "has-focus") {
+		t.Error("should not have has-focus without focus lines")
+	}
+	if strings.Contains(html, "focused") {
+		t.Error("should not have focused class without focus lines")
+	}
+}
+
+func TestRender_LineMarkersViaOptions(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.Render("line one\nline two\nline three", Options{
+		Lang: "go",
+		LineMarkers: []LineMarker{
+			{Type: MarkerIns, Lines: []Range{{Start: 2, End: 2}}},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `highlight ins`) {
+		t.Error("line 2 should have ins class via Render() API")
+	}
+}
+
+func TestRender_FocusLinesViaOptions(t *testing.T) {
+	engine := newTestEngine(threeLineMock())
+	html, err := engine.Render("line one\nline two\nline three", Options{
+		Lang:       "go",
+		FocusLines: []Range{{Start: 1, End: 1}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "has-focus") {
+		t.Error("should have has-focus class")
+	}
+}
+
+func TestRenderWithMeta_InlineMarker_MarkElement(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "const useState = true", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("const useState = true", `go "use"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "<mark>use</mark>") {
+		t.Errorf("expected <mark>use</mark> in output, got: %s", html)
+	}
+}
+
+func TestRenderWithMeta_InlineMarker_InsElement(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "hello world", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("hello world", `go ins="world"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "<ins>world</ins>") {
+		t.Errorf("expected <ins>world</ins>, got: %s", html)
+	}
+}
+
+func TestRenderWithMeta_InlineMarker_DelElement(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "hello world", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("hello world", `go del="hello"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "<del>hello</del>") {
+		t.Errorf("expected <del>hello</del>, got: %s", html)
+	}
+}
+
+func TestRenderWithMeta_InlineMarker_MultiTokenSpan(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{
+				{Content: "fmt", Color: "#000"},
+				{Content: ".", Color: "#111"},
+				{Content: "Println", Color: "#222"},
+			},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("fmt.Println", `go "fmt.Println"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `class="open-end"`) {
+		t.Error("first token should have open-end class")
+	}
+	if !strings.Contains(html, `class="open-start open-end"`) {
+		t.Error("middle token should have both open classes")
+	}
+	if !strings.Contains(html, `class="open-start"`) && !strings.Contains(html, `open-start">`) {
+		t.Error("last token should have open-start class")
+	}
+}
+
+func TestRender_InlineMarkersViaOptions(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "hello world", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello world", Options{
+		Lang:          "go",
+		InlineMarkers: []InlineMarker{{Type: MarkerMark, Text: "world"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "<mark>world</mark>") {
+		t.Errorf("expected <mark>world</mark> via Render() API, got: %s", html)
+	}
+}
+
+func TestCSS_ContainsMarkerVars(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	)
+	css := engine.CSS()
+	vars := []string{
+		"--kz-mark-bg", "--kz-mark-border", "--kz-mark-accent-width",
+		"--kz-ins-bg", "--kz-ins-border", "--kz-ins-indicator",
+		"--kz-del-bg", "--kz-del-border", "--kz-del-indicator",
+		"--kz-inline-mark-bg", "--kz-inline-mark-border",
+		"--kz-focus-dimmed-opacity",
+	}
+	for _, v := range vars {
+		if !strings.Contains(css, v) {
+			t.Errorf("CSS missing variable: %s", v)
+		}
+	}
+}
+
+func TestCSS_ContainsMarkerStyles(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	)
+	css := engine.CSS()
+	rules := []string{
+		".highlight.mark",
+		".highlight.ins",
+		".highlight.del",
+		"open-start",
+		"open-end",
+		"has-focus",
+	}
+	for _, r := range rules {
+		if !strings.Contains(css, r) {
+			t.Errorf("CSS missing rule/class: %s", r)
+		}
+	}
+}
