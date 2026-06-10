@@ -76,8 +76,12 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	}
 	sb.WriteString(fmt.Sprintf("<figure class=\"%s\" data-lang=\"%s\">", classes, html.EscapeString(resolved.Lang)))
 
-	sb.WriteString("<div class=\"kz-terminal-header\">")
-	sb.WriteString("<span class=\"kz-terminal-dots\"><span></span><span></span><span></span></span>")
+	if cfg.TerminalDotStyle == config.DotsMinimal {
+		sb.WriteString("<div class=\"kz-terminal-header kz-dots-minimal\">")
+	} else {
+		sb.WriteString("<div class=\"kz-terminal-header\">")
+		sb.WriteString("<span class=\"kz-terminal-dots\"><span></span><span></span><span></span></span>")
+	}
 	if resolved.Title != "" {
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
 	}

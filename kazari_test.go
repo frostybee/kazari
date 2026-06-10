@@ -292,6 +292,84 @@ func TestRender_TerminalFrame(t *testing.T) {
 	}
 }
 
+func TestTerminalDots_DefaultColored(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "echo hi", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl)
+	html, err := engine.Render("echo hi", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-terminal-dots") {
+		t.Error("default dot style should render colored dot spans")
+	}
+	if strings.Contains(html, "kz-dots-minimal") {
+		t.Error("default dot style should not have kz-dots-minimal class")
+	}
+}
+
+func TestTerminalDots_Minimal(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "echo hi", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#000", BG: "#fff"},
+	}
+
+	engine := newTestEngine(hl, WithTerminalDotStyle(DotsMinimal))
+	html, err := engine.Render("echo hi", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-dots-minimal") {
+		t.Error("minimal dot style should add kz-dots-minimal class to header")
+	}
+	if strings.Contains(html, "kz-terminal-dots") {
+		t.Error("minimal dot style should not render colored dot spans")
+	}
+}
+
+func TestCSS_ColoredDots(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#000", BG: "#fff"}}
+	engine := newTestEngine(hl)
+	css := engine.CSS()
+
+	if !strings.Contains(css, "--kz-terminal-dot-red") {
+		t.Error("default CSS should contain colored dot rules")
+	}
+	if strings.Contains(css, "kz-dots-minimal") {
+		t.Error("default CSS should not contain minimal dot rules")
+	}
+	if strings.Contains(css, "--kz-terminal-icon") {
+		t.Error("default CSS should not contain minimal dot variables")
+	}
+}
+
+func TestCSS_MinimalDots(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#000", BG: "#fff"}}
+	engine := newTestEngine(hl, WithTerminalDotStyle(DotsMinimal))
+	css := engine.CSS()
+
+	if !strings.Contains(css, "kz-dots-minimal") {
+		t.Error("minimal CSS should contain minimal dot rules")
+	}
+	if !strings.Contains(css, "mask-image") {
+		t.Error("minimal CSS should use mask-image")
+	}
+	if !strings.Contains(css, "--kz-terminal-dots-fg") {
+		t.Error("minimal CSS should define --kz-terminal-dots-fg")
+	}
+	if !strings.Contains(css, "--kz-terminal-icon") {
+		t.Error("minimal CSS should define --kz-terminal-icon")
+	}
+	if strings.Contains(css, "--kz-terminal-dot-red") {
+		t.Error("minimal CSS should not contain colored dot rules")
+	}
+}
+
 func TestRender_TerminalFrame_WithShebang(t *testing.T) {
 	hl := &mockHighlighter{
 		lightTokens: [][]Token{

@@ -109,6 +109,14 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		)
 	}
 
+	// Minimal terminal dots (conditional)
+	if cfg.TerminalDotStyle == config.DotsMinimal {
+		staticVars = append(staticVars,
+			nv("--kz-terminal-dots-opacity", "0.15"),
+			nv("--kz-terminal-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3Ccircle cx='30' cy='8' r='8'/%3E%3Ccircle cx='52' cy='8' r='8'/%3E%3C/svg%3E")`),
+		)
+	}
+
 	// Light theme variables.
 	lightVars := buildThemeVars(light, cfg)
 	// Dark theme variables.
@@ -234,6 +242,15 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 			nv("--kz-copy-fg-hover", "#ffffff"),
 			nv("--kz-copy-bg-hover", "rgba(63, 63, 70, 0.8)"),
 		)
+	}
+
+	// Minimal terminal dots color derived from theme luminance.
+	if cfg.TerminalDotStyle == config.DotsMinimal {
+		if color.IsLight(tc.EditorBG) {
+			vars = append(vars, nv("--kz-terminal-dots-fg", "#24292f"))
+		} else {
+			vars = append(vars, nv("--kz-terminal-dots-fg", "#e6edf3"))
+		}
 	}
 
 	// Code group tab colors derived from theme luminance.

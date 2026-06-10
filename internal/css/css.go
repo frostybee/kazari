@@ -56,6 +56,12 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	sb.WriteString(readCSS("toolbar.css"))
 	sb.WriteString(readCSS("terminal.css"))
 
+	if cfg.TerminalDotStyle == config.DotsMinimal {
+		sb.WriteString(readCSS("terminal-dots-minimal.css"))
+	} else {
+		sb.WriteString(readCSS("terminal-dots-colored.css"))
+	}
+
 	if cfg.CopyButton {
 		sb.WriteString(readCSS("copy.css"))
 	}

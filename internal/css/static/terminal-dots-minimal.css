@@ -1,0 +1,19 @@
+.kazari-code .kz-terminal-header.kz-dots-minimal {
+  min-height: 2rem;
+}
+.kazari-code .kz-terminal-header.kz-dots-minimal::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  left: var(--kz-code-padding-inline);
+  width: 2.1rem;
+  height: 0.56rem;
+  background-color: var(--kz-terminal-dots-fg);
+  opacity: var(--kz-terminal-dots-opacity);
+  -webkit-mask-image: var(--kz-terminal-icon);
+  mask-image: var(--kz-terminal-icon);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}

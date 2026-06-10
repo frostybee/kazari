@@ -57,6 +57,10 @@ func WithCollapsible(c CollapsibleConfig) Option {
 	}
 }
 
+func WithTerminalDotStyle(style TerminalDotStyle) Option {
+	return func(b *engineBuilder) { b.cfg.TerminalDotStyle = int(style) }
+}
+
 func WithMinSyntaxHighlightingColorContrast(ratio float64) Option {
 	return func(b *engineBuilder) { b.cfg.MinContrast = ratio }
 }

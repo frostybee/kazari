@@ -25,6 +25,12 @@ const (
 	FrameNone     = 3
 )
 
+// Terminal dot style constants matching the public TerminalDotStyle enum.
+const (
+	DotsColored = 0
+	DotsMinimal = 1
+)
+
 // MarkerType identifies the kind of line or inline marker.
 type MarkerType int
 
@@ -176,6 +182,7 @@ type Config struct {
 	CascadeLayer       string
 	LanguageAliases    map[string]string
 	CodeGroups         bool
+	TerminalDotStyle   int // DotsColored or DotsMinimal
 }
 
 // DefaultConfig returns the engine configuration with all documented defaults.
@@ -209,8 +216,9 @@ func DefaultConfig() *Config {
 		TabWidth:        2,
 		MinContrast:     5.5,
 		Minify:          true,
-		CascadeLayer:    "kazari",
-		LanguageAliases: nil,
+		CascadeLayer:     "kazari",
+		LanguageAliases:  nil,
+		TerminalDotStyle: DotsColored,
 	}
 }
 

@@ -102,6 +102,22 @@ with no frame wrapper.`
 		log.Fatalf("Render ps: %v", err)
 	}
 
+	// Terminal frame with minimal (CSS-only monochrome) dots.
+	// Separate engine because dot style is engine-level. Its CSS is appended to the
+	// page (rules are markup-gated, duplicates are harmless) but its JS must NOT be
+	// included — duplicate const declarations break the module script.
+	dotsEngine := kazari.New(
+		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithMinify(false),
+		kazari.WithTerminalDotStyle(kazari.DotsMinimal),
+	)
+
+	minimalDotsHTML, err := dotsEngine.Render(bashCode, kazari.Options{Lang: "bash", Title: "Minimal dots"})
+	if err != nil {
+		log.Fatalf("Render minimalDots: %v", err)
+	}
+
 	lnEnabled := true
 	lnHTML, err := engine.Render(lnCode, kazari.Options{Lang: "go", Title: "main.go", LineNumbers: &lnEnabled})
 	if err != nil {
@@ -433,6 +449,7 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 	codeGroupHTML := codeGroupBuf.String()
 
 	css := collapseEngine.CSS()
+	dotsCSS := dotsEngine.CSS()
 	js := collapseEngine.JS()
 
 	page := fmt.Sprintf(`<!DOCTYPE html>
@@ -442,6 +459,7 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kazari Demo</title>
 <style>
+%s
 %s
 body {
   font-family: system-ui, sans-serif;
@@ -472,6 +490,9 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 %s
 
 <h2>Terminal Frame (with title)</h2>
+%s
+
+<h2>Terminal Frame (minimal dots)</h2>
 %s
 
 <h2>Line Numbers</h2>
@@ -529,7 +550,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 %s
 </script>
 </body>
-</html>`, css, goHTML, jsHTML, bashHTML, psHTML, lnHTML, lnStartHTML, plainHTML,
+</html>`, css, dotsCSS, goHTML, jsHTML, bashHTML, psHTML, minimalDotsHTML, lnHTML, lnStartHTML, plainHTML,
 		markerHTML, labelHTML, focusHTML, inlineHTML, sqHTML, combinedHTML,
 		thresholdHTML, rangeHTML, multiRangeHTML, gapHTML,
 		csStartHTML, csEndHTML, csAutoHTML, codeGroupHTML, js)

@@ -48,6 +48,14 @@ const (
 	FrameNone                  // no frame
 )
 
+// TerminalDotStyle determines how terminal frame dots are rendered.
+type TerminalDotStyle int
+
+const (
+	DotsColored TerminalDotStyle = iota // macOS red/yellow/green DOM spans (default)
+	DotsMinimal                          // CSS-only monochrome dots via SVG mask
+)
+
 // Range represents an inclusive 1-based line range.
 type Range struct {
 	Start int
