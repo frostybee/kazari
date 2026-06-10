@@ -54,6 +54,32 @@ type InlineMarker struct {
 	Text string
 }
 
+// MarkerBGColors maps marker types to their CSS rgba background values.
+var MarkerBGColors = map[MarkerType]string{
+	MarkerMark: "rgba(255,200,0,0.12)",
+	MarkerIns:  "rgba(46,160,67,0.12)",
+	MarkerDel:  "rgba(248,81,73,0.12)",
+}
+
+// MarkerEffectiveBGs holds opaque hex backgrounds after compositing marker RGBA on editor BG.
+type MarkerEffectiveBGs struct {
+	Mark string
+	Ins  string
+	Del  string
+}
+
+// BG returns the effective background for a given marker type.
+func (m *MarkerEffectiveBGs) BG(mt MarkerType) string {
+	switch mt {
+	case MarkerIns:
+		return m.Ins
+	case MarkerDel:
+		return m.Del
+	default:
+		return m.Mark
+	}
+}
+
 // MergedToken holds both light and dark colors for a single token.
 type MergedToken struct {
 	Content    string
@@ -144,6 +170,8 @@ type Config struct {
 	DarkMode           DarkModeConfig
 	TabWidth           int
 	MinContrast        float64
+	LightMarkerBGs     *MarkerEffectiveBGs
+	DarkMarkerBGs      *MarkerEffectiveBGs
 	Minify             bool
 	CascadeLayer       string
 	LanguageAliases    map[string]string

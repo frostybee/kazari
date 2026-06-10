@@ -6,20 +6,32 @@ import (
 )
 
 type mockHighlighter struct {
-	lightTokens [][]Token
-	darkTokens  [][]Token
-	themeInfo   ThemeInfo
+	lightTokens   [][]Token
+	darkTokens    [][]Token
+	themeInfo     ThemeInfo
+	darkThemeInfo ThemeInfo
+	lightThemeName string
 }
 
 func (m *mockHighlighter) Tokenize(code, lang, theme string) ([][]Token, error) {
-	if theme == "dark-theme" && m.darkTokens != nil {
+	if m.darkTokens != nil && theme != m.lightTheme() {
 		return m.darkTokens, nil
 	}
 	return m.lightTokens, nil
 }
 
 func (m *mockHighlighter) GetThemeColors(theme string) (ThemeInfo, error) {
+	if m.darkThemeInfo.BG != "" && theme != m.lightTheme() {
+		return m.darkThemeInfo, nil
+	}
 	return m.themeInfo, nil
+}
+
+func (m *mockHighlighter) lightTheme() string {
+	if m.lightThemeName != "" {
+		return m.lightThemeName
+	}
+	return "light-theme"
 }
 
 func (m *mockHighlighter) GetLoadedLanguages() []string {
@@ -1120,6 +1132,121 @@ func TestRender_InlineMarkersViaOptions(t *testing.T) {
 	}
 	if !strings.Contains(html, "<mark>world</mark>") {
 		t.Errorf("expected <mark>world</mark> via Render() API, got: %s", html)
+	}
+}
+
+func TestRenderWithMeta_InlineMarker_SingleQuote(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "hello world", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("hello world", `go 'hello'`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "<mark>hello</mark>") {
+		t.Errorf("expected <mark>hello</mark> from single-quoted marker, got: %s", html)
+	}
+}
+
+// --- Contrast adjustment tests ---
+
+func TestRender_ContrastAdjustment_MarkedLine(t *testing.T) {
+	// Use a token color very close to the effective mark background on white.
+	// Mark bg rgba(255,200,0,0.12) on #ffffff composites to ~#fff8e0 (light yellow).
+	// A light yellow token (#f0e8b0) has poor contrast against that bg.
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "test", Color: "#f0e8b0"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(4.5))
+	html, err := engine.RenderWithMeta("test", `go {1}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The adjusted color should NOT be the original low-contrast color.
+	if strings.Contains(html, "--sl:#f0e8b0") {
+		t.Error("token color should be adjusted for contrast on marked line, but original color was kept")
+	}
+	if !strings.Contains(html, "--sl:") {
+		t.Error("expected --sl: color to be present")
+	}
+}
+
+func TestRender_ContrastAdjustment_UnmarkedLine(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "test", Color: "#f0e8b0"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(4.5))
+	html, err := engine.RenderWithMeta("test", `go`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// On unmarked lines, the original color should be preserved.
+	if !strings.Contains(html, "--sl:#f0e8b0") {
+		t.Error("token color should NOT be adjusted on unmarked line")
+	}
+}
+
+func TestRender_ContrastAdjustment_Disabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "test", Color: "#f0e8b0"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(0))
+	html, err := engine.RenderWithMeta("test", `go {1}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// With MinContrast=0, no adjustment should happen.
+	if !strings.Contains(html, "--sl:#f0e8b0") {
+		t.Error("token color should NOT be adjusted when MinContrast=0")
+	}
+}
+
+func TestRender_ContrastAdjustment_DualTheme(t *testing.T) {
+	// Light token has poor contrast on light mark bg; dark token has poor contrast on dark mark bg.
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "test", Color: "#f0e8b0"}},
+		},
+		darkTokens: [][]Token{
+			{{Content: "test", Color: "#3a3520"}},
+		},
+		themeInfo:      ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo:  ThemeInfo{FG: "#c9d1d9", BG: "#0d1117"},
+		lightThemeName: "light",
+	}
+	engine := newTestEngine(hl,
+		WithMinSyntaxHighlightingColorContrast(4.5),
+		WithThemes("light", "dark"),
+	)
+	html, err := engine.RenderWithMeta("test", `go {1}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Both colors should be adjusted.
+	if strings.Contains(html, "--sl:#f0e8b0") {
+		t.Error("light color should be adjusted")
+	}
+	if strings.Contains(html, "--sd:#3a3520") {
+		t.Error("dark color should be adjusted")
+	}
+	if !strings.Contains(html, "--sl:") {
+		t.Error("expected --sl: to be present")
+	}
+	if !strings.Contains(html, "--sd:") {
+		t.Error("expected --sd: to be present")
 	}
 }
 

@@ -176,19 +176,26 @@ func parseMarkerToken(remainder string, mtype config.MarkerType, result *ParseRe
 	}
 }
 
-// parseLabeledRange handles "A":6-10 inside braces.
+// parseLabeledRange handles "A":6-10 or 'A':6-10 inside braces.
 func parseLabeledRange(s string) (string, []config.LineRange, bool) {
-	if !strings.HasPrefix(s, "\"") {
+	if len(s) == 0 {
 		return "", nil, false
 	}
-	// Find closing quote
-	end := strings.Index(s[1:], "\"")
+	var quoteChar byte
+	switch s[0] {
+	case '"':
+		quoteChar = '"'
+	case '\'':
+		quoteChar = '\''
+	default:
+		return "", nil, false
+	}
+	end := strings.IndexByte(s[1:], quoteChar)
 	if end < 0 {
 		return "", nil, false
 	}
 	label := s[1 : end+1]
 	rest := s[end+2:]
-	// Expect ":"
 	if !strings.HasPrefix(rest, ":") {
 		return "", nil, false
 	}
@@ -236,9 +243,10 @@ func tokenize(meta string) []string {
 		start := i
 
 		// Quoted string at top level (inline text marker)
-		if runes[i] == '"' {
+		if isQuoteChar(runes[i]) {
+			quoteChar := runes[i]
 			i++
-			for i < len(runes) && runes[i] != '"' {
+			for i < len(runes) && runes[i] != quoteChar {
 				if runes[i] == '\\' {
 					i++
 				}
@@ -253,9 +261,10 @@ func tokenize(meta string) []string {
 
 		// Collect until whitespace, but handle quoted values and brace groups inline
 		for i < len(runes) && !unicode.IsSpace(runes[i]) {
-			if runes[i] == '"' {
+			if isQuoteChar(runes[i]) {
+				qc := runes[i]
 				i++
-				for i < len(runes) && runes[i] != '"' {
+				for i < len(runes) && runes[i] != qc {
 					if runes[i] == '\\' {
 						i++
 					}
@@ -293,21 +302,36 @@ func isBareLang(tok string) bool {
 	if tok == "" {
 		return false
 	}
-	if strings.Contains(tok, "=") || strings.HasPrefix(tok, "{") || strings.HasPrefix(tok, "\"") {
+	if strings.Contains(tok, "=") || strings.HasPrefix(tok, "{") || strings.HasPrefix(tok, "\"") || strings.HasPrefix(tok, "'") {
 		return false
 	}
 	return true
 }
 
+func isQuoteChar(r rune) bool {
+	return r == '"' || r == '\''
+}
+
 func isQuotedString(tok string) bool {
-	return len(tok) >= 2 && tok[0] == '"' && tok[len(tok)-1] == '"'
+	if len(tok) < 2 {
+		return false
+	}
+	return (tok[0] == '"' && tok[len(tok)-1] == '"') ||
+		(tok[0] == '\'' && tok[len(tok)-1] == '\'')
 }
 
 func unquote(s string) string {
-	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
-		s = s[1 : len(s)-1]
+	if len(s) >= 2 {
+		if s[0] == '"' && s[len(s)-1] == '"' {
+			s = s[1 : len(s)-1]
+			return strings.ReplaceAll(s, `\"`, `"`)
+		}
+		if s[0] == '\'' && s[len(s)-1] == '\'' {
+			s = s[1 : len(s)-1]
+			return strings.ReplaceAll(s, `\'`, `'`)
+		}
 	}
-	return strings.ReplaceAll(s, `\"`, `"`)
+	return s
 }
 
 func extractBraces(s string) string {

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/frostybee/kazari/internal/collapsible"
+	"github.com/frostybee/kazari/internal/color"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
 	"github.com/frostybee/kazari/internal/frame"
@@ -56,6 +57,15 @@ func New(opts ...Option) *Engine {
 					LineNumberFG: info.LineNumberFG,
 				}
 			}
+		}
+	}
+
+	if e.cfg.MinContrast > 0 {
+		if e.lightColors.EditorBG != "" {
+			e.cfg.LightMarkerBGs = computeMarkerBGs(e.lightColors.EditorBG)
+		}
+		if e.darkColors.EditorBG != "" {
+			e.cfg.DarkMarkerBGs = computeMarkerBGs(e.darkColors.EditorBG)
 		}
 	}
 
@@ -240,4 +250,21 @@ func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
 	}
 
 	return mergeTokens(lightTokens, darkTokens), nil
+}
+
+func computeMarkerBGs(editorBG string) *config.MarkerEffectiveBGs {
+	return &config.MarkerEffectiveBGs{
+		Mark: compositeMarkerBG(config.MarkerMark, editorBG),
+		Ins:  compositeMarkerBG(config.MarkerIns, editorBG),
+		Del:  compositeMarkerBG(config.MarkerDel, editorBG),
+	}
+}
+
+func compositeMarkerBG(mt config.MarkerType, editorBG string) string {
+	rgba := config.MarkerBGColors[mt]
+	hex, err := color.RGBAToHex(rgba)
+	if err != nil {
+		return editorBG
+	}
+	return color.OnBackground(hex, editorBG)
 }

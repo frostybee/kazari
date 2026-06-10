@@ -198,6 +198,16 @@ function App() {
 		log.Fatalf("Render inline: %v", err)
 	}
 
+	// Single-quote inline markers
+	sqCode := `import { useState, useEffect, useRef } from 'react';
+const [name, setName] = useState('');
+const ref = useRef(null);`
+
+	sqHTML, err := engine.RenderWithMeta(sqCode, `javascript title="single-quotes.jsx" showLineNumbers 'useState' ins='useRef' del='useEffect'`)
+	if err != nil {
+		log.Fatalf("Render single-quote: %v", err)
+	}
+
 	// Combined: line markers + inline + focus
 	combinedCode := `func main() {
 	db := connect()
@@ -485,6 +495,9 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <h2>Inline Markers</h2>
 %s
 
+<h2>Inline Markers (single quotes)</h2>
+%s
+
 <h2>Combined (markers + inline + focus)</h2>
 %s
 
@@ -517,7 +530,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 </script>
 </body>
 </html>`, css, goHTML, jsHTML, bashHTML, psHTML, lnHTML, lnStartHTML, plainHTML,
-		markerHTML, labelHTML, focusHTML, inlineHTML, combinedHTML,
+		markerHTML, labelHTML, focusHTML, inlineHTML, sqHTML, combinedHTML,
 		thresholdHTML, rangeHTML, multiRangeHTML, gapHTML,
 		csStartHTML, csEndHTML, csAutoHTML, codeGroupHTML, js)
 

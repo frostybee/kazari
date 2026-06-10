@@ -3,6 +3,7 @@ package color
 import (
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 )
 
@@ -228,6 +229,46 @@ func SetLuminance(hex string, targetLuminance float64) string {
 		clamp01(delinearize(lg)),
 		clamp01(delinearize(lb)),
 	)
+}
+
+// ParseRGBA parses a CSS rgba(R,G,B,A) string into r, g, b, a components (0-1 range).
+// R, G, B are integers 0-255; A is a float 0-1.
+func ParseRGBA(s string) (r, g, b, a float64, err error) {
+	s = strings.TrimSpace(s)
+	if !strings.HasPrefix(s, "rgba(") || !strings.HasSuffix(s, ")") {
+		return 0, 0, 0, 0, fmt.Errorf("invalid rgba format: %q", s)
+	}
+	inner := s[5 : len(s)-1]
+	parts := strings.Split(inner, ",")
+	if len(parts) != 4 {
+		return 0, 0, 0, 0, fmt.Errorf("rgba expects 4 components, got %d", len(parts))
+	}
+	ri, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+	if err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("invalid red: %w", err)
+	}
+	gi, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+	if err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("invalid green: %w", err)
+	}
+	bi, err := strconv.Atoi(strings.TrimSpace(parts[2]))
+	if err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("invalid blue: %w", err)
+	}
+	af, err := strconv.ParseFloat(strings.TrimSpace(parts[3]), 64)
+	if err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("invalid alpha: %w", err)
+	}
+	return float64(ri) / 255, float64(gi) / 255, float64(bi) / 255, af, nil
+}
+
+// RGBAToHex converts a CSS rgba() string to a #rrggbbaa hex string.
+func RGBAToHex(s string) (string, error) {
+	r, g, b, a, err := ParseRGBA(s)
+	if err != nil {
+		return "", err
+	}
+	return ToHexRGBA(r, g, b, a), nil
 }
 
 func clamp01(v float64) float64 {

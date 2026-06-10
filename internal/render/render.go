@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/frostybee/kazari/internal/collapsible"
+	"github.com/frostybee/kazari/internal/color"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/marker"
 )
@@ -59,7 +60,7 @@ func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.
 	sb.WriteString(fmt.Sprintf("<figure class=\"%s\" data-lang=\"%s\">", classes, html.EscapeString(resolved.Lang)))
 
 	renderToolbar(sb, resolved, cfg)
-	renderPreCode(sb, lines, resolved, dualTheme)
+	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 
 	if resolved.CollapseThreshold {
 		renderThresholdOverlay(sb, resolved)
@@ -87,7 +88,7 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	}
 	sb.WriteString("</div>")
 
-	renderPreCode(sb, lines, resolved, dualTheme)
+	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 
 	if resolved.CollapseThreshold {
 		renderThresholdOverlay(sb, resolved)
@@ -138,7 +139,7 @@ func renderCopyButton(sb *strings.Builder, rawCode string) {
 }
 
 func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
-	renderPreCode(sb, lines, resolved, dualTheme)
+	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 
 	if resolved.CollapseThreshold {
 		renderThresholdOverlay(sb, resolved)
@@ -147,23 +148,27 @@ func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 
 type lineContext struct {
 	resolved         *config.ResolvedBlock
+	cfg              *config.Config
 	dualTheme        bool
 	resolvedMarkers  map[int]marker.ResolvedLine
 	focusSet         map[int]bool
 	hasFocus         bool
 	collapseRangeMap map[int]int  // lineNum -> range index
 	thresholdVisible map[int]bool // lines visible in threshold preview
+	contrastCache    map[string]string
 }
 
-func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, dualTheme bool) {
+func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
 	lctx := &lineContext{
 		resolved:         resolved,
+		cfg:              cfg,
 		dualTheme:        dualTheme,
 		resolvedMarkers:  marker.ResolveLineMarkers(resolved.LineMarkers),
 		focusSet:         marker.ResolveFocusSet(resolved.FocusLines),
 		hasFocus:         len(resolved.FocusLines) > 0,
 		collapseRangeMap: buildCollapseRangeMap(resolved.CollapseRanges),
 		thresholdVisible: buildThresholdVisibleSet(resolved.CollapseSegments),
+		contrastCache:    make(map[string]string),
 	}
 
 	if resolved.LineNumbers {
@@ -254,9 +259,12 @@ func displayLang(lang string) string {
 func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineContext) {
 	classes := "kz-line"
 	labelAttr := ""
+	var markerType *config.MarkerType
 
 	if entry, ok := lctx.resolvedMarkers[lineNum]; ok && entry.HasMark {
 		classes += " highlight"
+		mt := entry.Type
+		markerType = &mt
 		switch entry.Type {
 		case config.MarkerMark:
 			classes += " mark"
@@ -286,14 +294,14 @@ func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineCont
 			if at.Token.Content == "" {
 				continue
 			}
-			renderAnnotatedToken(sb, at, lctx.dualTheme)
+			renderAnnotatedToken(sb, at, lctx, markerType)
 		}
 	} else {
 		for _, tok := range line.Tokens {
 			if tok.Content == "" {
 				continue
 			}
-			renderToken(sb, tok, lctx.dualTheme)
+			renderToken(sb, tok, lctx, markerType)
 		}
 	}
 	sb.WriteString("</div></div>")
@@ -310,7 +318,7 @@ func markerElement(mtype config.MarkerType) string {
 	}
 }
 
-func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, dualTheme bool) {
+func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx *lineContext, markerType *config.MarkerType) {
 	hasInlineMarker := false
 	for _, seg := range at.Segments {
 		if seg.Marker != nil {
@@ -320,7 +328,7 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, dual
 	}
 
 	if !hasInlineMarker {
-		renderToken(sb, at.Token, dualTheme)
+		renderToken(sb, at.Token, lctx, markerType)
 		return
 	}
 
@@ -339,7 +347,7 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, dual
 			classes = append(classes, "open-end")
 		}
 		sb.WriteString(fmt.Sprintf("<%s class=\"%s\">", elem, strings.Join(classes, " ")))
-		style := buildTokenStyle(at.Token, dualTheme)
+		style := buildTokenStyle(at.Token, lctx, markerType)
 		if style != "" {
 			sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
 		} else {
@@ -352,7 +360,7 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, dual
 	}
 
 	// Partial match or standalone: mark goes inside the span.
-	style := buildTokenStyle(at.Token, dualTheme)
+	style := buildTokenStyle(at.Token, lctx, markerType)
 	if style != "" {
 		sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
 	} else {
@@ -371,8 +379,8 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, dual
 	sb.WriteString("</span>")
 }
 
-func renderToken(sb *strings.Builder, tok MergedToken, dualTheme bool) {
-	style := buildTokenStyle(tok, dualTheme)
+func renderToken(sb *strings.Builder, tok MergedToken, lctx *lineContext, markerType *config.MarkerType) {
+	style := buildTokenStyle(tok, lctx, markerType)
 	if style != "" {
 		sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
 	} else {
@@ -382,19 +390,31 @@ func renderToken(sb *strings.Builder, tok MergedToken, dualTheme bool) {
 	sb.WriteString("</span>")
 }
 
-func buildTokenStyle(tok MergedToken, dualTheme bool) string {
+func buildTokenStyle(tok MergedToken, lctx *lineContext, markerType *config.MarkerType) string {
 	var parts []string
 
-	if tok.LightColor != "" {
-		parts = append(parts, fmt.Sprintf("--sl:%s", tok.LightColor))
+	lightColor := tok.LightColor
+	darkColor := tok.DarkColor
+
+	if markerType != nil && lctx.cfg.MinContrast > 0 {
+		if lightColor != "" && lctx.cfg.LightMarkerBGs != nil {
+			lightColor = adjustContrast(lightColor, lctx.cfg.LightMarkerBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+		}
+		if darkColor != "" && lctx.cfg.DarkMarkerBGs != nil {
+			darkColor = adjustContrast(darkColor, lctx.cfg.DarkMarkerBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+		}
 	}
-	if dualTheme && tok.DarkColor != "" {
-		parts = append(parts, fmt.Sprintf("--sd:%s", tok.DarkColor))
+
+	if lightColor != "" {
+		parts = append(parts, fmt.Sprintf("--sl:%s", lightColor))
+	}
+	if lctx.dualTheme && darkColor != "" {
+		parts = append(parts, fmt.Sprintf("--sd:%s", darkColor))
 	}
 	if tok.LightBG != "" {
 		parts = append(parts, fmt.Sprintf("--slbg:%s", tok.LightBG))
 	}
-	if dualTheme && tok.DarkBG != "" {
+	if lctx.dualTheme && tok.DarkBG != "" {
 		parts = append(parts, fmt.Sprintf("--sdbg:%s", tok.DarkBG))
 	}
 
@@ -416,6 +436,16 @@ func buildTokenStyle(tok MergedToken, dualTheme bool) string {
 	}
 
 	return strings.Join(parts, ";")
+}
+
+func adjustContrast(tokenColor, effectiveBG string, minContrast float64, cache map[string]string) string {
+	key := tokenColor + "|" + effectiveBG
+	if adjusted, ok := cache[key]; ok {
+		return adjusted
+	}
+	adjusted := color.EnsureContrastOnBackground(tokenColor, effectiveBG, minContrast)
+	cache[key] = adjusted
+	return adjusted
 }
 
 func digitCount(n int) int {
@@ -562,9 +592,12 @@ func renderGapIndicator(sb *strings.Builder, resolved *config.ResolvedBlock) {
 
 func renderHiddenLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineContext) {
 	classes := "kz-line kz-hidden"
+	var markerType *config.MarkerType
 
 	if entry, ok := lctx.resolvedMarkers[lineNum]; ok && entry.HasMark {
 		classes += " highlight"
+		mt := entry.Type
+		markerType = &mt
 		switch entry.Type {
 		case config.MarkerMark:
 			classes += " mark"
@@ -588,7 +621,7 @@ func renderHiddenLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *li
 		if tok.Content == "" {
 			continue
 		}
-		renderToken(sb, tok, lctx.dualTheme)
+		renderToken(sb, tok, lctx, markerType)
 	}
 	sb.WriteString("</div></div>")
 }
