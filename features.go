@@ -48,6 +48,7 @@ func WithCollapsible(c CollapsibleConfig) Option {
 			PreviewLines:          c.PreviewLines,
 			DefaultCollapsed:      c.DefaultCollapsed,
 			PreserveIndent:        c.PreserveIndent,
+			Style:                 config.CollapseStyle(c.Style),
 			ExpandButtonText:      c.ExpandButtonText,
 			CollapseButtonText:    c.CollapseButtonText,
 			ExpandedAnnouncement:  c.ExpandedAnnouncement,

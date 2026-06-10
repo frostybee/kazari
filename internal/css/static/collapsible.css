@@ -1,0 +1,246 @@
+/* --- Threshold-based collapse --- */
+
+.kazari-code .kz-collapse-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4em;
+    background: linear-gradient(
+        to bottom,
+        var(--kz-collapse-gradient-start, transparent),
+        var(--kz-collapse-gradient-end, var(--kz-editor-bg))
+    );
+    pointer-events: none;
+    transition: opacity var(--kz-collapse-transition, 300ms ease);
+    z-index: 1;
+}
+
+.kazari-code .kz-collapse-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    background: var(--kz-collapse-btn-bg, rgba(255, 255, 255, 0.08));
+    color: var(--kz-collapse-btn-fg, rgba(255, 255, 255, 0.7));
+    font-size: 0.85em;
+    cursor: pointer;
+    text-align: center;
+    transition: background var(--kz-collapse-transition, 300ms ease);
+    z-index: 2;
+    position: relative;
+}
+
+.kazari-code .kz-collapse-btn:hover {
+    background: var(--kz-collapse-btn-hover-bg, rgba(255, 255, 255, 0.15));
+}
+
+.kazari-code .frame {
+    position: relative;
+}
+
+.kazari-code .kz-sr-announce {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.kazari-code.kz-collapsed .kz-hidden {
+    display: none;
+}
+
+.kazari-code:not(.kz-collapsed) .kz-hidden {
+    display: grid;
+}
+
+.kazari-code:not(.kz-collapsed) .kz-collapse-gradient {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.kazari-code:not(.kz-collapsed) .kz-gap {
+    display: none;
+}
+
+/* --- Range-based collapse sections --- */
+
+.kazari-code .kz-section {
+    position: relative;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.kazari-code .kz-section summary {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    list-style: none;
+    -webkit-user-select: none;
+    user-select: none;
+    color: var(--kz-collapse-closed-fg, inherit);
+    background-color: var(--kz-collapse-closed-bg, rgb(84 174 255 / 20%));
+    --cs-border-color: var(--kz-collapse-closed-border, rgb(84 174 255 / 50%));
+    --cs-border-width: var(--kz-collapse-closed-border-width, 0);
+    box-shadow: inset 0 calc(-1 * var(--cs-border-width)) var(--cs-border-color),
+                inset 0 var(--cs-border-width) var(--cs-border-color);
+    margin: 0;
+    padding: 0;
+    font-family: var(--kz-collapse-closed-font-family, inherit);
+    font-size: var(--kz-collapse-closed-font-size, inherit);
+    line-height: var(--kz-collapse-closed-line-height, inherit);
+}
+
+.kazari-code .kz-section summary::marker {
+    display: inline-block;
+    content: "";
+    width: 16px;
+    height: 16px;
+}
+
+.kazari-code .kz-section summary::-webkit-details-marker {
+    display: none;
+}
+
+.kazari-code .kz-section summary .code {
+    padding-block: var(--kz-collapse-closed-padding, 4px);
+    padding-left: var(--kz-indent, 0ch);
+    text-indent: 0;
+}
+
+/* Expand & collapse icons (Octicons, MIT licensed) */
+.kazari-code .kz-section .expand,
+.kazari-code .kz-section .collapse {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+    opacity: 0.75;
+}
+
+.kazari-code .kz-section .expand::after,
+.kazari-code .kz-section .collapse::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    background-color: var(--kz-collapse-closed-fg, currentColor);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    line-height: 0;
+}
+
+.kazari-code .kz-section .expand::after {
+    -webkit-mask-image: var(--kz-collapse-expand-icon, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E"));
+    mask-image: var(--kz-collapse-expand-icon, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E"));
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.kazari-code .kz-section .collapse {
+    display: none;
+}
+
+.kazari-code .kz-section .collapse::after {
+    -webkit-mask-image: var(--kz-collapse-collapse-icon, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E"));
+    mask-image: var(--kz-collapse-collapse-icon, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E"));
+}
+
+.kazari-code .kz-section .text {
+    margin-left: 1em;
+}
+
+/* Common open section styles */
+.kazari-code .kz-section[open],
+.kazari-code .kz-section details[open] + .content-lines {
+    --cs-border-color: var(--kz-collapse-open-border, transparent);
+    --cs-border-width: var(--kz-collapse-open-border-width, 1px);
+    box-shadow: inset 0 calc(-1 * var(--cs-border-width)) var(--cs-border-color),
+                inset 0 var(--cs-border-width) var(--cs-border-color);
+}
+
+/* --- GitHub style (details is outer element) --- */
+
+.kazari-code details.kz-section[open] > summary {
+    display: none;
+}
+
+.kazari-code details.kz-section[open] {
+    background-color: var(--kz-collapse-open-bg, transparent);
+}
+
+/* --- Collapsible-start / collapsible-end styles (re-collapsible) --- */
+
+.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) {
+    display: flex;
+    flex-direction: column;
+}
+
+.kazari-code .kz-section.collapsible-end {
+    flex-direction: column-reverse;
+}
+
+.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) .content-lines {
+    display: none;
+}
+
+.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] .collapse {
+    display: inline-block;
+}
+
+.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] .expand,
+.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] .text {
+    display: none;
+}
+
+.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] + .content-lines {
+    display: block;
+    background-color: var(--kz-collapse-open-bg-collapsible, rgb(84 174 255 / 10%));
+}
+
+/* --- Gap indicators --- */
+
+.kazari-code .kz-gap {
+    background: var(--kz-collapse-closed-bg, rgba(128, 128, 128, 0.06));
+    border-block: 1px dashed var(--kz-collapse-closed-border, rgba(128, 128, 128, 0.15));
+}
+
+.kazari-code .kz-gap .code {
+    text-align: center;
+    padding-block: 0;
+    line-height: 1.2;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.kazari-code .kz-gap .kz-gap-indicator {
+    color: var(--kz-editor-fg, inherit);
+    opacity: 0.45;
+    font-size: 1.2em;
+}
+
+/* --- Print --- */
+
+@media print {
+    .kazari-code .kz-collapse-gradient,
+    .kazari-code .kz-collapse-btn {
+        display: none !important;
+    }
+    .kazari-code.kz-collapsed .kz-hidden {
+        display: grid !important;
+    }
+    .kazari-code .kz-gap {
+        display: none !important;
+    }
+    .kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details {
+        display: none !important;
+    }
+    .kazari-code .kz-section:is(.collapsible-start, .collapsible-end) .content-lines {
+        display: block !important;
+    }
+}

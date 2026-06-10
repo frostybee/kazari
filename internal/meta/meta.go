@@ -8,20 +8,13 @@ import (
 	"github.com/frostybee/kazari/internal/config"
 )
 
-// CollapseSpec holds per-block collapse info from meta.
-type CollapseSpec struct {
-	Enabled  bool
-	Disabled bool
-	Ranges   []config.LineRange
-}
-
 // ParseResult contains the full parsed meta string output.
 type ParseResult struct {
 	BlockOptions  config.BlockOptions
 	LineMarkers   []config.LineMarker
 	InlineMarkers []config.InlineMarker
 	FocusLines    []config.LineRange
-	Collapse      *CollapseSpec
+	Collapse      *config.CollapseSpec
 }
 
 // Parse parses a fence info meta string into structured data.
@@ -51,13 +44,13 @@ func Parse(meta string) *ParseResult {
 
 		case tok == "collapse":
 			if result.Collapse == nil {
-				result.Collapse = &CollapseSpec{}
+				result.Collapse = &config.CollapseSpec{}
 			}
 			result.Collapse.Enabled = true
 
 		case tok == "nocollapse":
 			if result.Collapse == nil {
-				result.Collapse = &CollapseSpec{}
+				result.Collapse = &config.CollapseSpec{}
 			}
 			result.Collapse.Disabled = true
 
@@ -105,12 +98,30 @@ func Parse(meta string) *ParseResult {
 			remainder := strings.TrimPrefix(tok, "rem=")
 			parseMarkerToken(remainder, config.MarkerDel, result)
 
+		case strings.HasPrefix(tok, "collapseStyle="):
+			val := unquote(strings.TrimPrefix(tok, "collapseStyle="))
+			if result.Collapse == nil {
+				result.Collapse = &config.CollapseSpec{}
+			}
+			var s config.CollapseStyle
+			switch val {
+			case "collapsible-start":
+				s = config.CollapseCollapsibleStart
+			case "collapsible-end":
+				s = config.CollapseCollapsibleEnd
+			case "collapsible-auto":
+				s = config.CollapseCollapsibleAuto
+			default:
+				s = config.CollapseGithub
+			}
+			result.Collapse.Style = &s
+
 		case strings.HasPrefix(tok, "collapse="):
 			rangeStr := extractBraces(strings.TrimPrefix(tok, "collapse="))
 			if result.Collapse == nil {
-				result.Collapse = &CollapseSpec{}
+				result.Collapse = &config.CollapseSpec{}
 			}
-			result.Collapse.Ranges = parseRanges(rangeStr)
+			result.Collapse.Ranges = append(result.Collapse.Ranges, parseRanges(rangeStr)...)
 
 		case strings.HasPrefix(tok, "{") && strings.HasSuffix(tok, "}"):
 			inner := tok[1 : len(tok)-1]

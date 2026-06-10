@@ -5,6 +5,7 @@ import (
 	"html"
 	"strings"
 
+	"github.com/frostybee/kazari/internal/collapsible"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/marker"
 )
@@ -29,7 +30,11 @@ func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.
 	var sb strings.Builder
 	dualTheme := hasDualTheme(lines)
 
-	sb.WriteString("<div class=\"kazari-code\">\n")
+	wrapperClass := "kazari-code"
+	if resolved.CollapseThreshold && (resolved.CollapseConfig == nil || resolved.CollapseConfig.DefaultCollapsed) {
+		wrapperClass += " kz-collapsed"
+	}
+	sb.WriteString(fmt.Sprintf("<div class=\"%s\">\n", wrapperClass))
 
 	if resolved.Frame == config.FrameNone {
 		renderNoFrame(&sb, lines, resolved, cfg, dualTheme)
@@ -56,6 +61,10 @@ func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.
 	renderToolbar(sb, resolved, cfg)
 	renderPreCode(sb, lines, resolved, dualTheme)
 
+	if resolved.CollapseThreshold {
+		renderThresholdOverlay(sb, resolved)
+	}
+
 	sb.WriteString("</figure>\n")
 }
 
@@ -79,6 +88,10 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	sb.WriteString("</div>")
 
 	renderPreCode(sb, lines, resolved, dualTheme)
+
+	if resolved.CollapseThreshold {
+		renderThresholdOverlay(sb, resolved)
+	}
 
 	sb.WriteString("</figure>\n")
 }
@@ -126,23 +139,31 @@ func renderCopyButton(sb *strings.Builder, rawCode string) {
 
 func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
 	renderPreCode(sb, lines, resolved, dualTheme)
+
+	if resolved.CollapseThreshold {
+		renderThresholdOverlay(sb, resolved)
+	}
 }
 
 type lineContext struct {
-	resolved        *config.ResolvedBlock
-	dualTheme       bool
-	resolvedMarkers map[int]marker.ResolvedLine
-	focusSet        map[int]bool
-	hasFocus        bool
+	resolved         *config.ResolvedBlock
+	dualTheme        bool
+	resolvedMarkers  map[int]marker.ResolvedLine
+	focusSet         map[int]bool
+	hasFocus         bool
+	collapseRangeMap map[int]int  // lineNum -> range index
+	thresholdVisible map[int]bool // lines visible in threshold preview
 }
 
 func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, dualTheme bool) {
 	lctx := &lineContext{
-		resolved:        resolved,
-		dualTheme:       dualTheme,
-		resolvedMarkers: marker.ResolveLineMarkers(resolved.LineMarkers),
-		focusSet:        marker.ResolveFocusSet(resolved.FocusLines),
-		hasFocus:        len(resolved.FocusLines) > 0,
+		resolved:         resolved,
+		dualTheme:        dualTheme,
+		resolvedMarkers:  marker.ResolveLineMarkers(resolved.LineMarkers),
+		focusSet:         marker.ResolveFocusSet(resolved.FocusLines),
+		hasFocus:         len(resolved.FocusLines) > 0,
+		collapseRangeMap: buildCollapseRangeMap(resolved.CollapseRanges),
+		thresholdVisible: buildThresholdVisibleSet(resolved.CollapseSegments),
 	}
 
 	if resolved.LineNumbers {
@@ -159,10 +180,42 @@ func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 		sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
 		renderCodeOpen(sb, lctx, 0)
 	}
+
 	for i, line := range lines {
 		lineNum := resolved.StartLineNumber + i
+
+		// Range-based collapse: wrap ranges in <details> or collapsible div
+		if rangeIdx, inRange := lctx.inCollapseRange(lineNum); inRange {
+			cr := resolved.CollapseRanges[rangeIdx]
+			if lineNum == cr.Start {
+				renderCollapseRangeOpen(sb, resolved, cr)
+			}
+			renderLine(sb, line, lineNum, lctx)
+			if lineNum == cr.End {
+				renderCollapseRangeClose(sb, cr)
+			}
+			continue
+		}
+
+		// Threshold-based collapse: segment-based visibility with gap indicators
+		if resolved.CollapseThreshold && lctx.thresholdVisible != nil {
+			if !lctx.thresholdVisible[lineNum] {
+				// Emit gap indicator between non-contiguous segments (not at trailing edge)
+				if len(resolved.CollapseSegments) > 1 {
+					prevVisible := lctx.thresholdVisible[lineNum-1] || lctx.inCollapseRangeEnd(lineNum-1)
+					nextVisibleExists := lctx.hasVisibleLineAfter(lineNum)
+					if prevVisible && nextVisibleExists {
+						renderGapIndicator(sb, resolved)
+					}
+				}
+				renderHiddenLine(sb, line, lineNum, lctx)
+				continue
+			}
+		}
+
 		renderLine(sb, line, lineNum, lctx)
 	}
+
 	sb.WriteString("</code></pre>")
 }
 
@@ -389,4 +442,188 @@ func hasDualTheme(lines []TokenLine) bool {
 		}
 	}
 	return false
+}
+
+// --- Collapsible rendering helpers ---
+
+func buildCollapseRangeMap(ranges []config.CollapseRange) map[int]int {
+	if len(ranges) == 0 {
+		return nil
+	}
+	m := make(map[int]int)
+	for i, cr := range ranges {
+		for line := cr.Start; line <= cr.End; line++ {
+			m[line] = i
+		}
+	}
+	return m
+}
+
+func (lctx *lineContext) inCollapseRange(lineNum int) (int, bool) {
+	if lctx.collapseRangeMap == nil {
+		return 0, false
+	}
+	idx, ok := lctx.collapseRangeMap[lineNum]
+	return idx, ok
+}
+
+func (lctx *lineContext) hasVisibleLineAfter(lineNum int) bool {
+	for _, seg := range lctx.resolved.CollapseSegments {
+		if seg.Start > lineNum {
+			return true
+		}
+	}
+	return false
+}
+
+func (lctx *lineContext) inCollapseRangeEnd(lineNum int) bool {
+	idx, ok := lctx.collapseRangeMap[lineNum]
+	if !ok {
+		return false
+	}
+	return lineNum == lctx.resolved.CollapseRanges[idx].End
+}
+
+func buildThresholdVisibleSet(segments []config.PreviewSegment) map[int]bool {
+	if len(segments) == 0 {
+		return nil
+	}
+	m := make(map[int]bool)
+	for _, seg := range segments {
+		for line := seg.Start; line <= seg.End; line++ {
+			m[line] = true
+		}
+	}
+	return m
+}
+
+func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange) {
+	sb.WriteString("<summary>")
+	sb.WriteString("<div class=\"kz-line\">")
+	if resolved.LineNumbers {
+		sb.WriteString("<div class=\"gutter\"><div class=\"ln\"></div></div>")
+	}
+
+	indentStyle := ""
+	if cr.MinIndent > 0 && resolved.CollapseConfig != nil && resolved.CollapseConfig.PreserveIndent {
+		indentStyle = fmt.Sprintf(" style=\"--kz-indent:%dch\"", cr.MinIndent)
+	}
+
+	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s>", indentStyle))
+	sb.WriteString("<span class=\"expand\"></span>")
+	sb.WriteString("<span class=\"collapse\"></span>")
+	sb.WriteString(fmt.Sprintf("<span class=\"text\">%s</span>", collapsible.SummaryText(cr.LineCount)))
+	sb.WriteString("</div>")
+	sb.WriteString("</div>")
+	sb.WriteString("</summary>")
+}
+
+func renderCollapseRangeOpen(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange) {
+	switch cr.Style {
+	case config.CollapseCollapsibleStart:
+		sb.WriteString("<div class=\"kz-section collapsible-start\">")
+		sb.WriteString("<details>")
+		renderSummaryLine(sb, resolved, cr)
+		sb.WriteString("</details>")
+		sb.WriteString("<div class=\"content-lines\">")
+
+	case config.CollapseCollapsibleEnd:
+		sb.WriteString("<div class=\"kz-section collapsible-end\">")
+		sb.WriteString("<details>")
+		renderSummaryLine(sb, resolved, cr)
+		sb.WriteString("</details>")
+		sb.WriteString("<div class=\"content-lines\">")
+
+	default: // github
+		sb.WriteString("<details class=\"kz-section\">")
+		renderSummaryLine(sb, resolved, cr)
+	}
+}
+
+func renderCollapseRangeClose(sb *strings.Builder, cr config.CollapseRange) {
+	switch cr.Style {
+	case config.CollapseCollapsibleStart, config.CollapseCollapsibleEnd:
+		sb.WriteString("</div></div>") // close content-lines + kz-section wrapper
+	default: // github
+		sb.WriteString("</details>")
+	}
+}
+
+func renderGapIndicator(sb *strings.Builder, resolved *config.ResolvedBlock) {
+	sb.WriteString("<div class=\"kz-line kz-gap\">")
+	if resolved.LineNumbers {
+		sb.WriteString("<div class=\"gutter\"><div class=\"ln\"></div></div>")
+	}
+	sb.WriteString("<div class=\"code\"><span class=\"kz-gap-indicator\">⋮</span></div>")
+	sb.WriteString("</div>")
+}
+
+func renderHiddenLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineContext) {
+	classes := "kz-line kz-hidden"
+
+	if entry, ok := lctx.resolvedMarkers[lineNum]; ok && entry.HasMark {
+		classes += " highlight"
+		switch entry.Type {
+		case config.MarkerMark:
+			classes += " mark"
+		case config.MarkerDel:
+			classes += " del"
+		case config.MarkerIns:
+			classes += " ins"
+		}
+	}
+
+	if lctx.hasFocus && lctx.focusSet[lineNum] {
+		classes += " focused"
+	}
+
+	sb.WriteString(fmt.Sprintf("<div class=\"%s\">", classes))
+	if lctx.resolved.LineNumbers {
+		sb.WriteString(fmt.Sprintf("<div class=\"gutter\"><div class=\"ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
+	}
+	sb.WriteString("<div class=\"code\">")
+	for _, tok := range line.Tokens {
+		if tok.Content == "" {
+			continue
+		}
+		renderToken(sb, tok, lctx.dualTheme)
+	}
+	sb.WriteString("</div></div>")
+}
+
+func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock) {
+	expandText := "Show more"
+	collapseText := "Show less"
+	expandedAnnouncement := "Code block expanded"
+	collapsedAnnouncement := "Code block collapsed"
+	if resolved.CollapseConfig != nil {
+		if resolved.CollapseConfig.ExpandButtonText != "" {
+			expandText = resolved.CollapseConfig.ExpandButtonText
+		}
+		if resolved.CollapseConfig.CollapseButtonText != "" {
+			collapseText = resolved.CollapseConfig.CollapseButtonText
+		}
+		if resolved.CollapseConfig.ExpandedAnnouncement != "" {
+			expandedAnnouncement = resolved.CollapseConfig.ExpandedAnnouncement
+		}
+		if resolved.CollapseConfig.CollapsedAnnouncement != "" {
+			collapsedAnnouncement = resolved.CollapseConfig.CollapsedAnnouncement
+		}
+	}
+
+	// Badge fallback: append highlighted line count when markers are beyond 2× cap
+	if resolved.CollapseBeyondCap > 0 {
+		expandText = fmt.Sprintf("%s (+%d highlighted)", expandText, resolved.CollapseBeyondCap)
+	}
+
+	sb.WriteString("<div class=\"kz-collapse-gradient\"></div>")
+	sb.WriteString(fmt.Sprintf(
+		"<button class=\"kz-collapse-btn\" aria-expanded=\"false\" data-expand=\"%s\" data-collapse=\"%s\" data-expanded-msg=\"%s\" data-collapsed-msg=\"%s\">%s</button>",
+		html.EscapeString(expandText),
+		html.EscapeString(collapseText),
+		html.EscapeString(expandedAnnouncement),
+		html.EscapeString(collapsedAnnouncement),
+		html.EscapeString(expandText),
+	))
+	sb.WriteString("<div class=\"kz-sr-announce\" aria-live=\"polite\"></div>")
 }

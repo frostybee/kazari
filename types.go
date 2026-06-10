@@ -130,12 +130,23 @@ type BlockDefaults struct {
 	Frame          Frame
 }
 
+// CollapseStyle identifies the visual style for range-based collapsible sections.
+type CollapseStyle int
+
+const (
+	CollapseGithub          CollapseStyle = iota // one-way expand, summary disappears
+	CollapseCollapsibleStart                     // re-collapsible, summary above content
+	CollapseCollapsibleEnd                       // re-collapsible, summary below content
+	CollapseCollapsibleAuto                      // auto: end if section reaches last line, else start
+)
+
 // CollapsibleConfig configures threshold-based collapsible code blocks.
 type CollapsibleConfig struct {
 	LineThreshold        int
 	PreviewLines         int
 	DefaultCollapsed     bool
 	PreserveIndent       bool
+	Style                CollapseStyle
 	ExpandButtonText     string
 	CollapseButtonText   string
 	ExpandedAnnouncement string // screen reader

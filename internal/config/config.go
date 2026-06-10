@@ -78,16 +78,50 @@ type BlockDefaults struct {
 	Frame          int // FrameAuto, FrameCode, FrameTerminal, FrameNone
 }
 
+// CollapseStyle identifies the visual style for range-based collapsible sections.
+type CollapseStyle int
+
+const (
+	CollapseGithub          CollapseStyle = iota // default — one-way expand, summary disappears
+	CollapseCollapsibleStart                     // re-collapsible, summary above content
+	CollapseCollapsibleEnd                       // re-collapsible, summary below content
+	CollapseCollapsibleAuto                      // auto: end if section reaches last line, else start
+)
+
 // CollapsibleConfig configures threshold-based collapsible code blocks.
 type CollapsibleConfig struct {
 	LineThreshold         int
 	PreviewLines          int
 	DefaultCollapsed      bool
 	PreserveIndent        bool
+	Style                 CollapseStyle
 	ExpandButtonText      string
 	CollapseButtonText    string
 	ExpandedAnnouncement  string
 	CollapsedAnnouncement string
+}
+
+// CollapseSpec holds per-block collapse directives from meta string or Options.
+type CollapseSpec struct {
+	Enabled  bool
+	Disabled bool
+	Ranges   []LineRange
+	Style    *CollapseStyle // nil = use engine default
+}
+
+// CollapseRange is a validated, render-ready collapse range with pre-computed metadata.
+type CollapseRange struct {
+	Start     int           // 1-based inclusive
+	End       int           // 1-based inclusive
+	LineCount int           // End - Start + 1
+	MinIndent int           // minimum indentation in spaces (for --kz-indent)
+	Style     CollapseStyle // resolved style (auto already resolved)
+}
+
+// PreviewSegment represents a contiguous range of visible lines in threshold preview.
+type PreviewSegment struct {
+	Start int // 1-based inclusive
+	End   int // 1-based inclusive
 }
 
 // Config holds the fully resolved engine configuration.
@@ -175,6 +209,12 @@ type ResolvedBlock struct {
 	LineMarkers   []LineMarker
 	InlineMarkers []InlineMarker
 	FocusLines    []LineRange
+	// Collapse state (populated by collapsible.ResolveCollapse)
+	CollapseThreshold  bool
+	CollapseRanges     []CollapseRange
+	CollapseSegments   []PreviewSegment
+	CollapseBeyondCap  int // marked lines beyond 2× preview cap (for badge)
+	CollapseConfig     *CollapsibleConfig
 }
 
 // Resolve applies the config cascade for a specific block:

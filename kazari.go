@@ -4,7 +4,9 @@ package kazari
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/frostybee/kazari/internal/collapsible"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
 	"github.com/frostybee/kazari/internal/frame"
@@ -68,6 +70,17 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 	resolved.LineMarkers = convertLineMarkers(opts.LineMarkers)
 	resolved.InlineMarkers = convertInlineMarkers(opts.InlineMarkers)
 	resolved.FocusLines = convertRanges(opts.FocusLines)
+
+	var spec *config.CollapseSpec
+	if opts.Collapse != nil {
+		spec = &config.CollapseSpec{
+			Enabled:  opts.Collapse.Enabled,
+			Disabled: opts.Collapse.Disabled,
+			Ranges:   convertRanges(opts.Collapse.Ranges),
+		}
+	}
+	e.resolveCollapse(code, resolved, spec)
+
 	return e.renderResolved(code, resolved)
 }
 
@@ -80,6 +93,7 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	resolved.LineMarkers = parsed.LineMarkers
 	resolved.InlineMarkers = parsed.InlineMarkers
 	resolved.FocusLines = parsed.FocusLines
+	e.resolveCollapse(code, resolved, parsed.Collapse)
 	return e.renderResolved(code, resolved)
 }
 
@@ -182,6 +196,19 @@ func convertRanges(ranges []Range) []config.LineRange {
 		out[i] = config.LineRange{Start: r.Start, End: r.End}
 	}
 	return out
+}
+
+func (e *Engine) resolveCollapse(code string, resolved *config.ResolvedBlock, spec *config.CollapseSpec) {
+	lineCount := strings.Count(code, "\n") + 1
+	result := collapsible.ResolveCollapse(
+		lineCount, spec, e.cfg.Collapsible, code,
+		resolved.LineMarkers, resolved.FocusLines,
+	)
+	resolved.CollapseThreshold = result.Threshold
+	resolved.CollapseSegments = result.PreviewSegments
+	resolved.CollapseBeyondCap = result.BeyondCapCount
+	resolved.CollapseRanges = result.Ranges
+	resolved.CollapseConfig = e.cfg.Collapsible
 }
 
 func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {

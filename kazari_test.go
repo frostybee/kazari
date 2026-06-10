@@ -1034,3 +1034,545 @@ func TestCSS_ContainsMarkerStyles(t *testing.T) {
 		}
 	}
 }
+
+// --- Collapsible section tests ---
+
+func makeMultiLineTokens(n int) [][]Token {
+	lines := make([][]Token, n)
+	for i := range lines {
+		lines[i] = []Token{{Content: "line", Color: "#333"}}
+	}
+	return lines
+}
+
+func TestRender_Collapsible_ThresholdTriggered(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(20),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    15,
+			PreviewLines:     8,
+			DefaultCollapsed: true,
+		}),
+	)
+
+	code := strings.Repeat("line\n", 19) + "line"
+	html, err := engine.Render(code, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-collapsed") {
+		t.Error("missing kz-collapsed class on wrapper")
+	}
+	if !strings.Contains(html, "kz-hidden") {
+		t.Error("missing kz-hidden class on hidden lines")
+	}
+	if !strings.Contains(html, "kz-collapse-gradient") {
+		t.Error("missing gradient overlay")
+	}
+	if !strings.Contains(html, "kz-collapse-btn") {
+		t.Error("missing collapse button")
+	}
+	if !strings.Contains(html, `aria-expanded="false"`) {
+		t.Error("missing aria-expanded attribute")
+	}
+	if !strings.Contains(html, `data-expand="Show more"`) {
+		t.Error("missing data-expand attribute")
+	}
+}
+
+func TestRender_Collapsible_BelowThreshold(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(5),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
+	)
+
+	code := "a\nb\nc\nd\ne"
+	html, err := engine.Render(code, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-collapsed") {
+		t.Error("should not have kz-collapsed class for short block")
+	}
+	if strings.Contains(html, "kz-hidden") {
+		t.Error("should not have hidden lines for short block")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_ForceCollapse(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(5),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 3}),
+	)
+
+	code := "a\nb\nc\nd\ne"
+	html, err := engine.RenderWithMeta(code, "go collapse")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-collapse-btn") {
+		t.Error("collapse meta should force threshold collapse even below threshold")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_Nocollapse(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(20),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
+	)
+
+	code := strings.Repeat("line\n", 19) + "line"
+	html, err := engine.RenderWithMeta(code, "go nocollapse")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-collapse-btn") {
+		t.Error("nocollapse should prevent threshold collapse")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_RangeBased(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:  15,
+			PreviewLines:   8,
+			PreserveIndent: true,
+		}),
+	)
+
+	code := "a\n    b\n    c\n    d\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, "go collapse={2-4}")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<details class="kz-section">`) {
+		t.Error("missing <details> for range-based collapse")
+	}
+	if !strings.Contains(html, "<summary>") {
+		t.Error("missing <summary> element")
+	}
+	if !strings.Contains(html, "3 collapsed lines") {
+		t.Error("missing summary text")
+	}
+	if !strings.Contains(html, `--kz-indent:4ch`) {
+		t.Error("missing indent preservation")
+	}
+	if !strings.Contains(html, `class="expand"`) {
+		t.Error("missing expand icon span")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_RangeWithLineNumbers(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(5),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+
+	code := "a\nb\nc\nd\ne"
+	html, err := engine.RenderWithMeta(code, "go showLineNumbers collapse={2-3}")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	// Summary should have empty gutter for alignment
+	if !strings.Contains(html, `<div class="gutter"><div class="ln"></div></div>`) {
+		t.Error("missing empty gutter placeholder in summary line")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_MultipleRanges(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(15),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+
+	code := strings.Repeat("line\n", 14) + "line"
+	html, err := engine.RenderWithMeta(code, "go collapse={2-4,8-10}")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	count := strings.Count(html, `<details class="kz-section">`)
+	if count != 2 {
+		t.Errorf("expected 2 <details> sections, got %d", count)
+	}
+}
+
+func TestRender_Collapsible_CustomButtonText(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(20),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:      15,
+			PreviewLines:       8,
+			DefaultCollapsed:   true,
+			ExpandButtonText:   "Expand",
+			CollapseButtonText: "Collapse",
+		}),
+	)
+
+	code := strings.Repeat("line\n", 19) + "line"
+	html, err := engine.Render(code, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, `data-expand="Expand"`) {
+		t.Error("missing custom expand text")
+	}
+	if !strings.Contains(html, `data-collapse="Collapse"`) {
+		t.Error("missing custom collapse text")
+	}
+}
+
+func TestCSS_ContainsCollapsibleStyles(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15}),
+	)
+	css := engine.CSS()
+
+	rules := []string{
+		"kz-collapse-gradient",
+		"kz-collapse-btn",
+		"kz-hidden",
+		"kz-section",
+		"@media print",
+	}
+	for _, r := range rules {
+		if !strings.Contains(css, r) {
+			t.Errorf("CSS missing collapsible rule: %s", r)
+		}
+	}
+}
+
+func TestCSS_NoCollapsibleWhenDisabled(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	)
+	css := engine.CSS()
+
+	if strings.Contains(css, "kz-collapse-gradient") {
+		t.Error("collapsible CSS should not be included when feature is disabled")
+	}
+}
+
+func TestJS_ContainsCollapsibleHandler(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15}),
+	)
+	js := engine.JS()
+
+	if !strings.Contains(js, "kz-collapse-btn") {
+		t.Error("JS missing collapsible handler")
+	}
+	if !strings.Contains(js, "aria-expanded") {
+		t.Error("JS missing aria-expanded toggle")
+	}
+}
+
+func TestJS_NoCollapsibleWhenDisabled(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	)
+	js := engine.JS()
+
+	if strings.Contains(js, "kz-collapse-btn") {
+		t.Error("collapsible JS should not be included when feature is disabled")
+	}
+}
+
+func TestRender_Collapsible_GapIndicator(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(30),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    15,
+			PreviewLines:     8,
+			DefaultCollapsed: true,
+		}),
+	)
+
+	code := strings.Repeat("line\n", 29) + "line"
+	// Mark line 12 — within 2× cap (16), should create gap indicator
+	html, err := engine.Render(code, Options{
+		Lang: "go",
+		LineMarkers: []LineMarker{
+			{Type: MarkerMark, Lines: []Range{{Start: 12, End: 12}}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-gap") {
+		t.Error("missing gap indicator for non-contiguous preview segments")
+	}
+	if !strings.Contains(html, "kz-gap-indicator") {
+		t.Error("missing gap indicator span")
+	}
+}
+
+func TestRender_Collapsible_NoGapWithoutMarkers(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(30),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    15,
+			PreviewLines:     8,
+			DefaultCollapsed: true,
+		}),
+	)
+
+	code := strings.Repeat("line\n", 29) + "line"
+	html, err := engine.Render(code, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-gap") {
+		t.Error("should not have gap indicators without markers")
+	}
+}
+
+func TestRender_Collapsible_BadgeFallback(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(50),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    15,
+			PreviewLines:     8,
+			DefaultCollapsed: true,
+		}),
+	)
+
+	code := strings.Repeat("line\n", 49) + "line"
+	// Mark lines 30-32 — beyond 2× cap (16), should trigger badge
+	html, err := engine.Render(code, Options{
+		Lang: "go",
+		LineMarkers: []LineMarker{
+			{Type: MarkerMark, Lines: []Range{{Start: 30, End: 32}}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "(+3 highlighted)") {
+		t.Error("missing badge fallback count on expand button")
+	}
+}
+
+func TestCSS_ContainsGapStyles(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15}),
+	)
+	css := engine.CSS()
+
+	if !strings.Contains(css, "kz-gap") {
+		t.Error("CSS missing gap indicator styles")
+	}
+}
+
+// --- Collapse style tests ---
+
+func TestRenderWithMeta_CollapseStyle_CollapsibleStart(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, `go collapse={2-4} collapseStyle="collapsible-start"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<div class="kz-section collapsible-start">`) {
+		t.Error("missing collapsible-start wrapper div")
+	}
+	if !strings.Contains(html, `<div class="content-lines">`) {
+		t.Error("missing content-lines div")
+	}
+	if strings.Contains(html, `<details class="kz-section">`) {
+		t.Error("should not have github-style details wrapper")
+	}
+}
+
+func TestRenderWithMeta_CollapseStyle_CollapsibleEnd(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, `go collapse={2-4} collapseStyle="collapsible-end"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<div class="kz-section collapsible-end">`) {
+		t.Error("missing collapsible-end wrapper div")
+	}
+}
+
+func TestRenderWithMeta_CollapseStyle_Auto_NotAtEnd(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, `go collapse={2-4} collapseStyle="collapsible-auto"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `collapsible-start`) {
+		t.Error("auto should resolve to collapsible-start when range is not at end")
+	}
+}
+
+func TestRenderWithMeta_CollapseStyle_Auto_AtEnd(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, `go collapse={8-10} collapseStyle="collapsible-auto"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `collapsible-end`) {
+		t.Error("auto should resolve to collapsible-end when range reaches last line")
+	}
+}
+
+func TestRenderWithMeta_CollapseStyle_GithubDefault(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100}),
+	)
+
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, `go collapse={2-4}`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `<details class="kz-section">`) {
+		t.Error("default style should be github with details wrapper")
+	}
+	if strings.Contains(html, "content-lines") {
+		t.Error("github style should not have content-lines div")
+	}
+}
+
+func TestRender_CollapseStyle_EngineDefault(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold: 100,
+			Style:         CollapseCollapsibleStart,
+		}),
+	)
+
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	html, err := engine.RenderWithMeta(code, `go collapse={2-4}`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, `collapsible-start`) {
+		t.Error("engine-level Style should apply when no meta collapseStyle specified")
+	}
+}
+
+func TestCSS_ContainsCollapsibleStartStyles(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15}),
+	)
+	css := engine.CSS()
+
+	rules := []string{
+		"collapsible-start",
+		"collapsible-end",
+		"content-lines",
+		"column-reverse",
+	}
+	for _, r := range rules {
+		if !strings.Contains(css, r) {
+			t.Errorf("CSS missing collapsible style rule: %s", r)
+		}
+	}
+}

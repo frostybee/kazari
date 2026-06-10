@@ -75,6 +75,28 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-focus-dimmed-opacity", "0.35"},
 	}
 
+	// Collapsible defaults (conditional)
+	if cfg.Collapsible != nil {
+		staticVars = append(staticVars,
+			// Threshold button
+			struct{ name, value string }{"--kz-collapse-btn-bg", "rgba(255,255,255,0.08)"},
+			struct{ name, value string }{"--kz-collapse-btn-fg", "rgba(255,255,255,0.7)"},
+			struct{ name, value string }{"--kz-collapse-btn-hover-bg", "rgba(255,255,255,0.15)"},
+			struct{ name, value string }{"--kz-collapse-gradient-start", "transparent"},
+			struct{ name, value string }{"--kz-collapse-gradient-end", "var(--kz-editor-bg)"},
+			struct{ name, value string }{"--kz-collapse-transition", "300ms ease"},
+			// Range section (EC-matching defaults)
+			struct{ name, value string }{"--kz-collapse-closed-bg", "rgb(84 174 255 / 20%)"},
+			struct{ name, value string }{"--kz-collapse-closed-border", "rgb(84 174 255 / 50%)"},
+			struct{ name, value string }{"--kz-collapse-closed-border-width", "0"},
+			struct{ name, value string }{"--kz-collapse-closed-padding", "4px"},
+			struct{ name, value string }{"--kz-collapse-open-bg", "transparent"},
+			struct{ name, value string }{"--kz-collapse-open-bg-collapsible", "rgb(84 174 255 / 10%)"},
+			struct{ name, value string }{"--kz-collapse-open-border", "transparent"},
+			struct{ name, value string }{"--kz-collapse-open-border-width", "1px"},
+		)
+	}
+
 	// Light theme variables.
 	lightVars := buildThemeVars(light)
 	// Dark theme variables.
