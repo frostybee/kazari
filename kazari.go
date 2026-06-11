@@ -10,6 +10,7 @@ import (
 	"github.com/frostybee/kazari/internal/ansi"
 	"github.com/frostybee/kazari/internal/collapsible"
 	"github.com/frostybee/kazari/internal/color"
+	"github.com/frostybee/kazari/internal/locale"
 	"github.com/frostybee/kazari/internal/diff"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
@@ -44,20 +45,28 @@ func New(opts ...Option) *Engine {
 	// Extract theme colors at construction time for CSS generation.
 	if e.hl != nil {
 		if info, err := e.hl.GetThemeColors(e.cfg.LightTheme); err == nil {
+			ti := ThemeInfo{BG: info.BG, FG: info.FG, SelectionBG: info.SelectionBG, LineNumberFG: info.LineNumberFG}
+			if b.themeCustomizer != nil {
+				ti = b.themeCustomizer(e.cfg.LightTheme, ti)
+			}
 			e.lightColors = theme.ThemeColors{
-				EditorBG:     info.BG,
-				EditorFG:     info.FG,
-				SelectionBG:  info.SelectionBG,
-				LineNumberFG: info.LineNumberFG,
+				EditorBG:     ti.BG,
+				EditorFG:     ti.FG,
+				SelectionBG:  ti.SelectionBG,
+				LineNumberFG: ti.LineNumberFG,
 			}
 		}
 		if e.cfg.DarkTheme != "" {
 			if info, err := e.hl.GetThemeColors(e.cfg.DarkTheme); err == nil {
+				ti := ThemeInfo{BG: info.BG, FG: info.FG, SelectionBG: info.SelectionBG, LineNumberFG: info.LineNumberFG}
+				if b.themeCustomizer != nil {
+					ti = b.themeCustomizer(e.cfg.DarkTheme, ti)
+				}
 				e.darkColors = theme.ThemeColors{
-					EditorBG:     info.BG,
-					EditorFG:     info.FG,
-					SelectionBG:  info.SelectionBG,
-					LineNumberFG: info.LineNumberFG,
+					EditorBG:     ti.BG,
+					EditorFG:     ti.FG,
+					SelectionBG:  ti.SelectionBG,
+					LineNumberFG: ti.LineNumberFG,
 				}
 			}
 		}
@@ -71,6 +80,8 @@ func New(opts ...Option) *Engine {
 			e.cfg.DarkMarkerBGs = computeMarkerBGs(e.darkColors.EditorBG)
 		}
 	}
+
+	e.cfg.UIStrings = locale.Resolve(e.cfg.Locale, e.cfg.UIStringOverrides)
 
 	return e
 }

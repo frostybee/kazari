@@ -54,6 +54,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 
 	sb.WriteString(readCSS("frame.css"))
 	sb.WriteString(readCSS("toolbar.css"))
+	if cfg.FileIcons {
+		sb.WriteString(readCSS("file-icons.css"))
+	}
 	sb.WriteString(readCSS("terminal.css"))
 
 	if cfg.TerminalDotStyle == config.DotsMinimal {

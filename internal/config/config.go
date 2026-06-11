@@ -1,6 +1,10 @@
 package config
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/frostybee/kazari/internal/locale"
+)
 
 // DarkModeKind identifies the dark mode CSS strategy.
 type DarkModeKind int
@@ -186,6 +190,13 @@ type Config struct {
 	TerminalDotStyle           int // DotsColored or DotsMinimal
 	TerminalCommentStripping   bool
 	MermaidPassThrough         bool
+	DataLineCount              bool
+	ThemeCSSRoot               string
+	Locale                     string
+	UIStringOverrides          map[string]string
+	UIStrings                  *locale.UIStrings
+	FileIcons                  bool
+	FileIconResolver           func(string) string
 }
 
 // DefaultConfig returns the engine configuration with all documented defaults.
@@ -224,6 +235,10 @@ func DefaultConfig() *Config {
 		TerminalDotStyle:         DotsColored,
 		TerminalCommentStripping: true,
 		MermaidPassThrough:       true,
+		DataLineCount:            true,
+		ThemeCSSRoot:             ":root",
+		Locale:                   "en-US",
+		FileIcons:                true,
 	}
 }
 

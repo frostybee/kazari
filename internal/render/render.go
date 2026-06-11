@@ -35,7 +35,11 @@ func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.
 	if resolved.CollapseThreshold && (resolved.CollapseConfig == nil || resolved.CollapseConfig.DefaultCollapsed) {
 		wrapperClass += " kz-collapsed"
 	}
-	sb.WriteString(fmt.Sprintf("<div class=\"%s\">\n", wrapperClass))
+	if cfg.DataLineCount {
+		sb.WriteString(fmt.Sprintf("<div class=\"%s\" data-lines=\"%d\">\n", wrapperClass, len(lines)))
+	} else {
+		sb.WriteString(fmt.Sprintf("<div class=\"%s\">\n", wrapperClass))
+	}
 
 	if resolved.Frame == config.FrameNone {
 		renderNoFrame(&sb, lines, resolved, cfg, dualTheme)
@@ -63,7 +67,7 @@ func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 
 	if resolved.CollapseThreshold {
-		renderThresholdOverlay(sb, resolved)
+		renderThresholdOverlay(sb, resolved, cfg)
 	}
 
 	sb.WriteString("</figure>\n")
@@ -87,7 +91,7 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	}
 	if cfg.CopyButton {
 		sb.WriteString("<div class=\"kz-terminal-actions\">")
-		renderCopyButton(sb, resolved.RawCode)
+		renderCopyButton(sb, resolved.RawCode, cfg)
 		sb.WriteString("</div>")
 	}
 	sb.WriteString("</div>")
@@ -95,7 +99,7 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 
 	if resolved.CollapseThreshold {
-		renderThresholdOverlay(sb, resolved)
+		renderThresholdOverlay(sb, resolved, cfg)
 	}
 
 	sb.WriteString("</figure>\n")
@@ -107,6 +111,16 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 	// Left section
 	sb.WriteString("<div class=\"kz-toolbar-left\">")
 	if resolved.Title != "" {
+		if cfg.FileIcons {
+			ext := fileExt(resolved.Title)
+			if ext != "" {
+				if cfg.FileIconResolver != nil {
+					sb.WriteString(cfg.FileIconResolver(ext))
+				} else {
+					sb.WriteString(fmt.Sprintf(`<span class="kz-file-icon" data-ext="%s"></span>`, html.EscapeString(ext)))
+				}
+			}
+		}
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
 	} else if cfg.LanguageBadge && resolved.Lang != "" {
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
@@ -119,26 +133,28 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
 	}
 	if cfg.FullscreenButton {
-		sb.WriteString("<button class=\"kz-fs-btn\" aria-label=\"Fullscreen\">")
+		sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\">", html.EscapeString(cfg.UIStrings.FullscreenLabel)))
 			sb.WriteString(fullscreenSVG)
 			sb.WriteString("</button>")
 	}
 	if cfg.CopyButton {
-		renderCopyButton(sb, resolved.RawCode)
+		renderCopyButton(sb, resolved.RawCode, cfg)
 	}
 	sb.WriteString("</div>")
 
 	sb.WriteString("</div>")
 }
 
-func renderCopyButton(sb *strings.Builder, rawCode string) {
+func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 	encoded := encodeForDataCode(rawCode)
 	sb.WriteString(fmt.Sprintf(
-		"<button class=\"kz-copy-btn\" title=\"Copy to clipboard\" data-copied=\"Copied!\" data-code=\"%s\">",
+		"<button class=\"kz-copy-btn\" title=\"%s\" data-copied=\"%s\" data-code=\"%s\">",
+		html.EscapeString(cfg.UIStrings.CopyTitle),
+		html.EscapeString(cfg.UIStrings.CopySuccess),
 		html.EscapeString(encoded),
 	))
 	sb.WriteString(copySVG)
-	sb.WriteString("<span>Copy</span>")
+	sb.WriteString(fmt.Sprintf("<span>%s</span>", html.EscapeString(cfg.UIStrings.CopyLabel)))
 	sb.WriteString("</button>")
 }
 
@@ -146,7 +162,7 @@ func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 
 	if resolved.CollapseThreshold {
-		renderThresholdOverlay(sb, resolved)
+		renderThresholdOverlay(sb, resolved, cfg)
 	}
 }
 
@@ -197,7 +213,7 @@ func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 		if rangeIdx, inRange := lctx.inCollapseRange(lineNum); inRange {
 			cr := resolved.CollapseRanges[rangeIdx]
 			if lineNum == cr.Start {
-				renderCollapseRangeOpen(sb, resolved, cr)
+				renderCollapseRangeOpen(sb, resolved, cr, cfg)
 			}
 			renderLine(sb, line, lineNum, lctx)
 			if lineNum == cr.End {
@@ -242,6 +258,14 @@ func renderCodeOpen(sb *strings.Builder, lctx *lineContext, lnWidth int) {
 
 func encodeForDataCode(code string) string {
 	return strings.ReplaceAll(code, "\n", "\x7f")
+}
+
+func fileExt(title string) string {
+	idx := strings.LastIndex(title, ".")
+	if idx < 0 || idx == len(title)-1 {
+		return ""
+	}
+	return title[idx+1:]
 }
 
 func displayLang(lang string) string {
@@ -533,7 +557,7 @@ func buildThresholdVisibleSet(segments []config.PreviewSegment) map[int]bool {
 	return m
 }
 
-func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange) {
+func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange, cfg *config.Config) {
 	sb.WriteString("<summary>")
 	sb.WriteString("<div class=\"kz-line\">")
 	if resolved.LineNumbers {
@@ -548,31 +572,31 @@ func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr c
 	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s>", indentStyle))
 	sb.WriteString("<span class=\"expand\"></span>")
 	sb.WriteString("<span class=\"collapse\"></span>")
-	sb.WriteString(fmt.Sprintf("<span class=\"text\">%s</span>", collapsible.SummaryText(cr.LineCount)))
+	sb.WriteString(fmt.Sprintf("<span class=\"text\">%s</span>", collapsible.SummaryText(cr.LineCount, cfg.UIStrings)))
 	sb.WriteString("</div>")
 	sb.WriteString("</div>")
 	sb.WriteString("</summary>")
 }
 
-func renderCollapseRangeOpen(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange) {
+func renderCollapseRangeOpen(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange, cfg *config.Config) {
 	switch cr.Style {
 	case config.CollapseCollapsibleStart:
 		sb.WriteString("<div class=\"kz-section collapsible-start\">")
 		sb.WriteString("<details>")
-		renderSummaryLine(sb, resolved, cr)
+		renderSummaryLine(sb, resolved, cr, cfg)
 		sb.WriteString("</details>")
 		sb.WriteString("<div class=\"content-lines\">")
 
 	case config.CollapseCollapsibleEnd:
 		sb.WriteString("<div class=\"kz-section collapsible-end\">")
 		sb.WriteString("<details>")
-		renderSummaryLine(sb, resolved, cr)
+		renderSummaryLine(sb, resolved, cr, cfg)
 		sb.WriteString("</details>")
 		sb.WriteString("<div class=\"content-lines\">")
 
 	default: // github
 		sb.WriteString("<details class=\"kz-section\">")
-		renderSummaryLine(sb, resolved, cr)
+		renderSummaryLine(sb, resolved, cr, cfg)
 	}
 }
 
@@ -630,11 +654,11 @@ func renderHiddenLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *li
 	sb.WriteString("</div></div>")
 }
 
-func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock) {
-	expandText := "Show more"
-	collapseText := "Show less"
-	expandedAnnouncement := "Code block expanded"
-	collapsedAnnouncement := "Code block collapsed"
+func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
+	expandText := cfg.UIStrings.ExpandButtonText
+	collapseText := cfg.UIStrings.CollapseButtonText
+	expandedAnnouncement := cfg.UIStrings.ExpandedAnnouncement
+	collapsedAnnouncement := cfg.UIStrings.CollapsedAnnouncement
 	if resolved.CollapseConfig != nil {
 		if resolved.CollapseConfig.ExpandButtonText != "" {
 			expandText = resolved.CollapseConfig.ExpandButtonText

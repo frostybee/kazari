@@ -72,3 +72,15 @@ func WithTerminalCommentStripping(enabled bool) Option {
 func WithMinSyntaxHighlightingColorContrast(ratio float64) Option {
 	return func(b *engineBuilder) { b.cfg.MinContrast = ratio }
 }
+
+func WithDataLineCount(enabled bool) Option {
+	return func(b *engineBuilder) { b.cfg.DataLineCount = enabled }
+}
+
+func WithFileIcons(enabled bool) Option {
+	return func(b *engineBuilder) { b.cfg.FileIcons = enabled }
+}
+
+func WithFileIconResolver(f func(ext string) string) Option {
+	return func(b *engineBuilder) { b.cfg.FileIconResolver = f }
+}

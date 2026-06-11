@@ -7,8 +7,9 @@ type Option func(*engineBuilder)
 
 // engineBuilder collects configuration during New().
 type engineBuilder struct {
-	cfg *config.Config
-	hl  Highlighter
+	cfg             *config.Config
+	hl              Highlighter
+	themeCustomizer func(string, ThemeInfo) ThemeInfo
 }
 
 func WithHighlighter(hl Highlighter) Option {
@@ -89,6 +90,22 @@ func WithCascadeLayer(name string) Option {
 
 func WithLanguageAliases(m map[string]string) Option {
 	return func(b *engineBuilder) { b.cfg.LanguageAliases = m }
+}
+
+func WithThemeCSSRoot(selector string) Option {
+	return func(b *engineBuilder) { b.cfg.ThemeCSSRoot = selector }
+}
+
+func WithThemeCustomizer(f func(themeName string, colors ThemeInfo) ThemeInfo) Option {
+	return func(b *engineBuilder) { b.themeCustomizer = f }
+}
+
+func WithLocale(loc string) Option {
+	return func(b *engineBuilder) { b.cfg.Locale = loc }
+}
+
+func WithUIStrings(overrides map[string]string) Option {
+	return func(b *engineBuilder) { b.cfg.UIStringOverrides = overrides }
 }
 
 func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {

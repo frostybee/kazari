@@ -109,6 +109,15 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		)
 	}
 
+	// File icon defaults (conditional)
+	if cfg.FileIcons {
+		staticVars = append(staticVars,
+			nv("--kz-file-icon-size", "1rem"),
+			nv("--kz-file-icon-margin", "0 0.4rem 0 0"),
+			nv("--kz-file-icon-opacity", "0.8"),
+		)
+	}
+
 	// Minimal terminal dots (conditional)
 	if cfg.TerminalDotStyle == config.DotsMinimal {
 		staticVars = append(staticVars,
@@ -122,34 +131,39 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 	// Dark theme variables.
 	darkVars := buildThemeVars(dark, cfg)
 
+	root := cfg.ThemeCSSRoot
+	if root == "" {
+		root = ":root"
+	}
+
 	switch cfg.DarkMode.Kind {
 	case config.DarkModeSelectorKind:
-		sb.WriteString(":root {\n")
+		sb.WriteString(fmt.Sprintf("%s {\n", root))
 		writeVars(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
 		sb.WriteString("}\n")
-		sb.WriteString(fmt.Sprintf(":root%s {\n", cfg.DarkMode.Selector))
+		sb.WriteString(fmt.Sprintf("%s%s {\n", root, cfg.DarkMode.Selector))
 		writeVarLines(&sb, darkVars)
 		sb.WriteString("}\n")
 
 	case config.DarkModeMediaQueryKind:
-		sb.WriteString(":root {\n")
+		sb.WriteString(fmt.Sprintf("%s {\n", root))
 		writeVars(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
 		sb.WriteString("}\n")
-		sb.WriteString("@media (prefers-color-scheme: dark) {\n:root {\n")
+		sb.WriteString(fmt.Sprintf("@media (prefers-color-scheme: dark) {\n%s {\n", root))
 		writeVarLines(&sb, darkVars)
 		sb.WriteString("}\n}\n")
 
 	case config.DarkModeBothKind:
-		sb.WriteString(":root {\n")
+		sb.WriteString(fmt.Sprintf("%s {\n", root))
 		writeVars(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
 		sb.WriteString("}\n")
-		sb.WriteString("@media (prefers-color-scheme: dark) {\n:root {\n")
+		sb.WriteString(fmt.Sprintf("@media (prefers-color-scheme: dark) {\n%s {\n", root))
 		writeVarLines(&sb, darkVars)
 		sb.WriteString("}\n}\n")
-		sb.WriteString(fmt.Sprintf(":root%s {\n", cfg.DarkMode.Selector))
+		sb.WriteString(fmt.Sprintf("%s%s {\n", root, cfg.DarkMode.Selector))
 		writeVarLines(&sb, darkVars)
 		sb.WriteString("}\n")
 	}

@@ -540,6 +540,95 @@ const nope = false;`
 	}
 	syncGroupHTML := syncGroupBuf.String()
 
+	// Theme customizer: modify dark theme background
+	customizerEngine := kazari.New(
+		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithMinify(false),
+		kazari.WithThemeCustomizer(func(name string, colors kazari.ThemeInfo) kazari.ThemeInfo {
+			if name == "github-dark" {
+				colors.BG = "#1a1b26"
+			}
+			return colors
+		}),
+	)
+
+	customizerCode := `fmt.Println("Custom dark BG: #1a1b26")`
+	customizerHTML, err := customizerEngine.Render(customizerCode, kazari.Options{Lang: "go", Title: "customized-theme.go"})
+	if err != nil {
+		log.Fatalf("Render customizer: %v", err)
+	}
+	customizerCSS := customizerEngine.CSS()
+
+	// Scoped CSS root
+	scopedEngine := kazari.New(
+		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithMinify(false),
+		kazari.WithThemeCSSRoot(".kazari-scoped"),
+	)
+
+	scopedCode := `fmt.Println("CSS vars scoped to .kazari-scoped")`
+	scopedHTML, err := scopedEngine.Render(scopedCode, kazari.Options{Lang: "go", Title: "scoped.go"})
+	if err != nil {
+		log.Fatalf("Render scoped: %v", err)
+	}
+	scopedCSS := scopedEngine.CSS()
+
+	// French locale demo
+	frEngine := kazari.New(
+		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithMinify(false),
+		kazari.WithLocale("fr-FR"),
+	)
+
+	frCode := `fmt.Println("Bonjour le monde !")`
+	frHTML, err := frEngine.Render(frCode, kazari.Options{Lang: "go", Title: "locale-fr.go"})
+	if err != nil {
+		log.Fatalf("Render fr: %v", err)
+	}
+	frCSS := frEngine.CSS()
+
+	// File icons with custom resolver (emoji placeholders)
+	iconEngine := kazari.New(
+		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithMinify(false),
+		kazari.WithFileIconResolver(func(ext string) string {
+			icons := map[string]string{
+				"go":   "🔵",
+				"py":   "🐍",
+				"js":   "🟡",
+				"rs":   "🦀",
+				"css":  "🎨",
+			}
+			icon := "📄"
+			if v, ok := icons[ext]; ok {
+				icon = v
+			}
+			return fmt.Sprintf(`<span class="kz-file-icon" style="font-size:1rem;margin-right:0.4rem">%s</span>`, icon)
+		}),
+	)
+
+	iconGoHTML, err := iconEngine.Render(`fmt.Println("Go")`, kazari.Options{Lang: "go", Title: "main.go"})
+	if err != nil {
+		log.Fatalf("Render iconGo: %v", err)
+	}
+	iconPyHTML, err := iconEngine.Render(`print("Python")`, kazari.Options{Lang: "python", Title: "app.py"})
+	if err != nil {
+		log.Fatalf("Render iconPy: %v", err)
+	}
+	iconJsHTML, err := iconEngine.Render(`console.log("JS")`, kazari.Options{Lang: "javascript", Title: "index.js"})
+	if err != nil {
+		log.Fatalf("Render iconJs: %v", err)
+	}
+	iconRsHTML, err := iconEngine.Render(`fn main() {}`, kazari.Options{Lang: "rust", Title: "main.rs"})
+	if err != nil {
+		log.Fatalf("Render iconRs: %v", err)
+	}
+	iconCSS := iconEngine.CSS()
+
 	css := collapseEngine.CSS()
 	dotsCSS := dotsEngine.CSS()
 	js := collapseEngine.JS()
@@ -661,6 +750,30 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <h2>Code Group Tab Sync (tabs synced across groups)</h2>
 %s
 
+<h2>Theme Customizer (dark BG changed to #1a1b26)</h2>
+<style>%s</style>
+%s
+
+<h2>Locale: French (<code>WithLocale("fr-FR")</code>)</h2>
+<p>Copy button shows "Copier" / "Copié !", fullscreen shows "Plein écran".</p>
+<style>%s</style>
+%s
+
+<h2>File Icons (custom resolver with emoji)</h2>
+<p>Uses <code>WithFileIconResolver</code> to inject emoji icons per extension.</p>
+<style>%s</style>
+%s
+%s
+%s
+%s
+
+<h2>Scoped CSS Root (<code>.kazari-scoped</code>)</h2>
+<div class="kazari-scoped">
+<style>%s</style>
+%s
+</div>
+<p><small>Inspect the <code>&lt;style&gt;</code> tag above: CSS variables are scoped to <code>.kazari-scoped</code> instead of <code>:root</code>.</small></p>
+
 <script type="module">
 %s
 </script>
@@ -671,7 +784,11 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 		csStartHTML, csEndHTML, csAutoHTML,
 		mermaidHTML, regexHTML, captureHTML,
 		themeOverrideHTML, themeOverrideAltHTML, diffHTML, codeGroupHTML,
-		ansiHTML, syncGroupHTML, js)
+		ansiHTML, syncGroupHTML,
+		customizerCSS, customizerHTML,
+		frCSS, frHTML,
+		iconCSS, iconGoHTML, iconPyHTML, iconJsHTML, iconRsHTML,
+		scopedCSS, scopedHTML, js)
 
 	if err := os.WriteFile("showcase.html", []byte(page), 0644); err != nil {
 		log.Fatalf("WriteFile: %v", err)

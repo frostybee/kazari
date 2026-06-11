@@ -1,0 +1,9 @@
+.kazari-code .kz-file-icon {
+  display: inline-block;
+  width: var(--kz-file-icon-size);
+  height: var(--kz-file-icon-size);
+  margin: var(--kz-file-icon-margin);
+  opacity: var(--kz-file-icon-opacity);
+  vertical-align: middle;
+  flex-shrink: 0;
+}

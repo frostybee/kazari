@@ -1,11 +1,11 @@
 package collapsible
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/frostybee/kazari/internal/config"
+	"github.com/frostybee/kazari/internal/locale"
 )
 
 // CollapseResult holds the resolved collapse state for a single code block.
@@ -257,9 +257,6 @@ func ResolveCollapseStyle(style config.CollapseStyle, rangeEnd, lineCount int) c
 }
 
 // SummaryText returns the summary text for a collapsed section.
-func SummaryText(lineCount int) string {
-	if lineCount == 1 {
-		return "1 collapsed line"
-	}
-	return fmt.Sprintf("%d collapsed lines", lineCount)
+func SummaryText(lineCount int, strings *locale.UIStrings) string {
+	return locale.FormatCollapsedLines(strings, lineCount)
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/frostybee/kazari/internal/config"
+	"github.com/frostybee/kazari/internal/locale"
 )
 
 func TestShouldThresholdCollapse(t *testing.T) {
@@ -139,8 +140,9 @@ func TestSummaryText(t *testing.T) {
 		{0, "0 collapsed lines"},
 	}
 
+	s := locale.Resolve("en-US", nil)
 	for _, tt := range tests {
-		got := SummaryText(tt.count)
+		got := SummaryText(tt.count, s)
 		if got != tt.want {
 			t.Errorf("SummaryText(%d) = %q, want %q", tt.count, got, tt.want)
 		}

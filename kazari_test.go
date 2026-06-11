@@ -1,6 +1,7 @@
 package kazari
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -94,7 +95,7 @@ func TestRender_DualTheme(t *testing.T) {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	if !strings.Contains(html, `<div class="kazari-code">`) {
+	if !strings.Contains(html, `class="kazari-code"`) {
 		t.Error("missing kazari-code wrapper")
 	}
 	if !strings.Contains(html, "--sl:#cf222e") {
@@ -2485,5 +2486,488 @@ func TestRender_ANSI_DualColorsSame(t *testing.T) {
 	}
 	if !strings.Contains(html, "--sd:#cc0000") {
 		t.Error("expected dark color to match light (ANSI colors are theme-independent)")
+	}
+}
+
+// --- data-lines attribute tests ---
+
+func TestRender_DataLineCount_Default(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "line1", Color: "#333"}},
+			{{Content: "line2", Color: "#333"}},
+			{{Content: "line3", Color: "#333"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("line1\nline2\nline3", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `data-lines="3"`) {
+		t.Error("data-lines should be present by default with correct count")
+	}
+}
+
+func TestRender_DataLineCount_Disabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "line1", Color: "#333"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDataLineCount(false))
+	html, err := engine.Render("line1", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "data-lines") {
+		t.Error("data-lines should not be present when disabled")
+	}
+}
+
+func TestRender_DataLineCount_SingleLine(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "hello", Color: "#333"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `data-lines="1"`) {
+		t.Error("single-line block should have data-lines=\"1\"")
+	}
+}
+
+// --- Theme CSS root tests ---
+
+func TestCSS_ThemeCSSRoot_Default(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	css := engine.CSS()
+	if !strings.Contains(css, ":root {") {
+		t.Error("default CSS root should be :root")
+	}
+}
+
+func TestCSS_ThemeCSSRoot_Custom(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithThemeCSSRoot(".kazari-container"),
+	)
+	css := engine.CSS()
+	if !strings.Contains(css, ".kazari-container {") {
+		t.Error("custom CSS root should appear in output")
+	}
+	if strings.Contains(css, ":root {") {
+		t.Error(":root should not appear when custom root is set")
+	}
+}
+
+func TestCSS_ThemeCSSRoot_DarkModeComposition(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo:     ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo: ThemeInfo{FG: "#e1e4e8", BG: "#0d1117"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+		WithThemeCSSRoot(".container"),
+		WithDarkMode(SelectorMode(".dark")),
+	)
+	css := engine.CSS()
+	if !strings.Contains(css, ".container.dark {") {
+		t.Error("dark mode selector should compose with custom root")
+	}
+}
+
+// --- Theme customizer tests ---
+
+func TestNew_ThemeCustomizer_ModifiesBG(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithThemeCustomizer(func(name string, colors ThemeInfo) ThemeInfo {
+			colors.BG = "#0a0a0a"
+			return colors
+		}),
+	)
+	css := engine.CSS()
+	if !strings.Contains(css, "#0a0a0a") {
+		t.Error("customizer should modify the background color in CSS output")
+	}
+	if strings.Contains(css, "--kz-editor-bg:#ffffff") {
+		t.Error("original editor BG should be replaced by customizer")
+	}
+}
+
+func TestNew_ThemeCustomizer_ReceivesThemeName(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo:     ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo: ThemeInfo{FG: "#e1e4e8", BG: "#0d1117"},
+	}
+	var receivedNames []string
+	New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithThemeCustomizer(func(name string, colors ThemeInfo) ThemeInfo {
+			receivedNames = append(receivedNames, name)
+			return colors
+		}),
+	)
+	if len(receivedNames) != 2 {
+		t.Fatalf("expected 2 customizer calls, got %d", len(receivedNames))
+	}
+	if receivedNames[0] != "light-theme" {
+		t.Errorf("first call should be light theme, got %q", receivedNames[0])
+	}
+	if receivedNames[1] != "dark-theme" {
+		t.Errorf("second call should be dark theme, got %q", receivedNames[1])
+	}
+}
+
+func TestNew_ThemeCustomizer_NilIsNoOp(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	)
+	css := engine.CSS()
+	if !strings.Contains(css, "#ffffff") {
+		t.Error("without customizer, original BG should be preserved")
+	}
+}
+
+func TestNew_ThemeCustomizer_BothThemes(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo:     ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo: ThemeInfo{FG: "#e1e4e8", BG: "#0d1117"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+		WithThemeCustomizer(func(name string, colors ThemeInfo) ThemeInfo {
+			if name == "light-theme" {
+				colors.BG = "#f0f0f0"
+			} else {
+				colors.BG = "#111111"
+			}
+			return colors
+		}),
+	)
+	css := engine.CSS()
+	if !strings.Contains(css, "#f0f0f0") {
+		t.Error("customizer should modify light theme BG")
+	}
+	if !strings.Contains(css, "#111111") {
+		t.Error("customizer should modify dark theme BG")
+	}
+}
+
+// --- Locale / UI strings tests ---
+
+func TestRender_Locale_CopyButton(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithLocale("fr-FR"),
+	)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, ">Copier</span>") {
+		t.Error("copy button should use French label")
+	}
+	if !strings.Contains(html, `data-copied="Copié !"`) {
+		t.Error("copy button should use French success text")
+	}
+	if !strings.Contains(html, `title="Copier dans le presse-papiers"`) {
+		t.Error("copy button should use French title")
+	}
+}
+
+func TestRender_Locale_FullscreenButton(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithLocale("ja-JP"),
+	)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `aria-label="全画面"`) {
+		t.Error("fullscreen button should use Japanese label")
+	}
+}
+
+func TestRender_Locale_ThresholdOverlay(t *testing.T) {
+	longCode := strings.Repeat("line\n", 20)
+	hl := &mockHighlighter{
+		lightTokens: func() [][]Token {
+			lines := make([][]Token, 20)
+			for i := range lines {
+				lines[i] = []Token{{Content: "line", Color: "#333"}}
+			}
+			return lines
+		}(),
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithLocale("fr-FR"),
+		WithCollapsible(CollapsibleConfig{LineThreshold: 5, PreviewLines: 3, DefaultCollapsed: true}),
+	)
+	html, err := engine.Render(longCode, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "Afficher plus") {
+		t.Error("threshold overlay should use French expand text")
+	}
+	if !strings.Contains(html, "Afficher moins") {
+		t.Error("threshold overlay should use French collapse text")
+	}
+}
+
+func TestRender_Locale_CustomOverride(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithUIStrings(map[string]string{"copy.label": "Copy code"}),
+	)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, ">Copy code</span>") {
+		t.Error("copy button should use overridden label")
+	}
+}
+
+func TestRender_Locale_DefaultEnglish(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, ">Copy</span>") {
+		t.Error("default should use English copy label")
+	}
+	if !strings.Contains(html, `aria-label="Fullscreen"`) {
+		t.Error("default should use English fullscreen label")
+	}
+}
+
+func TestRender_Locale_CollapseConfigOverridesLocale(t *testing.T) {
+	longCode := strings.Repeat("line\n", 20)
+	hl := &mockHighlighter{
+		lightTokens: func() [][]Token {
+			lines := make([][]Token, 20)
+			for i := range lines {
+				lines[i] = []Token{{Content: "line", Color: "#333"}}
+			}
+			return lines
+		}(),
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithLocale("fr-FR"),
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    5,
+			PreviewLines:     3,
+			DefaultCollapsed: true,
+			ExpandButtonText: "Reveal",
+		}),
+	)
+	html, err := engine.Render(longCode, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "Reveal") {
+		t.Error("CollapseConfig text should override locale")
+	}
+}
+
+// --- File icon tests ---
+
+func TestRender_FileIcons_Present(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "go", Title: "main.go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `data-ext="go"`) {
+		t.Error("icon span should have data-ext for .go files")
+	}
+	if !strings.Contains(html, `class="kz-file-icon"`) {
+		t.Error("icon span should have kz-file-icon class")
+	}
+}
+
+func TestRender_FileIcons_CorrectExt(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "javascript", Title: "app.config.js"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `data-ext="js"`) {
+		t.Error("should extract last extension (js), not config")
+	}
+}
+
+func TestRender_FileIcons_NoTitle(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "kz-file-icon") {
+		t.Error("no icon when no title is set")
+	}
+}
+
+func TestRender_FileIcons_NoExtension(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "go", Title: "Makefile"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "kz-file-icon") {
+		t.Error("no icon when title has no extension")
+	}
+}
+
+func TestRender_FileIcons_Disabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithFileIcons(false))
+	html, err := engine.Render("hello", Options{Lang: "go", Title: "main.go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "kz-file-icon") {
+		t.Error("no icon when file icons disabled")
+	}
+}
+
+func TestRender_FileIcons_TerminalFrame(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "echo hi", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("echo hi", Options{Lang: "bash", Title: "terminal.sh"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "kz-file-icon") {
+		t.Error("no icon for terminal frames")
+	}
+}
+
+func TestRender_FileIcons_CustomResolver(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithFileIconResolver(func(ext string) string {
+		return fmt.Sprintf(`<img class="custom-icon" src="/icons/%s.svg"/>`, ext)
+	}))
+	html, err := engine.Render("hello", Options{Lang: "go", Title: "main.go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `<img class="custom-icon" src="/icons/go.svg"/>`) {
+		t.Error("custom resolver output should be used")
+	}
+	if strings.Contains(html, "kz-file-icon") {
+		t.Error("default span should not appear when resolver is set")
+	}
+}
+
+func TestCSS_FileIcons_VarsPresent(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	css := engine.CSS()
+	if !strings.Contains(css, "--kz-file-icon-size") {
+		t.Error("file icon CSS vars should be present when enabled")
+	}
+}
+
+func TestCSS_FileIcons_VarsAbsent(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithFileIcons(false))
+	css := engine.CSS()
+	if strings.Contains(css, "--kz-file-icon-size") {
+		t.Error("file icon CSS vars should not be present when disabled")
 	}
 }
