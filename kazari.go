@@ -7,9 +7,10 @@ import (
 	"html"
 	"strings"
 
+	"github.com/frostybee/kazari/internal/ansi"
 	"github.com/frostybee/kazari/internal/collapsible"
-	"github.com/frostybee/kazari/internal/diff"
 	"github.com/frostybee/kazari/internal/color"
+	"github.com/frostybee/kazari/internal/diff"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
 	"github.com/frostybee/kazari/internal/frame"
@@ -116,6 +117,11 @@ func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock) (st
 	}
 
 	code = e.preprocess(code, resolved)
+
+	if resolved.Lang == "ansi" {
+		lines := ansi.Parse(code)
+		return render.RenderBlock(lines, resolved, e.cfg), nil
+	}
 
 	if resolved.Lang == "diff" && resolved.DiffLang != "" {
 		stripped, diffMarkers := diff.ProcessDiffBlock(code)

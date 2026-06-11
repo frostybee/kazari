@@ -520,6 +520,26 @@ const nope = false;`
 	}
 	codeGroupHTML := codeGroupBuf.String()
 
+	// ANSI escape sequence rendering
+	ansiCode := "\x1b[1;34mINFO\x1b[0m  Server started on \x1b[32m:8080\x1b[0m\n" +
+		"\x1b[1;33mWARN\x1b[0m  Cache miss for key \x1b[36m\"user:42\"\x1b[0m\n" +
+		"\x1b[1;31mERROR\x1b[0m Connection refused: \x1b[4mdb.example.com:5432\x1b[0m\n" +
+		"\x1b[90m2024-01-15 10:30:45\x1b[0m \x1b[38;5;208mDEBUG\x1b[0m Retrying in \x1b[1m3s\x1b[0m..."
+
+	ansiHTML, err := engine.RenderWithMeta(ansiCode, `ansi title="server.log" showLineNumbers`)
+	if err != nil {
+		log.Fatalf("Render ansi: %v", err)
+	}
+
+	// Tab sync across code groups
+	syncGroupMD := []byte(":::code-group sync=\"language\"\n\n```go\ngo get github.com/example/pkg\n```\n\n```python\npip install example-pkg\n```\n\n```javascript\nnpm install example-pkg\n```\n\n:::\n\n<p>Select a language above and the group below syncs automatically.</p>\n\n:::code-group sync=\"language\"\n\n```go\nimport \"github.com/example/pkg\"\n```\n\n```python\nimport example_pkg\n```\n\n```javascript\nconst pkg = require('example-pkg');\n```\n\n:::\n\n<p>This group uses a different sync key (<code>sync=\"platform\"</code>) and syncs independently.</p>\n\n:::code-group sync=\"platform\"\n\n```bash title=\"Linux\"\nsudo apt install build-essential\n```\n\n```powershell title=\"Windows\"\nwinget install Microsoft.VisualStudio.BuildTools\n```\n\n```bash title=\"macOS\"\nbrew install gcc\n```\n\n:::\n")
+
+	var syncGroupBuf bytes.Buffer
+	if err := md.Convert(syncGroupMD, &syncGroupBuf); err != nil {
+		log.Fatalf("goldmark.Convert sync groups: %v", err)
+	}
+	syncGroupHTML := syncGroupBuf.String()
+
 	css := collapseEngine.CSS()
 	dotsCSS := dotsEngine.CSS()
 	js := collapseEngine.JS()
@@ -635,6 +655,12 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <h2>Code Group (tabbed code blocks via Goldmark)</h2>
 %s
 
+<h2>ANSI Escape Sequences (parsed SGR codes)</h2>
+%s
+
+<h2>Code Group Tab Sync (tabs synced across groups)</h2>
+%s
+
 <script type="module">
 %s
 </script>
@@ -644,7 +670,8 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 		thresholdHTML, rangeHTML, multiRangeHTML, gapHTML,
 		csStartHTML, csEndHTML, csAutoHTML,
 		mermaidHTML, regexHTML, captureHTML,
-		themeOverrideHTML, themeOverrideAltHTML, diffHTML, codeGroupHTML, js)
+		themeOverrideHTML, themeOverrideAltHTML, diffHTML, codeGroupHTML,
+		ansiHTML, syncGroupHTML, js)
 
 	if err := os.WriteFile("showcase.html", []byte(page), 0644); err != nil {
 		log.Fatalf("WriteFile: %v", err)

@@ -1,5 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
   var groups = document.querySelectorAll(".kz-group");
+  var syncing = false;
+
+  function findTabByLabel(tabs, label) {
+    for (var i = 0; i < tabs.length; i++) {
+      if (tabs[i].textContent === label) return i;
+    }
+    return -1;
+  }
+
+  function syncOtherGroups(syncKey, label, sourceGroup) {
+    groups.forEach(function (otherGroup) {
+      if (otherGroup === sourceGroup) return;
+      if (otherGroup.getAttribute("data-sync") !== syncKey) return;
+      var otherTabs = otherGroup.querySelectorAll('.kz-group-tabs button[role="tab"]');
+      var otherPanels = otherGroup.querySelectorAll('.kz-group-panels > [role="tabpanel"]');
+      var matchIndex = findTabByLabel(otherTabs, label);
+      if (matchIndex < 0) return;
+      otherTabs.forEach(function (t, i) {
+        var selected = i === matchIndex;
+        t.setAttribute("aria-selected", selected ? "true" : "false");
+        t.setAttribute("tabindex", selected ? "0" : "-1");
+        if (otherPanels[i]) {
+          if (selected) {
+            otherPanels[i].removeAttribute("hidden");
+          } else {
+            otherPanels[i].setAttribute("hidden", "");
+          }
+        }
+      });
+    });
+  }
+
   groups.forEach(function (group, gi) {
     var tabs = group.querySelectorAll('.kz-group-tabs button[role="tab"]');
     var panels = group.querySelectorAll('.kz-group-panels > [role="tabpanel"]');
@@ -17,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    function activate(index) {
+    function activate(index, shouldSync) {
       tabs.forEach(function (t, i) {
         var selected = i === index;
         t.setAttribute("aria-selected", selected ? "true" : "false");
@@ -30,13 +62,24 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         }
       });
-      tabs[index].focus();
+      if (shouldSync) tabs[index].focus();
+
+      var syncKey = group.getAttribute("data-sync");
+      if (syncKey && shouldSync && !syncing) {
+        var label = tabs[index].textContent;
+        syncing = true;
+        try {
+          localStorage.setItem("kz-tabs-" + syncKey, label);
+        } catch (e) {}
+        syncOtherGroups(syncKey, label, group);
+        syncing = false;
+      }
     }
 
     // Click handler.
     tabs.forEach(function (tab, i) {
       tab.addEventListener("click", function () {
-        activate(i);
+        activate(i, true);
       });
     });
 
@@ -56,8 +99,22 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       if (next >= 0) {
         e.preventDefault();
-        activate(next);
+        activate(next, true);
       }
     });
+
+    // Restore synced tab from localStorage on load.
+    var syncKey = group.getAttribute("data-sync");
+    if (syncKey) {
+      try {
+        var saved = localStorage.getItem("kz-tabs-" + syncKey);
+        if (saved) {
+          var matchIndex = findTabByLabel(tabs, saved);
+          if (matchIndex >= 0) {
+            activate(matchIndex, false);
+          }
+        }
+      } catch (e) {}
+    }
   });
 });

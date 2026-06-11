@@ -326,3 +326,59 @@ func TestJS_ExcludesCodeGroupHandler(t *testing.T) {
 		t.Error("JS should not include code group handler when disabled")
 	}
 }
+
+// --- Tab sync tests ---
+
+func TestCodeGroup_SyncAttribute(t *testing.T) {
+	engine := newTestEngine()
+	md := ":::code-group sync=\"language\"\n\n```go\nfunc main() {}\n```\n\n```python\nprint()\n```\n\n:::\n"
+	html := renderMarkdown(t, engine, md, true)
+
+	if !strings.Contains(html, `data-sync="language"`) {
+		t.Error("missing data-sync attribute")
+	}
+}
+
+func TestCodeGroup_SyncAttribute_SingleQuote(t *testing.T) {
+	engine := newTestEngine()
+	md := ":::code-group sync='runtime'\n\n```go\nfmt.Println()\n```\n\n```python\nprint()\n```\n\n:::\n"
+	html := renderMarkdown(t, engine, md, true)
+
+	if !strings.Contains(html, `data-sync="runtime"`) {
+		t.Error("missing data-sync attribute for single-quote syntax")
+	}
+}
+
+func TestCodeGroup_NoSync(t *testing.T) {
+	engine := newTestEngine()
+	md := ":::code-group\n\n```go\nfunc main() {}\n```\n\n```python\nprint()\n```\n\n:::\n"
+	html := renderMarkdown(t, engine, md, true)
+
+	if strings.Contains(html, "data-sync") {
+		t.Error("data-sync should not be present without sync attribute")
+	}
+	if !strings.Contains(html, `class="kazari-code kz-group"`) {
+		t.Error("code group should still render without sync")
+	}
+}
+
+func TestCodeGroup_SyncAttribute_HTMLEscaped(t *testing.T) {
+	engine := newTestEngine()
+	md := ":::code-group sync=\"a&b\"\n\n```go\nfunc main() {}\n```\n\n```python\nprint()\n```\n\n:::\n"
+	html := renderMarkdown(t, engine, md, true)
+
+	if !strings.Contains(html, `data-sync="a&amp;b"`) {
+		t.Error("sync key should be HTML-escaped")
+	}
+}
+
+func TestCodeGroup_SyncMultipleGroups(t *testing.T) {
+	engine := newTestEngine()
+	md := ":::code-group sync=\"lang\"\n\n```go\nfmt.Println()\n```\n\n```python\nprint()\n```\n\n:::\n\nSome text.\n\n:::code-group sync=\"lang\"\n\n```go\nimport \"fmt\"\n```\n\n```python\nimport os\n```\n\n:::\n"
+	html := renderMarkdown(t, engine, md, true)
+
+	count := strings.Count(html, `data-sync="lang"`)
+	if count != 2 {
+		t.Errorf("expected 2 groups with data-sync, got %d", count)
+	}
+}

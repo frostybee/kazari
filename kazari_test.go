@@ -2369,3 +2369,121 @@ func TestDiff_NoLangRendersNormally(t *testing.T) {
 		t.Error("without lang= meta, diff should render as plain diff text")
 	}
 }
+
+// --- ANSI rendering tests ---
+
+func TestRender_ANSI_BasicColor(t *testing.T) {
+	engine := newTestEngine(&mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	})
+	html, err := engine.Render("\x1b[31mhello\x1b[0m", Options{Lang: "ansi"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "--sl:#cc0000") {
+		t.Error("expected red color in --sl custom property")
+	}
+	if !strings.Contains(html, "hello") {
+		t.Error("expected token content")
+	}
+}
+
+func TestRender_ANSI_TerminalFrame(t *testing.T) {
+	engine := newTestEngine(&mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	})
+	html, err := engine.Render("\x1b[32mok\x1b[0m", Options{Lang: "ansi"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "is-terminal") {
+		t.Error("ANSI blocks should auto-detect as terminal frame")
+	}
+}
+
+func TestRender_ANSI_NoHighlighter(t *testing.T) {
+	engine := New(WithMinify(false))
+	html, err := engine.Render("\x1b[34mblue\x1b[0m", Options{Lang: "ansi"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "--sl:#3465a4") {
+		t.Error("ANSI rendering should work without a highlighter")
+	}
+}
+
+func TestRender_ANSI_WithLineNumbers(t *testing.T) {
+	engine := newTestEngine(&mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}, WithLineNumbers(true))
+	html, err := engine.Render("\x1b[31mline1\x1b[0m\nline2", Options{Lang: "ansi"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `class="ln"`) {
+		t.Error("ANSI blocks should support line numbers")
+	}
+}
+
+func TestRender_ANSI_WithMarkers(t *testing.T) {
+	engine := newTestEngine(&mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	})
+	html, err := engine.Render("line1\nline2\nline3", Options{
+		Lang:        "ansi",
+		LineMarkers: []LineMarker{{Type: MarkerMark, Lines: []Range{{Start: 2, End: 2}}}},
+	})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "highlight mark") {
+		t.Error("ANSI blocks should support line markers")
+	}
+}
+
+func TestRender_ANSI_CopyButton(t *testing.T) {
+	engine := newTestEngine(&mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}, WithCopyButton(true))
+	html, err := engine.Render("\x1b[31mhello\x1b[0m", Options{Lang: "ansi"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "data-code=") {
+		t.Error("ANSI blocks should have a copy button with data-code")
+	}
+}
+
+func TestRenderWithMeta_ANSI(t *testing.T) {
+	engine := newTestEngine(&mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	})
+	html, err := engine.RenderWithMeta("\x1b[33myellow\x1b[0m", `ansi title="Output"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "--sl:#c4a000") {
+		t.Error("expected yellow color")
+	}
+	if !strings.Contains(html, "Output") {
+		t.Error("expected title from meta string")
+	}
+}
+
+func TestRender_ANSI_DualColorsSame(t *testing.T) {
+	engine := New(
+		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+	)
+	html, err := engine.Render("\x1b[31mred\x1b[0m", Options{Lang: "ansi"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "--sl:#cc0000") {
+		t.Error("expected light color")
+	}
+	if !strings.Contains(html, "--sd:#cc0000") {
+		t.Error("expected dark color to match light (ANSI colors are theme-independent)")
+	}
+}

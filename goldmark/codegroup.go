@@ -25,6 +25,7 @@ var KindCodeGroup = ast.NewNodeKind("CodeGroup")
 // CodeGroupNode is a container AST node wrapping multiple fenced code blocks.
 type CodeGroupNode struct {
 	ast.BaseBlock
+	SyncKey string
 }
 
 func (n *CodeGroupNode) Kind() ast.NodeKind {
@@ -45,11 +46,12 @@ func (p *codeGroupParser) Trigger() []byte {
 
 func (p *codeGroupParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {
 	line, _ := reader.PeekLine()
-	if !isCodeGroupOpener(line) {
+	isOpener, syncKey := parseCodeGroupOpener(line)
+	if !isOpener {
 		return nil, parser.NoChildren
 	}
 	reader.Advance(len(line))
-	return &CodeGroupNode{}, parser.HasChildren
+	return &CodeGroupNode{SyncKey: syncKey}, parser.HasChildren
 }
 
 func (p *codeGroupParser) Continue(node ast.Node, reader text.Reader, pc parser.Context) parser.State {
@@ -67,8 +69,31 @@ func (p *codeGroupParser) CanInterruptParagraph() bool { return false }
 
 func (p *codeGroupParser) CanAcceptIndentedLine() bool { return false }
 
-func isCodeGroupOpener(line []byte) bool {
-	return bytes.Equal(bytes.TrimSpace(line), []byte(":::code-group"))
+func parseCodeGroupOpener(line []byte) (bool, string) {
+	trimmed := bytes.TrimSpace(line)
+	prefix := []byte(":::code-group")
+	if !bytes.HasPrefix(trimmed, prefix) {
+		return false, ""
+	}
+	rest := bytes.TrimSpace(trimmed[len(prefix):])
+	if len(rest) == 0 {
+		return true, ""
+	}
+	return true, extractSyncKey(rest)
+}
+
+func extractSyncKey(rest []byte) string {
+	s := string(bytes.TrimSpace(rest))
+	for _, prefix := range []string{`sync="`, `sync='`} {
+		if strings.HasPrefix(s, prefix) {
+			quote := s[len(prefix)-1]
+			end := strings.IndexByte(s[len(prefix):], quote)
+			if end >= 0 {
+				return s[len(prefix) : len(prefix)+end]
+			}
+		}
+	}
+	return ""
 }
 
 func isCodeGroupCloser(line []byte) bool {
@@ -107,7 +132,12 @@ func (r *codeGroupRenderer) renderCodeGroup(w util.BufWriter, source []byte, nod
 		labels[i] = deriveTabLabel(block, source)
 	}
 
-	w.WriteString(`<div class="kazari-code kz-group">`)
+	cgNode := node.(*CodeGroupNode)
+	if cgNode.SyncKey != "" {
+		w.WriteString(fmt.Sprintf(`<div class="kazari-code kz-group" data-sync="%s">`, html.EscapeString(cgNode.SyncKey)))
+	} else {
+		w.WriteString(`<div class="kazari-code kz-group">`)
+	}
 
 	// Tab bar.
 	w.WriteString(`<div class="kz-group-tabs" role="tablist">`)
