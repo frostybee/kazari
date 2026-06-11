@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/frostybee/kazari"
+	kazarinuri "github.com/frostybee/kazari/nuri"
 	"github.com/frostybee/nuri"
 	"github.com/frostybee/nuri/bundle/core"
 )
@@ -13,7 +14,7 @@ import (
 // the engine takes the two-pass fallback path. Methods are forwarded
 // explicitly (embedding would forward TokenizeDual too).
 type plainHighlighter struct {
-	n *kazari.NuriHighlighter
+	n *kazarinuri.NuriHighlighter
 }
 
 func (p plainHighlighter) Tokenize(code, lang, theme string) ([][]kazari.Token, error) {
@@ -41,7 +42,7 @@ func TestDualThemeEquivalence(t *testing.T) {
 	}
 	defer hl.Close(ctx)
 
-	nuriHL := kazari.NewNuriHighlighter(ctx, hl)
+	nuriHL := kazarinuri.New(ctx, hl)
 	newEngine := func(h kazari.Highlighter) *kazari.Engine {
 		return kazari.New(
 			kazari.WithHighlighter(h),

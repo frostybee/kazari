@@ -2,30 +2,24 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/frostybee/kazari"
+	kazarichroma "github.com/frostybee/kazari/chroma"
 	kazarimd "github.com/frostybee/kazari/goldmark"
-	kazarinuri "github.com/frostybee/kazari/nuri"
-	"github.com/frostybee/nuri"
-	"github.com/frostybee/nuri/bundle/core"
 	"github.com/yuin/goldmark"
 )
 
 func main() {
-	ctx := context.Background()
-
-	hl, err := nuri.New(ctx, nuri.WithFS(core.FS()))
-	if err != nil {
-		log.Fatalf("nuri.New: %v", err)
-	}
-	defer hl.Close(ctx)
+	hl := kazarichroma.New(kazarichroma.WithStyleMap(map[string]string{
+		"github-light": "github",
+		"github-dark":  "github-dark",
+	}))
 
 	engine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 	)
@@ -103,12 +97,8 @@ with no frame wrapper.`
 		log.Fatalf("Render ps: %v", err)
 	}
 
-	// Terminal frame with minimal (CSS-only monochrome) dots.
-	// Separate engine because dot style is engine-level. Its CSS is appended to the
-	// page (rules are markup-gated, duplicates are harmless) but its JS must NOT be
-	// included — duplicate const declarations break the module script.
 	dotsEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithTerminalDotStyle(kazari.DotsMinimal),
@@ -137,8 +127,6 @@ with no frame wrapper.`
 		log.Fatalf("Render plain: %v", err)
 	}
 
-	// Word wrap: long lines wrap instead of scrolling horizontally, and
-	// continuation lines align at the original indent column.
 	wrapCode := `func configure(opts *Options) {
 	opts.Logger = log.New(os.Stdout, "[kazari] a deliberately long prefix string that forces this line to wrap inside the demo container", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
 	opts.Description = "Word wrap keeps long lines visible without horizontal scrolling, and preserved indentation keeps wrapped continuations aligned with the code structure."
@@ -149,7 +137,6 @@ with no frame wrapper.`
 		log.Fatalf("Render wrap: %v", err)
 	}
 
-	// Line markers: mark, ins, del
 	markerCode := `package main
 
 import "fmt"
@@ -171,7 +158,6 @@ func main() {
 		log.Fatalf("Render markers: %v", err)
 	}
 
-	// Labeled range (EC reference example)
 	labelCode := `<button
   role="button"
   {...props}
@@ -195,7 +181,6 @@ func main() {
 		log.Fatalf("Render labels: %v", err)
 	}
 
-	// Focus lines
 	focusCode := `func process(items []string) error {
 	for _, item := range items {
 		if err := validate(item); err != nil {
@@ -211,7 +196,6 @@ func main() {
 		log.Fatalf("Render focus: %v", err)
 	}
 
-	// Inline markers
 	inlineCode := `import { useState, useEffect } from 'react';
 
 function App() {
@@ -227,7 +211,6 @@ function App() {
 		log.Fatalf("Render inline: %v", err)
 	}
 
-	// Single-quote inline markers
 	sqCode := `import { useState, useEffect, useRef } from 'react';
 const [name, setName] = useState('');
 const ref = useRef(null);`
@@ -237,7 +220,6 @@ const ref = useRef(null);`
 		log.Fatalf("Render single-quote: %v", err)
 	}
 
-	// Combined: line markers + inline + focus
 	combinedCode := `func main() {
 	db := connect()
 	defer db.Close()
@@ -257,10 +239,8 @@ const ref = useRef(null);`
 		log.Fatalf("Render combined: %v", err)
 	}
 
-	// --- Collapsible examples ---
-
 	collapseEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithCollapsible(kazari.CollapsibleConfig{
@@ -271,7 +251,6 @@ const ref = useRef(null);`
 		}),
 	)
 
-	// Threshold-based collapse (long block auto-collapses)
 	thresholdCode := `package main
 
 import (
@@ -306,7 +285,6 @@ func (s *Server) Start() error {
 		log.Fatalf("Render threshold: %v", err)
 	}
 
-	// Range-based collapse (specific sections collapsed)
 	rangeCode := `package main
 
 import (
@@ -337,7 +315,6 @@ func evaluate(expr string) float64 {
 		log.Fatalf("Render range: %v", err)
 	}
 
-	// Range-based with multiple ranges
 	multiRangeCode := `package api
 
 import (
@@ -377,7 +354,6 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Render multiRange: %v", err)
 	}
 
-	// Threshold + markers: gap indicators between non-contiguous segments
 	gapCode := `package main
 
 import (
@@ -426,25 +402,21 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Render gap: %v", err)
 	}
 
-	// Collapsible-start style (re-collapsible, summary above)
 	csStartHTML, err := collapseEngine.RenderWithMeta(rangeCode, `go title="calc.go" showLineNumbers collapse={3-8} collapseStyle="collapsible-start"`)
 	if err != nil {
 		log.Fatalf("Render csStart: %v", err)
 	}
 
-	// Collapsible-end style (re-collapsible, summary below)
 	csEndHTML, err := collapseEngine.RenderWithMeta(rangeCode, `go title="calc.go" showLineNumbers collapse={3-8} collapseStyle="collapsible-end"`)
 	if err != nil {
 		log.Fatalf("Render csEnd: %v", err)
 	}
 
-	// Collapsible-auto style (auto-selects start/end based on position)
 	csAutoHTML, err := collapseEngine.RenderWithMeta(rangeCode, `go title="calc.go" showLineNumbers collapse={3-8,20-24} collapseStyle="collapsible-auto"`)
 	if err != nil {
 		log.Fatalf("Render csAuto: %v", err)
 	}
 
-	// Mermaid pass-through
 	mermaidCode := `graph TD
     A[Start] --> B{Decision}
     B -->|Yes| C[Do something]
@@ -457,7 +429,6 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Render mermaid: %v", err)
 	}
 
-	// Regex markers
 	regexCode := `func fetchUsers() ([]User, error) {
 	resp, err := http.Get("/api/users")
 	if err != nil {
@@ -474,7 +445,6 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Render regex: %v", err)
 	}
 
-	// Regex with capture group
 	captureCode := `const yes = true;
 const yep = true;
 const nope = false;`
@@ -484,7 +454,6 @@ const nope = false;`
 		log.Fatalf("Render capture: %v", err)
 	}
 
-	// Per-block theme override
 	themeCode := `func main() {
 	fmt.Println("Same code, different theme")
 }`
@@ -499,7 +468,6 @@ const nope = false;`
 		log.Fatalf("Render themeOverride: %v", err)
 	}
 
-	// Hybrid diff + syntax highlighting
 	diffCode := " import (\n" +
 		"-\t\"fmt\"\n" +
 		"+\t\"log\"\n" +
@@ -516,9 +484,6 @@ const nope = false;`
 		log.Fatalf("Render diff: %v", err)
 	}
 
-	// --- Code group example (via Goldmark) ---
-	// Use collapseEngine for code groups too (single engine = single CSS/JS output).
-
 	codeGroupMD := []byte(":::code-group\n\n```go title=\"main.go\"\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello from Go!\")\n}\n```\n\n```python title=\"main.py\"\ndef main():\n    print(\"Hello from Python!\")\n\nif __name__ == \"__main__\":\n    main()\n```\n\n```javascript title=\"index.js\"\nfunction main() {\n  console.log(\"Hello from JavaScript!\");\n}\n\nmain();\n```\n\n:::\n")
 
 	md := goldmark.New(
@@ -533,7 +498,6 @@ const nope = false;`
 	}
 	codeGroupHTML := codeGroupBuf.String()
 
-	// ANSI escape sequence rendering
 	ansiCode := "\x1b[1;34mINFO\x1b[0m  Server started on \x1b[32m:8080\x1b[0m\n" +
 		"\x1b[1;33mWARN\x1b[0m  Cache miss for key \x1b[36m\"user:42\"\x1b[0m\n" +
 		"\x1b[1;31mERROR\x1b[0m Connection refused: \x1b[4mdb.example.com:5432\x1b[0m\n" +
@@ -544,7 +508,6 @@ const nope = false;`
 		log.Fatalf("Render ansi: %v", err)
 	}
 
-	// Tab sync across code groups
 	syncGroupMD := []byte(":::code-group sync=\"language\"\n\n```go\ngo get github.com/example/pkg\n```\n\n```python\npip install example-pkg\n```\n\n```javascript\nnpm install example-pkg\n```\n\n:::\n\n<p>Select a language above and the group below syncs automatically.</p>\n\n:::code-group sync=\"language\"\n\n```go\nimport \"github.com/example/pkg\"\n```\n\n```python\nimport example_pkg\n```\n\n```javascript\nconst pkg = require('example-pkg');\n```\n\n:::\n\n<p>This group uses a different sync key (<code>sync=\"platform\"</code>) and syncs independently.</p>\n\n:::code-group sync=\"platform\"\n\n```bash title=\"Linux\"\nsudo apt install build-essential\n```\n\n```powershell title=\"Windows\"\nwinget install Microsoft.VisualStudio.BuildTools\n```\n\n```bash title=\"macOS\"\nbrew install gcc\n```\n\n:::\n")
 
 	var syncGroupBuf bytes.Buffer
@@ -553,9 +516,8 @@ const nope = false;`
 	}
 	syncGroupHTML := syncGroupBuf.String()
 
-	// Theme customizer: modify dark theme background
 	customizerEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithThemeCustomizer(func(name string, colors kazari.ThemeInfo) kazari.ThemeInfo {
@@ -573,12 +535,10 @@ const nope = false;`
 	}
 	customizerCSS := customizerEngine.CSS()
 
-	// OKLCH theme adjustments: tint editor backgrounds toward teal.
-	// Scoped CSS root keeps the tinted variables from leaking into the page.
 	tintHue := 195.0
 	tintChroma := 0.04
 	tintedEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithThemeCSSRoot(".kazari-tinted"),
@@ -592,9 +552,8 @@ const nope = false;`
 	}
 	tintedCSS := tintedEngine.CSS()
 
-	// Scoped CSS root
 	scopedEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithThemeCSSRoot(".kazari-scoped"),
@@ -607,9 +566,8 @@ const nope = false;`
 	}
 	scopedCSS := scopedEngine.CSS()
 
-	// French locale demo
 	frEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithLocale("fr-FR"),
@@ -622,20 +580,19 @@ const nope = false;`
 	}
 	frCSS := frEngine.CSS()
 
-	// File icons with custom resolver (emoji placeholders)
 	iconEngine := kazari.New(
-		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
+		kazari.WithHighlighter(hl),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithFileIconResolver(func(ext string) string {
 			icons := map[string]string{
-				"go":   "🔵",
-				"py":   "🐍",
-				"js":   "🟡",
-				"rs":   "🦀",
-				"css":  "🎨",
+				"go":  "\U0001F535",
+				"py":  "\U0001F40D",
+				"js":  "\U0001F7E1",
+				"rs":  "\U0001F980",
+				"css": "\U0001F3A8",
 			}
-			icon := "📄"
+			icon := "\U0001F4C4"
 			if v, ok := icons[ext]; ok {
 				icon = v
 			}
@@ -670,7 +627,7 @@ const nope = false;`
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kazari Demo</title>
+<title>Kazari + Chroma Demo</title>
 <style>
 %s
 %s
@@ -689,8 +646,8 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 </style>
 </head>
 <body>
-<h1>Kazari Demo</h1>
-<p>Dual-theme code blocks with frames, copy buttons, and dark mode.</p>
+<h1>Kazari + Chroma Demo</h1>
+<p>All Kazari features powered by <strong>Chroma</strong> (Pygments-style syntax highlighting). Dual-theme code blocks with frames, copy buttons, and dark mode.</p>
 <button onclick="document.documentElement.classList.toggle('dark'); document.querySelectorAll('.kazari-tinted, .kazari-scoped').forEach((el) => el.classList.toggle('dark'))">Toggle Dark Mode</button>
 
 <h2>Editor Frame (explicit title)</h2>
@@ -797,7 +754,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 </div>
 
 <h2>Locale: French (<code>WithLocale("fr-FR")</code>)</h2>
-<p>Copy button shows "Copier" / "Copié !", fullscreen shows "Plein écran".</p>
+<p>Copy button shows "Copier" / "Copie !", fullscreen shows "Plein ecran".</p>
 <style>%s</style>
 %s
 
@@ -833,8 +790,8 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 		iconCSS, iconGoHTML, iconPyHTML, iconJsHTML, iconRsHTML,
 		scopedCSS, scopedHTML, js)
 
-	if err := os.WriteFile("showcase.html", []byte(page), 0644); err != nil {
+	if err := os.WriteFile("showcase-chroma.html", []byte(page), 0644); err != nil {
 		log.Fatalf("WriteFile: %v", err)
 	}
-	fmt.Println("Written: showcase.html")
+	fmt.Println("Written: showcase-chroma.html")
 }

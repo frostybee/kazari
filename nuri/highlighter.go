@@ -1,8 +1,9 @@
-package kazari
+package kazarinuri
 
 import (
 	"context"
 
+	"github.com/frostybee/kazari"
 	"github.com/frostybee/nuri"
 	"github.com/frostybee/nuri/ast"
 )
@@ -13,12 +14,12 @@ type NuriHighlighter struct {
 	ctx context.Context
 }
 
-// NewNuriHighlighter creates an adapter from a Nuri Highlighter instance.
-func NewNuriHighlighter(ctx context.Context, hl *nuri.Highlighter) *NuriHighlighter {
+// New creates an adapter from a Nuri Highlighter instance.
+func New(ctx context.Context, hl *nuri.Highlighter) *NuriHighlighter {
 	return &NuriHighlighter{hl: hl, ctx: ctx}
 }
 
-func (n *NuriHighlighter) Tokenize(code, lang, themeName string) ([][]Token, error) {
+func (n *NuriHighlighter) Tokenize(code, lang, themeName string) ([][]kazari.Token, error) {
 	result, err := n.hl.CodeToTokens(n.ctx, code, ast.CodeToTokensOptions{
 		Lang:  lang,
 		Theme: themeName,
@@ -27,11 +28,11 @@ func (n *NuriHighlighter) Tokenize(code, lang, themeName string) ([][]Token, err
 		return nil, err
 	}
 
-	lines := make([][]Token, len(result.Tokens))
+	lines := make([][]kazari.Token, len(result.Tokens))
 	for i, nuriLine := range result.Tokens {
-		tokens := make([]Token, len(nuriLine))
+		tokens := make([]kazari.Token, len(nuriLine))
 		for j, nt := range nuriLine {
-			tokens[j] = Token{
+			tokens[j] = kazari.Token{
 				Content:   nt.Content,
 				Color:     nt.Color,
 				BgColor:   nt.BgColor,
@@ -46,7 +47,7 @@ func (n *NuriHighlighter) Tokenize(code, lang, themeName string) ([][]Token, err
 // TokenizeDual implements DualThemeTokenizer: one tokenization pass resolves
 // both themes via Nuri's multi-theme mode, halving dual-theme cost. Both
 // returned streams share token boundaries by construction.
-func (n *NuriHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string) ([][]Token, [][]Token, error) {
+func (n *NuriHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string) ([][]kazari.Token, [][]kazari.Token, error) {
 	result, err := n.hl.CodeToTokens(n.ctx, code, ast.CodeToTokensOptions{
 		Lang: lang,
 		Themes: map[string]string{
@@ -58,17 +59,13 @@ func (n *NuriHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string)
 		return nil, nil, err
 	}
 
-	// Nuri sorts theme keys, so "dark" is the default theme: its style fills
-	// each token's own Color/BgColor/FontStyle fields, while "light" lives in
-	// ThemeStyles["light"]. A missing ThemeStyles entry falls back to the
-	// default-theme style rather than emitting an uncolored token.
-	light := make([][]Token, len(result.Tokens))
-	dark := make([][]Token, len(result.Tokens))
+	light := make([][]kazari.Token, len(result.Tokens))
+	dark := make([][]kazari.Token, len(result.Tokens))
 	for i, line := range result.Tokens {
-		lightLine := make([]Token, len(line))
-		darkLine := make([]Token, len(line))
+		lightLine := make([]kazari.Token, len(line))
+		darkLine := make([]kazari.Token, len(line))
 		for j, nt := range line {
-			darkLine[j] = Token{
+			darkLine[j] = kazari.Token{
 				Content:   nt.Content,
 				Color:     nt.Color,
 				BgColor:   nt.BgColor,
@@ -87,13 +84,13 @@ func (n *NuriHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string)
 	return light, dark, nil
 }
 
-func (n *NuriHighlighter) GetThemeColors(themeName string) (ThemeInfo, error) {
+func (n *NuriHighlighter) GetThemeColors(themeName string) (kazari.ThemeInfo, error) {
 	tc, err := n.hl.GetThemeColors(themeName)
 	if err != nil {
-		return ThemeInfo{}, err
+		return kazari.ThemeInfo{}, err
 	}
 
-	return ThemeInfo{
+	return kazari.ThemeInfo{
 		FG:           tc.Foreground,
 		BG:           tc.Background,
 		SelectionBG:  tc.SelectionBackground,

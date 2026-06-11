@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/frostybee/kazari"
+	kazarinuri "github.com/frostybee/kazari/nuri"
 	"github.com/frostybee/nuri"
 	"github.com/frostybee/nuri/bundle/core"
 )
@@ -19,7 +20,7 @@ func TestPerLangCost(t *testing.T) {
 	defer hl.Close(ctx)
 
 	engine := kazari.New(
-		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 	)

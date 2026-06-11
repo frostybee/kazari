@@ -8,6 +8,7 @@ import (
 
 	"github.com/frostybee/kazari"
 	kazarimd "github.com/frostybee/kazari/goldmark"
+	kazarinuri "github.com/frostybee/kazari/nuri"
 	"github.com/frostybee/nuri"
 	"github.com/frostybee/nuri/bundle/core"
 	"github.com/yuin/goldmark"
@@ -26,7 +27,7 @@ func TestFullPipeline(t *testing.T) {
 
 	start = time.Now()
 	engine := kazari.New(
-		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 	)
@@ -66,7 +67,7 @@ func TestFullPipeline(t *testing.T) {
 
 	start = time.Now()
 	collapseEngine := kazari.New(
-		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
 		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
 		kazari.WithCollapsible(kazari.CollapsibleConfig{
