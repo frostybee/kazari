@@ -92,14 +92,16 @@ type LineMarker struct {
 
 // InlineMarker represents an inline text marker.
 type InlineMarker struct {
-	Type MarkerType
-	Text string
+	Type    MarkerType
+	Text    string
+	IsRegex bool
 }
 
 // Options is the per-block configuration passed to Render or derived from meta string.
 type Options struct {
 	Lang            string
 	Title           string
+	Theme           string
 	Frame           *Frame // nil = use default
 	LineNumbers     *bool  // nil = use default
 	StartLineNumber *int  // nil = use default (1)

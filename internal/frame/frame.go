@@ -176,6 +176,20 @@ func isFilePath(s string) bool {
 	return false
 }
 
+// StripTerminalComments removes lines whose first non-whitespace character is '#'.
+func StripTerminalComments(code string) string {
+	lines := strings.Split(code, "\n")
+	kept := make([]string, 0, len(lines))
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || !strings.HasPrefix(trimmed, "#") {
+			kept = append(kept, line)
+		}
+	}
+	result := strings.Join(kept, "\n")
+	return strings.TrimRight(result, "\n")
+}
+
 func removeLineFromCode(lines []string, index int) string {
 	result := make([]string, 0, len(lines)-1)
 	for i, line := range lines {

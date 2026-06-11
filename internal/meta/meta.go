@@ -15,6 +15,7 @@ type ParseResult struct {
 	InlineMarkers []config.InlineMarker
 	FocusLines    []config.LineRange
 	Collapse      *config.CollapseSpec
+	DiffLang      string
 }
 
 // Parse parses a fence info meta string into structured data.
@@ -56,6 +57,12 @@ func Parse(meta string) *ParseResult {
 
 		case strings.HasPrefix(tok, "title="):
 			result.BlockOptions.Title = unquote(strings.TrimPrefix(tok, "title="))
+
+		case strings.HasPrefix(tok, "theme="):
+			result.BlockOptions.Theme = unquote(strings.TrimPrefix(tok, "theme="))
+
+		case strings.HasPrefix(tok, "lang="):
+			result.DiffLang = unquote(strings.TrimPrefix(tok, "lang="))
 
 		case strings.HasPrefix(tok, "frame="):
 			frame := unquote(strings.TrimPrefix(tok, "frame="))
@@ -144,6 +151,13 @@ func Parse(meta string) *ParseResult {
 				Type: config.MarkerMark,
 				Text: unquote(tok),
 			})
+
+		case isRegexPattern(tok):
+			result.InlineMarkers = append(result.InlineMarkers, config.InlineMarker{
+				Type:    config.MarkerMark,
+				Text:    extractRegex(tok),
+				IsRegex: true,
+			})
 		}
 	}
 
@@ -152,7 +166,13 @@ func Parse(meta string) *ParseResult {
 
 // parseMarkerToken handles ins="text", ins={lines}, ins={"label":lines}
 func parseMarkerToken(remainder string, mtype config.MarkerType, result *ParseResult) {
-	if isQuotedString(remainder) {
+	if isRegexPattern(remainder) {
+		result.InlineMarkers = append(result.InlineMarkers, config.InlineMarker{
+			Type:    mtype,
+			Text:    extractRegex(remainder),
+			IsRegex: true,
+		})
+	} else if isQuotedString(remainder) {
 		// Inline text marker: ins="text"
 		result.InlineMarkers = append(result.InlineMarkers, config.InlineMarker{
 			Type: mtype,
@@ -259,6 +279,22 @@ func tokenize(meta string) []string {
 			continue
 		}
 
+		// Regex pattern at top level: /pattern/
+		if runes[i] == '/' {
+			i++
+			for i < len(runes) && runes[i] != '/' {
+				if runes[i] == '\\' {
+					i++
+				}
+				i++
+			}
+			if i < len(runes) {
+				i++ // closing /
+			}
+			tokens = append(tokens, string(runes[start:i]))
+			continue
+		}
+
 		// Collect until whitespace, but handle quoted values and brace groups inline
 		for i < len(runes) && !unicode.IsSpace(runes[i]) {
 			if isQuoteChar(runes[i]) {
@@ -272,6 +308,17 @@ func tokenize(meta string) []string {
 				}
 				if i < len(runes) {
 					i++ // closing quote
+				}
+			} else if runes[i] == '/' {
+				i++
+				for i < len(runes) && runes[i] != '/' {
+					if runes[i] == '\\' {
+						i++
+					}
+					i++
+				}
+				if i < len(runes) {
+					i++
 				}
 			} else if runes[i] == '{' {
 				depth := 0
@@ -339,4 +386,13 @@ func extractBraces(s string) string {
 		return s[1 : len(s)-1]
 	}
 	return s
+}
+
+func isRegexPattern(tok string) bool {
+	return len(tok) >= 2 && tok[0] == '/' && tok[len(tok)-1] == '/'
+}
+
+func extractRegex(tok string) string {
+	inner := tok[1 : len(tok)-1]
+	return strings.ReplaceAll(inner, `\/`, `/`)
 }

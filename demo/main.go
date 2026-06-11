@@ -431,6 +431,78 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Render csAuto: %v", err)
 	}
 
+	// Mermaid pass-through
+	mermaidCode := `graph TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Do something]
+    B -->|No| D[Do something else]
+    C --> E[End]
+    D --> E`
+
+	mermaidHTML, err := engine.Render(mermaidCode, kazari.Options{Lang: "mermaid"})
+	if err != nil {
+		log.Fatalf("Render mermaid: %v", err)
+	}
+
+	// Regex markers
+	regexCode := `func fetchUsers() ([]User, error) {
+	resp, err := http.Get("/api/users")
+	if err != nil {
+		return nil, fmt.Errorf("fetchUsers failed: %w", err)
+	}
+	defer resp.Body.Close()
+	var users []User
+	json.NewDecoder(resp.Body).Decode(&users)
+	return users, nil
+}`
+
+	regexHTML, err := engine.RenderWithMeta(regexCode, `go title="regex-markers.go" showLineNumbers /err\b/ ins=/func\s+\w+/ del=/fmt\.Errorf/`)
+	if err != nil {
+		log.Fatalf("Render regex: %v", err)
+	}
+
+	// Regex with capture group
+	captureCode := `const yes = true;
+const yep = true;
+const nope = false;`
+
+	captureHTML, err := engine.RenderWithMeta(captureCode, `javascript title="capture-group.js" /ye(s|p)/`)
+	if err != nil {
+		log.Fatalf("Render capture: %v", err)
+	}
+
+	// Per-block theme override
+	themeCode := `func main() {
+	fmt.Println("Same code, different theme")
+}`
+
+	themeOverrideHTML, err := engine.RenderWithMeta(themeCode, `go title="default theme" showLineNumbers`)
+	if err != nil {
+		log.Fatalf("Render themeDefault: %v", err)
+	}
+
+	themeOverrideAltHTML, err := engine.RenderWithMeta(themeCode, `go title="theme=dracula" showLineNumbers theme="dracula"`)
+	if err != nil {
+		log.Fatalf("Render themeOverride: %v", err)
+	}
+
+	// Hybrid diff + syntax highlighting
+	diffCode := " import (\n" +
+		"-\t\"fmt\"\n" +
+		"+\t\"log\"\n" +
+		" \t\"os\"\n" +
+		" )\n" +
+		" \n" +
+		" func main() {\n" +
+		"-\tfmt.Println(\"hello\")\n" +
+		"+\tlog.Println(\"hello\")\n" +
+		" }"
+
+	diffHTML, err := engine.RenderWithMeta(diffCode, `diff lang="go" title="hybrid-diff.go" showLineNumbers`)
+	if err != nil {
+		log.Fatalf("Render diff: %v", err)
+	}
+
 	// --- Code group example (via Goldmark) ---
 	// Use collapseEngine for code groups too (single engine = single CSS/JS output).
 
@@ -543,6 +615,23 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <h2>Collapsible: collapsible-auto (auto start/end based on position)</h2>
 %s
 
+<h2>Mermaid Pass-Through (raw code for Mermaid.js)</h2>
+%s
+
+<h2>Regex Markers</h2>
+<p><code>/err\b/</code> = mark, <code>ins=/func\s+\w+/</code> = ins, <code>del=/fmt\.Errorf/</code> = del</p>
+%s
+
+<h2>Regex Capture Group (<code>/ye(s|p)/</code> marks only "s" or "p")</h2>
+%s
+
+<h2>Per-Block Theme Override (default vs dracula)</h2>
+%s
+%s
+
+<h2>Hybrid Diff + Syntax Highlighting (<code>diff lang="go"</code>)</h2>
+%s
+
 <h2>Code Group (tabbed code blocks via Goldmark)</h2>
 %s
 
@@ -553,7 +642,9 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 </html>`, css, dotsCSS, goHTML, jsHTML, bashHTML, psHTML, minimalDotsHTML, lnHTML, lnStartHTML, plainHTML,
 		markerHTML, labelHTML, focusHTML, inlineHTML, sqHTML, combinedHTML,
 		thresholdHTML, rangeHTML, multiRangeHTML, gapHTML,
-		csStartHTML, csEndHTML, csAutoHTML, codeGroupHTML, js)
+		csStartHTML, csEndHTML, csAutoHTML,
+		mermaidHTML, regexHTML, captureHTML,
+		themeOverrideHTML, themeOverrideAltHTML, diffHTML, codeGroupHTML, js)
 
 	if err := os.WriteFile("showcase.html", []byte(page), 0644); err != nil {
 		log.Fatalf("WriteFile: %v", err)

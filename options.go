@@ -95,6 +95,7 @@ func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {
 	bo := &config.BlockOptions{
 		Lang:            opts.Lang,
 		Title:           opts.Title,
+		Theme:           opts.Theme,
 		StartLineNumber: opts.StartLineNumber,
 	}
 	if opts.Frame != nil {

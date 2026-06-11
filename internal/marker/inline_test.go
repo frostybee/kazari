@@ -176,3 +176,100 @@ func TestProcessInlineMarkers_DelType(t *testing.T) {
 		t.Error("expected del marker on 'hello'")
 	}
 }
+
+// --- Regex marker tests ---
+
+func TestProcessInlineMarkers_RegexSimple(t *testing.T) {
+	tokens := []config.MergedToken{tok("func main() {}")}
+	markers := []config.InlineMarker{{Type: config.MarkerMark, Text: `func`, IsRegex: true}}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	segs := result[0].Segments
+	if len(segs) < 2 {
+		t.Fatalf("expected at least 2 segments, got %d", len(segs))
+	}
+	if segs[0].Marker == nil {
+		t.Error("first segment should have marker for 'func'")
+	}
+	if segs[0].Content != "func" {
+		t.Errorf("marked content = %q, want %q", segs[0].Content, "func")
+	}
+}
+
+func TestProcessInlineMarkers_RegexCaptureGroup(t *testing.T) {
+	tokens := []config.MergedToken{tok("yes and yep")}
+	markers := []config.InlineMarker{{Type: config.MarkerMark, Text: `ye(s|p)`, IsRegex: true}}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	segs := result[0].Segments
+	marked := []string{}
+	for _, s := range segs {
+		if s.Marker != nil {
+			marked = append(marked, s.Content)
+		}
+	}
+	if len(marked) != 2 || marked[0] != "s" || marked[1] != "p" {
+		t.Errorf("capture group should mark 's' and 'p', got %v", marked)
+	}
+}
+
+func TestProcessInlineMarkers_RegexNonCapturing(t *testing.T) {
+	tokens := []config.MergedToken{tok("yes and yep")}
+	markers := []config.InlineMarker{{Type: config.MarkerMark, Text: `ye(?:s|p)`, IsRegex: true}}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	segs := result[0].Segments
+	marked := []string{}
+	for _, s := range segs {
+		if s.Marker != nil {
+			marked = append(marked, s.Content)
+		}
+	}
+	if len(marked) != 2 || marked[0] != "yes" || marked[1] != "yep" {
+		t.Errorf("non-capturing group should mark 'yes' and 'yep', got %v", marked)
+	}
+}
+
+func TestProcessInlineMarkers_RegexNoMatch(t *testing.T) {
+	tokens := []config.MergedToken{tok("hello world")}
+	markers := []config.InlineMarker{{Type: config.MarkerMark, Text: `xyz\d+`, IsRegex: true}}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	for _, tw := range result {
+		for _, s := range tw.Segments {
+			if s.Marker != nil {
+				t.Error("no matches expected")
+			}
+		}
+	}
+}
+
+func TestProcessInlineMarkers_RegexInvalid(t *testing.T) {
+	tokens := []config.MergedToken{tok("hello")}
+	markers := []config.InlineMarker{{Type: config.MarkerMark, Text: `[invalid`, IsRegex: true}}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	if len(result) != 1 || len(result[0].Segments) != 1 {
+		t.Error("invalid regex should be skipped gracefully")
+	}
+	if result[0].Segments[0].Marker != nil {
+		t.Error("invalid regex should produce no markers")
+	}
+}
+
+func TestProcessInlineMarkers_RegexOverlapWithLiteral(t *testing.T) {
+	tokens := []config.MergedToken{tok("func main")}
+	markers := []config.InlineMarker{
+		{Type: config.MarkerMark, Text: `func`, IsRegex: false},
+		{Type: config.MarkerIns, Text: `func`, IsRegex: true},
+	}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	segs := result[0].Segments
+	if segs[0].Marker == nil {
+		t.Fatal("expected marker on 'func'")
+	}
+	if segs[0].Marker.Type != config.MarkerIns {
+		t.Errorf("ins (higher priority) should win overlap, got type %d", segs[0].Marker.Type)
+	}
+}

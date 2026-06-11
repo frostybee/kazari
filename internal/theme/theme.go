@@ -45,7 +45,7 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		// Line marker defaults
 		{"--kz-mark-bg", "rgba(255,200,0,0.12)"},
 		{"--kz-mark-border", "rgba(255,200,0,0.5)"},
-		{"--kz-mark-accent-width", "3px"},
+		{"--kz-mark-border-width", "3px"},
 		{"--kz-ins-bg", "rgba(46,160,67,0.12)"},
 		{"--kz-ins-border", "rgba(46,160,67,0.5)"},
 		{"--kz-ins-indicator", "'+'"},

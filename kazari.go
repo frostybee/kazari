@@ -4,9 +4,11 @@ package kazari
 
 import (
 	"fmt"
+	"html"
 	"strings"
 
 	"github.com/frostybee/kazari/internal/collapsible"
+	"github.com/frostybee/kazari/internal/diff"
 	"github.com/frostybee/kazari/internal/color"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
@@ -103,14 +105,26 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	resolved.LineMarkers = parsed.LineMarkers
 	resolved.InlineMarkers = parsed.InlineMarkers
 	resolved.FocusLines = parsed.FocusLines
+	resolved.DiffLang = parsed.DiffLang
 	e.resolveCollapse(code, resolved, parsed.Collapse)
 	return e.renderResolved(code, resolved)
 }
 
 func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock) (string, error) {
+	if e.cfg.MermaidPassThrough && resolved.Lang == "mermaid" {
+		return renderMermaidBlock(code), nil
+	}
+
 	code = e.preprocess(code, resolved)
 
-	lines, err := e.tokenize(code, resolved.Lang)
+	if resolved.Lang == "diff" && resolved.DiffLang != "" {
+		stripped, diffMarkers := diff.ProcessDiffBlock(code)
+		code = stripped
+		resolved.Lang = resolved.DiffLang
+		resolved.LineMarkers = append(resolved.LineMarkers, diffMarkers...)
+	}
+
+	lines, err := e.tokenize(code, resolved.Lang, resolved.Theme)
 	if err != nil {
 		return "", err
 	}
@@ -136,7 +150,14 @@ func (e *Engine) preprocess(code string, resolved *config.ResolvedBlock) string 
 	}
 
 	resolved.RawCode = code
+	if resolved.Frame == config.FrameTerminal && e.cfg.TerminalCommentStripping {
+		resolved.RawCode = frame.StripTerminalComments(resolved.RawCode)
+	}
 	return code
+}
+
+func renderMermaidBlock(code string) string {
+	return fmt.Sprintf("<pre class=\"mermaid\">%s</pre>\n", html.EscapeString(code))
 }
 
 // Tokenize returns raw tokens for consumers building custom HTML.
@@ -196,8 +217,9 @@ func convertInlineMarkers(markers []InlineMarker) []config.InlineMarker {
 	out := make([]config.InlineMarker, len(markers))
 	for i, m := range markers {
 		out[i] = config.InlineMarker{
-			Type: config.MarkerType(m.Type),
-			Text: m.Text,
+			Type:    config.MarkerType(m.Type),
+			Text:    m.Text,
+			IsRegex: m.IsRegex,
 		}
 	}
 	return out
@@ -227,7 +249,7 @@ func (e *Engine) resolveCollapse(code string, resolved *config.ResolvedBlock, sp
 	resolved.CollapseConfig = e.cfg.Collapsible
 }
 
-func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
+func (e *Engine) tokenize(code, lang, themeOverride string) ([]render.TokenLine, error) {
 	if e.hl == nil {
 		return plaintextLines(code), nil
 	}
@@ -236,12 +258,11 @@ func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
 		code = expandTabs(code, e.cfg.TabWidth)
 	}
 
-	// Dual-theme fast path: capable highlighters resolve both themes from a
-	// single tokenization pass (identical token boundaries by construction,
-	// so mergeTokens takes its 1:1 fast path).
-	if e.cfg.DarkTheme != "" {
+	lightTheme, darkTheme := e.resolveThemes(themeOverride)
+
+	if darkTheme != "" {
 		if dual, ok := e.hl.(DualThemeTokenizer); ok {
-			light, dark, err := dual.TokenizeDual(code, lang, e.cfg.LightTheme, e.cfg.DarkTheme)
+			light, dark, err := dual.TokenizeDual(code, lang, lightTheme, darkTheme)
 			if err != nil {
 				return nil, err
 			}
@@ -249,20 +270,35 @@ func (e *Engine) tokenize(code, lang string) ([]render.TokenLine, error) {
 		}
 	}
 
-	lightTokens, err := e.hl.Tokenize(code, lang, e.cfg.LightTheme)
+	lightTokens, err := e.hl.Tokenize(code, lang, lightTheme)
 	if err != nil {
 		return nil, err
 	}
 
 	var darkTokens [][]Token
-	if e.cfg.DarkTheme != "" {
-		darkTokens, err = e.hl.Tokenize(code, lang, e.cfg.DarkTheme)
+	if darkTheme != "" {
+		darkTokens, err = e.hl.Tokenize(code, lang, darkTheme)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return mergeTokens(lightTokens, darkTokens), nil
+}
+
+func (e *Engine) resolveThemes(override string) (light, dark string) {
+	light = e.cfg.LightTheme
+	dark = e.cfg.DarkTheme
+	if override == "" {
+		return
+	}
+	if idx := strings.Index(override, ","); idx >= 0 {
+		light = strings.TrimSpace(override[:idx])
+		dark = strings.TrimSpace(override[idx+1:])
+	} else {
+		light = override
+	}
+	return
 }
 
 func computeMarkerBGs(editorBG string) *config.MarkerEffectiveBGs {

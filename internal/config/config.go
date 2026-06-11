@@ -56,8 +56,9 @@ type LineMarker struct {
 
 // InlineMarker represents an inline text marker.
 type InlineMarker struct {
-	Type MarkerType
-	Text string
+	Type    MarkerType
+	Text    string
+	IsRegex bool
 }
 
 // MarkerBGColors maps marker types to their CSS rgba background values.
@@ -182,7 +183,9 @@ type Config struct {
 	CascadeLayer       string
 	LanguageAliases    map[string]string
 	CodeGroups         bool
-	TerminalDotStyle   int // DotsColored or DotsMinimal
+	TerminalDotStyle           int // DotsColored or DotsMinimal
+	TerminalCommentStripping   bool
+	MermaidPassThrough         bool
 }
 
 // DefaultConfig returns the engine configuration with all documented defaults.
@@ -218,7 +221,9 @@ func DefaultConfig() *Config {
 		Minify:          true,
 		CascadeLayer:     "kazari",
 		LanguageAliases:  nil,
-		TerminalDotStyle: DotsColored,
+		TerminalDotStyle:         DotsColored,
+		TerminalCommentStripping: true,
+		MermaidPassThrough:       true,
 	}
 }
 
@@ -226,6 +231,7 @@ func DefaultConfig() *Config {
 type BlockOptions struct {
 	Lang            string
 	Title           string
+	Theme           string
 	Frame           *int  // nil = use default
 	LineNumbers     *bool // nil = use default
 	StartLineNumber *int  // nil = use default (1)
@@ -236,6 +242,8 @@ type BlockOptions struct {
 type ResolvedBlock struct {
 	Lang            string
 	Title           string
+	Theme           string
+	DiffLang        string
 	Frame           int
 	LineNumbers     bool
 	StartLineNumber int
@@ -288,6 +296,9 @@ func (c *Config) Resolve(lang string, blockOpts *BlockOptions) *ResolvedBlock {
 		}
 		if blockOpts.Title != "" {
 			resolved.Title = blockOpts.Title
+		}
+		if blockOpts.Theme != "" {
+			resolved.Theme = blockOpts.Theme
 		}
 		if blockOpts.Frame != nil {
 			resolved.Frame = *blockOpts.Frame

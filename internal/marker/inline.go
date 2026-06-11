@@ -1,6 +1,7 @@
 package marker
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/frostybee/kazari/internal/config"
@@ -67,22 +68,53 @@ func findAllMatches(text string, markers []config.InlineMarker) []inlineMatch {
 		if m.Text == "" {
 			continue
 		}
-		offset := 0
-		for {
-			idx := strings.Index(text[offset:], m.Text)
-			if idx < 0 {
-				break
-			}
-			start := offset + idx
-			end := start + len(m.Text)
-			matches = append(matches, inlineMatch{
-				start:    start,
-				end:      end,
-				mtype:    m.Type,
-				priority: int(m.Type),
-			})
-			offset = end
+		if m.IsRegex {
+			matches = append(matches, findRegexMatches(text, m)...)
+		} else {
+			matches = append(matches, findLiteralMatches(text, m)...)
 		}
+	}
+	return matches
+}
+
+func findLiteralMatches(text string, m config.InlineMarker) []inlineMatch {
+	var matches []inlineMatch
+	offset := 0
+	for {
+		idx := strings.Index(text[offset:], m.Text)
+		if idx < 0 {
+			break
+		}
+		start := offset + idx
+		end := start + len(m.Text)
+		matches = append(matches, inlineMatch{
+			start:    start,
+			end:      end,
+			mtype:    m.Type,
+			priority: int(m.Type),
+		})
+		offset = end
+	}
+	return matches
+}
+
+func findRegexMatches(text string, m config.InlineMarker) []inlineMatch {
+	re, err := regexp.Compile(m.Text)
+	if err != nil {
+		return nil
+	}
+	var matches []inlineMatch
+	for _, loc := range re.FindAllStringSubmatchIndex(text, -1) {
+		start, end := loc[0], loc[1]
+		if len(loc) >= 4 && loc[2] >= 0 {
+			start, end = loc[2], loc[3]
+		}
+		matches = append(matches, inlineMatch{
+			start:    start,
+			end:      end,
+			mtype:    m.Type,
+			priority: int(m.Type),
+		})
 	}
 	return matches
 }

@@ -88,17 +88,16 @@ func (n *NuriHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string)
 }
 
 func (n *NuriHighlighter) GetThemeColors(themeName string) (ThemeInfo, error) {
-	result, err := n.hl.CodeToTokens(n.ctx, "", ast.CodeToTokensOptions{
-		Lang:  "text",
-		Theme: themeName,
-	})
+	tc, err := n.hl.GetThemeColors(themeName)
 	if err != nil {
 		return ThemeInfo{}, err
 	}
 
 	return ThemeInfo{
-		FG: result.FG,
-		BG: result.BG,
+		FG:           tc.Foreground,
+		BG:           tc.Background,
+		SelectionBG:  tc.SelectionBackground,
+		LineNumberFG: tc.Colors["editorLineNumber.foreground"],
 	}, nil
 }
 

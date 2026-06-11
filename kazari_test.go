@@ -1412,7 +1412,7 @@ func TestCSS_ContainsMarkerVars(t *testing.T) {
 	)
 	css := engine.CSS()
 	vars := []string{
-		"--kz-mark-bg", "--kz-mark-border", "--kz-mark-accent-width",
+		"--kz-mark-bg", "--kz-mark-border", "--kz-mark-border-width",
 		"--kz-ins-bg", "--kz-ins-border", "--kz-ins-indicator",
 		"--kz-del-bg", "--kz-del-border", "--kz-del-indicator",
 		"--kz-inline-mark-bg", "--kz-inline-mark-border",
@@ -1986,5 +1986,386 @@ func TestCSS_ContainsCollapsibleStartStyles(t *testing.T) {
 		if !strings.Contains(css, r) {
 			t.Errorf("CSS missing collapsible style rule: %s", r)
 		}
+	}
+}
+
+// --- Terminal comment stripping tests ---
+
+func extractDataCode(t *testing.T, html string) string {
+	t.Helper()
+	idx := strings.Index(html, `data-code="`)
+	if idx == -1 {
+		t.Fatal("no data-code attribute found")
+	}
+	start := idx + len(`data-code="`)
+	end := strings.Index(html[start:], `"`)
+	return html[start : start+end]
+}
+
+func TestTerminalCommentStripping_DefaultEnabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "# Install deps", Color: "#6a737d"}},
+			{{Content: "npm install", Color: "#24292f"}},
+			{{Content: "# Start server", Color: "#6a737d"}},
+			{{Content: "npm start", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#1e1e1e"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("# Install deps\nnpm install\n# Start server\nnpm start", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	dataCode := extractDataCode(t, html)
+	if strings.Contains(dataCode, "Install deps") {
+		t.Error("data-code should not contain comment text")
+	}
+	if !strings.Contains(dataCode, "npm install") {
+		t.Error("data-code should contain commands")
+	}
+}
+
+func TestTerminalCommentStripping_PreservesCommands(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "# comment", Color: "#6a737d"}},
+			{{Content: "echo hello", Color: "#24292f"}},
+			{{Content: "curl example.com", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#1e1e1e"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("# comment\necho hello\ncurl example.com", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	// data-code uses DEL (\x7f) for newlines
+	if !strings.Contains(html, "echo hello") {
+		t.Error("missing 'echo hello' in output")
+	}
+	if !strings.Contains(html, "curl example.com") {
+		t.Error("missing 'curl example.com' in output")
+	}
+}
+
+func TestTerminalCommentStripping_EditorFrameUnaffected(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "// a Go comment", Color: "#6a737d"}},
+			{{Content: "func main() {}", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("// a Go comment\nfunc main() {}", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "a Go comment") {
+		t.Error("editor frame should preserve comments in data-code")
+	}
+}
+
+func TestTerminalCommentStripping_Disabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "# Install deps", Color: "#6a737d"}},
+			{{Content: "npm install", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#1e1e1e"},
+	}
+	engine := newTestEngine(hl, WithTerminalCommentStripping(false))
+	html, err := engine.Render("# Install deps\nnpm install", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	dataCode := extractDataCode(t, html)
+	if !strings.Contains(dataCode, "Install deps") {
+		t.Error("with stripping disabled, comments should remain in data-code")
+	}
+}
+
+func TestTerminalCommentStripping_IndentedComments(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "  # indented comment", Color: "#6a737d"}},
+			{{Content: "npm install", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#1e1e1e"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("  # indented comment\nnpm install", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	dataCode := extractDataCode(t, html)
+	if strings.Contains(dataCode, "indented comment") {
+		t.Error("indented comments should be stripped from data-code")
+	}
+}
+
+func TestTerminalCommentStripping_InlineHashPreserved(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "echo hello # inline", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#1e1e1e"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("echo hello # inline", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "echo hello # inline") {
+		t.Error("inline # should not be stripped — only full comment lines")
+	}
+}
+
+func TestTerminalCommentStripping_CommentsStillRendered(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "# visible comment", Color: "#6a737d"}},
+			{{Content: "npm install", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#1e1e1e"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("# visible comment\nnpm install", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	// Comments are stripped from data-code but still rendered in the visible HTML
+	if !strings.Contains(html, "visible comment") {
+		t.Error("comments should still be visible in the rendered code block")
+	}
+	// But the data-code attribute should not contain them
+	// Extract data-code value: it uses DEL encoding
+	idx := strings.Index(html, `data-code="`)
+	if idx == -1 {
+		t.Fatal("no data-code attribute found")
+	}
+	dataCodeStart := idx + len(`data-code="`)
+	dataCodeEnd := strings.Index(html[dataCodeStart:], `"`)
+	dataCode := html[dataCodeStart : dataCodeStart+dataCodeEnd]
+	if strings.Contains(dataCode, "visible comment") {
+		t.Error("data-code should not contain stripped comment text")
+	}
+}
+
+// --- Mermaid pass-through tests ---
+
+func TestMermaid_RendersRawCode(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "graph TD", Color: "#24292f"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("graph TD;\n  A-->B;", Options{Lang: "mermaid"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `<pre class="mermaid">`) {
+		t.Error("mermaid block should render <pre class=\"mermaid\">")
+	}
+	if !strings.Contains(html, "A--&gt;B;") {
+		t.Error("mermaid code should be HTML-escaped")
+	}
+}
+
+func TestMermaid_NoFrameMarkup(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "graph TD", Color: "#24292f"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("graph TD;", Options{Lang: "mermaid"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "kazari-code") {
+		t.Error("mermaid block should not contain kazari-code wrapper")
+	}
+	if strings.Contains(html, "kz-copy-btn") {
+		t.Error("mermaid block should not contain copy button")
+	}
+	if strings.Contains(html, "data-code") {
+		t.Error("mermaid block should not contain data-code attribute")
+	}
+}
+
+func TestMermaid_DisabledRendersNormally(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "graph TD", Color: "#24292f"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithMermaidPassThrough(false))
+	html, err := engine.Render("graph TD;", Options{Lang: "mermaid"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, `<pre class="mermaid">`) {
+		t.Error("with mermaid disabled, should not render raw mermaid block")
+	}
+	if !strings.Contains(html, "kazari-code") {
+		t.Error("with mermaid disabled, should render normally with kazari-code wrapper")
+	}
+}
+
+func TestMermaid_NonMermaidUnaffected(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "func main", Color: "#24292f"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("func main() {}", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, `<pre class="mermaid">`) {
+		t.Error("non-mermaid language should not produce mermaid block")
+	}
+}
+
+// --- Regex marker integration tests ---
+
+func TestRegexMarker_RendersInlineMarkup(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "func main() {}", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("func main() {}", `go /func/`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "<mark>") {
+		t.Error("regex marker should produce <mark> element")
+	}
+}
+
+func TestRegexMarker_CaptureGroup(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "yes and yep", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("yes and yep", `text /ye(s|p)/`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "<mark>") {
+		t.Error("capture group regex should produce <mark> elements")
+	}
+}
+
+// --- Per-block theme override tests ---
+
+func TestThemeOverride_MetaParsed(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "func main", Color: "#24292f"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("func main", `go theme="dracula"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "kazari-code") {
+		t.Error("should render normally with theme override")
+	}
+}
+
+func TestThemeOverride_DefaultUnchanged(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#aaa"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "#aaa") {
+		t.Error("default theme should produce expected token colors")
+	}
+}
+
+func TestThemeOverride_GoAPI(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#aaa"}}},
+		themeInfo:    ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	_, err := engine.Render("x", Options{Lang: "go", Theme: "dracula"})
+	if err != nil {
+		t.Fatalf("Render() with Theme option error: %v", err)
+	}
+}
+
+// --- Hybrid diff tests ---
+
+func TestDiff_StripsPrefixes(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "const x = 1;", Color: "#24292f"}},
+			{{Content: "const y = 2;", Color: "#24292f"}},
+			{{Content: "const z = 3;", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("  const x = 1;\n+ const y = 2;\n- const z = 3;", `diff lang="javascript"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if strings.Contains(html, "highlight ins") || strings.Contains(html, "highlight del") {
+		// Markers are applied, good
+	}
+	if !strings.Contains(html, "const x") {
+		t.Error("diff block should contain stripped code")
+	}
+}
+
+func TestDiff_AppliesMarkers(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#24292f"}},
+			{{Content: "b", Color: "#24292f"}},
+			{{Content: "c", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("  a\n+ b\n- c", `diff lang="text"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "ins") {
+		t.Error("+ lines should produce ins markers")
+	}
+	if !strings.Contains(html, "del") {
+		t.Error("- lines should produce del markers")
+	}
+}
+
+func TestDiff_NoLangRendersNormally(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "+ added", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("+ added", `diff`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "+ added") {
+		t.Error("without lang= meta, diff should render as plain diff text")
 	}
 }

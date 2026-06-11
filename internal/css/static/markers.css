@@ -11,13 +11,13 @@
 
 /* Left accent bar via inset box-shadow (no layout shift) */
 .kazari-code .kz-line.highlight {
-  box-shadow: inset var(--kz-mark-accent-width) 0 0 0 var(--kz-mark-border);
+  box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-mark-border);
 }
 .kazari-code .kz-line.highlight.ins {
-  box-shadow: inset var(--kz-mark-accent-width) 0 0 0 var(--kz-ins-border);
+  box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-ins-border);
 }
 .kazari-code .kz-line.highlight.del {
-  box-shadow: inset var(--kz-mark-accent-width) 0 0 0 var(--kz-del-border);
+  box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-del-border);
 }
 
 /* Line number opacity bump on highlighted lines */
