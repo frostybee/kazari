@@ -267,3 +267,58 @@ func TestExtractFromComment_EmptyContent(t *testing.T) {
 		t.Errorf("empty content after comment should return empty, got %q", got)
 	}
 }
+
+// --- Frontmatter delimiter cleanup ---
+
+func TestExtractFileName_FrontmatterCleanup(t *testing.T) {
+	tests := []struct {
+		name      string
+		code      string
+		wantTitle string
+		wantCode  string
+	}{
+		{
+			name:      "YAML frontmatter emptied",
+			code:      "---\n# filename: doc.md\n---\n\ncontent",
+			wantTitle: "doc.md",
+			wantCode:  "content",
+		},
+		{
+			name:      "TOML frontmatter emptied",
+			code:      "+++\n# filename: config.toml\n+++\ncontent",
+			wantTitle: "config.toml",
+			wantCode:  "content",
+		},
+		{
+			name:      "non-empty frontmatter untouched",
+			code:      "---\ntitle: hello\n# filename: doc.md\n---\ncontent",
+			wantTitle: "doc.md",
+			wantCode:  "---\ntitle: hello\n---\ncontent",
+		},
+		{
+			name:      "no frontmatter untouched",
+			code:      "// main.go\npackage main",
+			wantTitle: "main.go",
+			wantCode:  "package main",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			title, modified := ExtractFileName(tt.code, "md")
+			if title != tt.wantTitle {
+				t.Errorf("title: got %q, want %q", title, tt.wantTitle)
+			}
+			if modified != tt.wantCode {
+				t.Errorf("code:\ngot:  %q\nwant: %q", modified, tt.wantCode)
+			}
+		})
+	}
+}
+
+func TestRemoveEmptyFrontmatter_MismatchedDelimiters(t *testing.T) {
+	code := "---\n+++\ncontent"
+	if got := removeEmptyFrontmatter(code); got != code {
+		t.Errorf("mismatched delimiters should be untouched, got %q", got)
+	}
+}

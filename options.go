@@ -7,9 +7,10 @@ type Option func(*engineBuilder)
 
 // engineBuilder collects configuration during New().
 type engineBuilder struct {
-	cfg             *config.Config
-	hl              Highlighter
-	themeCustomizer func(string, ThemeInfo) ThemeInfo
+	cfg              *config.Config
+	hl               Highlighter
+	themeCustomizer  func(string, ThemeInfo) ThemeInfo
+	themeAdjustments *ThemeAdjustments
 }
 
 func WithHighlighter(hl Highlighter) Option {
@@ -100,12 +101,25 @@ func WithThemeCustomizer(f func(themeName string, colors ThemeInfo) ThemeInfo) O
 	return func(b *engineBuilder) { b.themeCustomizer = f }
 }
 
+// WithThemeAdjustments tints the extracted theme colors in OKLCH space,
+// applied to both themes before the theme customizer runs.
+func WithThemeAdjustments(adj ThemeAdjustments) Option {
+	return func(b *engineBuilder) { b.themeAdjustments = &adj }
+}
+
 func WithLocale(loc string) Option {
 	return func(b *engineBuilder) { b.cfg.Locale = loc }
 }
 
 func WithUIStrings(overrides map[string]string) Option {
 	return func(b *engineBuilder) { b.cfg.UIStringOverrides = overrides }
+}
+
+// WithWarningHandler sets the function that receives non-fatal warnings,
+// such as unknown language fallbacks. When unset, warnings go to log.Printf.
+// Pass a no-op function to silence warnings entirely.
+func WithWarningHandler(f func(string)) Option {
+	return func(b *engineBuilder) { b.cfg.WarningHandler = f }
 }
 
 func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {

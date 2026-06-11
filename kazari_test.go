@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/frostybee/kazari/internal/color"
 )
 
 type mockHighlighter struct {
@@ -2969,5 +2971,554 @@ func TestCSS_FileIcons_VarsAbsent(t *testing.T) {
 	css := engine.CSS()
 	if strings.Contains(css, "--kz-file-icon-size") {
 		t.Error("file icon CSS vars should not be present when disabled")
+	}
+}
+
+// --- Word wrap tests ---
+
+func TestRender_Wrap_ClassEmitted(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: true}))
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `<pre class="wrap"`) {
+		t.Error("pre should carry wrap class when Wrap is enabled")
+	}
+}
+
+func TestRender_Wrap_AbsentByDefault(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("hello", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, `class="wrap"`) {
+		t.Error("pre should not carry wrap class by default")
+	}
+}
+
+func TestRenderWithMeta_Wrap(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "hello", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.RenderWithMeta("hello", "go wrap")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, `<pre class="wrap"`) {
+		t.Error("wrap meta option should emit wrap class on pre")
+	}
+}
+
+func TestRender_Wrap_IndentVarOnIndentedLine(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "    foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: true}))
+	html, err := engine.Render("    foo()", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `style="--kz-indent:4ch"`) {
+		t.Errorf("indented line should carry --kz-indent:4ch, got: %s", html)
+	}
+	if !strings.Contains(html, `<span class="indent">    </span>`) {
+		t.Error("leading whitespace should render inside span.indent")
+	}
+	if !strings.Contains(html, ">foo()</span>") {
+		t.Error("trimmed token content should follow the indent span")
+	}
+}
+
+func TestRender_Wrap_NoVarOnUnindentedLine(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: true}))
+	html, err := engine.Render("foo()", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, "--kz-indent") {
+		t.Error("unindented line should not carry --kz-indent")
+	}
+	if strings.Contains(html, `class="indent"`) {
+		t.Error("unindented line should not emit span.indent")
+	}
+}
+
+func TestRender_Wrap_HangingIndentAdds(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "  foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: true, HangingIndent: 3}))
+	html, err := engine.Render("  foo()", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `style="--kz-indent:5ch"`) {
+		t.Errorf("hanging indent should add to preserved indent (2+3=5), got: %s", html)
+	}
+}
+
+func TestRender_Wrap_HangingOnlyWhenPreserveDisabled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "    foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: false, HangingIndent: 2}))
+	html, err := engine.Render("    foo()", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `style="--kz-indent:2ch"`) {
+		t.Errorf("PreserveIndent=false should use hanging indent only, got: %s", html)
+	}
+}
+
+func TestRender_Wrap_WithLineNumbers(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "  foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: true, LineNumbers: true}))
+	html, err := engine.Render("  foo()", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `<pre class="wrap"`) {
+		t.Error("wrap class should coexist with line numbers")
+	}
+	if !strings.Contains(html, `class="gutter"`) {
+		t.Error("line number gutter should render in wrap mode")
+	}
+	if !strings.Contains(html, `style="--kz-indent:2ch"`) {
+		t.Error("indent var should render alongside line numbers")
+	}
+}
+
+func TestCSS_WrapStyles(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false))
+	css := engine.CSS()
+	if !strings.Contains(css, "pre.wrap .kz-line .code") {
+		t.Error("CSS should contain wrap rules")
+	}
+	if !strings.Contains(css, "text-indent: calc(var(--kz-indent, 0ch) * -1)") {
+		t.Error("CSS should contain negative text-indent for hanging alignment")
+	}
+	if !strings.Contains(css, ".indent") {
+		t.Error("CSS should contain span.indent rule")
+	}
+}
+
+// --- Token background tests ---
+
+func TestCSS_TokenBackground_LightRule(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false))
+	css := engine.CSS()
+	if !strings.Contains(css, `span[style*="--slbg"] { background-color: var(--slbg); }`) {
+		t.Error("CSS should contain light token background rule")
+	}
+}
+
+func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
+	darkRule := `span[style*="--sdbg"] { background-color: var(--sdbg); }`
+
+	t.Run("selector", func(t *testing.T) {
+		hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
+			WithDarkMode(SelectorMode(".dark")), WithMinify(false))
+		if !strings.Contains(engine.CSS(), ".dark .kazari-code .kz-line "+darkRule) {
+			t.Error("selector mode should scope dark bg rule under .dark")
+		}
+	})
+
+	t.Run("media", func(t *testing.T) {
+		hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
+			WithDarkMode(MediaQueryMode()), WithMinify(false))
+		css := engine.CSS()
+		if !strings.Contains(css, ".kazari-code .kz-line "+darkRule) {
+			t.Error("media mode should emit dark bg rule")
+		}
+	})
+
+	t.Run("both", func(t *testing.T) {
+		hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
+			WithDarkMode(BothMode(".dark")), WithMinify(false))
+		css := engine.CSS()
+		if !strings.Contains(css, ".dark .kazari-code .kz-line "+darkRule) {
+			t.Error("both mode should scope dark bg rule under .dark")
+		}
+		if strings.Count(css, darkRule) < 2 {
+			t.Error("both mode should emit dark bg rule in media query and under selector")
+		}
+	})
+}
+
+func TestRender_TokenBackground_EndToEnd(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "FAIL", Color: "#ffffff", BgColor: "#ff0000"}}},
+		darkTokens:  [][]Token{{{Content: "FAIL", Color: "#ffffff", BgColor: "#cc0000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false))
+	html, err := engine.Render("FAIL", Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "--slbg:#ff0000") {
+		t.Error("token light background should render as --slbg")
+	}
+	if !strings.Contains(html, "--sdbg:#cc0000") {
+		t.Error("token dark background should render as --sdbg")
+	}
+}
+
+// --- Unknown language fallback tests ---
+
+type erroringHighlighter struct {
+	mockHighlighter
+}
+
+func (e *erroringHighlighter) Tokenize(code, lang, theme string) ([][]Token, error) {
+	return nil, fmt.Errorf("tokenize failed for %s", lang)
+}
+
+func TestRender_UnknownLanguage_PlaintextFallback(t *testing.T) {
+	hl := &erroringHighlighter{
+		mockHighlighter: mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}},
+	}
+	var warnings []string
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithWarningHandler(func(msg string) { warnings = append(warnings, msg) }),
+	)
+	html, err := engine.Render("some code", Options{Lang: "madeuplang"})
+	if err != nil {
+		t.Fatalf("unknown language should fall back to plaintext, got error: %v", err)
+	}
+	if !strings.Contains(html, "some code") {
+		t.Error("plaintext fallback should render the raw code")
+	}
+	if len(warnings) != 1 {
+		t.Fatalf("expected 1 warning, got %d", len(warnings))
+	}
+}
+
+func TestRender_UnknownLanguage_WarningMessage(t *testing.T) {
+	hl := &erroringHighlighter{
+		mockHighlighter: mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}},
+	}
+	var got string
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithWarningHandler(func(msg string) { got = msg }),
+	)
+	if _, err := engine.Render("x", Options{Lang: "madeuplang"}); err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(got, `"madeuplang"`) {
+		t.Errorf("warning should name the unknown language, got %q", got)
+	}
+	if !strings.Contains(got, "plaintext") {
+		t.Errorf("warning should mention plaintext fallback, got %q", got)
+	}
+}
+
+func TestRender_KnownLanguage_ErrorPropagates(t *testing.T) {
+	hl := &erroringHighlighter{
+		mockHighlighter: mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithWarningHandler(func(string) {}),
+	)
+	// "go" is in mockHighlighter.GetLoadedLanguages, so the error is real.
+	if _, err := engine.Render("x", Options{Lang: "go"}); err == nil {
+		t.Fatal("errors for known languages must propagate")
+	}
+}
+
+func TestRender_UnknownLanguage_DefaultLogPath(t *testing.T) {
+	hl := &erroringHighlighter{
+		mockHighlighter: mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}},
+	}
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", ""), WithMinify(false))
+	html, err := engine.Render("safe", Options{Lang: "madeuplang"})
+	if err != nil {
+		t.Fatalf("default log path should not error: %v", err)
+	}
+	if !strings.Contains(html, "safe") {
+		t.Error("plaintext fallback should render code on default log path")
+	}
+}
+
+// --- Terminal sr-only label tests ---
+
+func TestRender_TerminalSRLabel_Untitled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "npm install", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("npm install", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `<span class="sr-only">Terminal window</span>`) {
+		t.Error("untitled terminal frame should carry sr-only label")
+	}
+}
+
+func TestRender_TerminalSRLabel_AbsentWhenTitled(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "npm install", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("npm install", Options{Lang: "bash", Title: "deploy.sh"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, `class="sr-only"`) {
+		t.Error("titled terminal frame should not carry sr-only label")
+	}
+}
+
+func TestRender_TerminalSRLabel_Localized(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "npm install", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLocale("fr-FR"))
+	html, err := engine.Render("npm install", Options{Lang: "bash"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `<span class="sr-only">Fenêtre de terminal</span>`) {
+		t.Error("sr-only label should localize")
+	}
+}
+
+// --- Copy button visibility tests ---
+
+func TestCSS_CopyButton_HoverVisibility(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCopyButton(true))
+	css := engine.CSS()
+	if !strings.Contains(css, "@media (hover: hover)") {
+		t.Error("copy CSS should gate idle hiding behind hover media query")
+	}
+	if !strings.Contains(css, "opacity: var(--kz-copy-idle-opacity, 0)") {
+		t.Error("copy CSS should use --kz-copy-idle-opacity for idle state")
+	}
+	if !strings.Contains(css, "--kz-copy-idle-opacity: 0;") {
+		t.Error("theme vars should declare --kz-copy-idle-opacity default")
+	}
+	if !strings.Contains(css, ".frame:focus-within .kz-copy-btn") {
+		t.Error("copy CSS should reveal button on focus-within")
+	}
+}
+
+func TestCSS_CopyButton_RTLIsolation(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCopyButton(true))
+	css := engine.CSS()
+	if !strings.Contains(css, "direction: ltr") {
+		t.Error("copy button should force ltr direction")
+	}
+	if !strings.Contains(css, "unicode-bidi: isolate") {
+		t.Error("copy button should isolate bidi context")
+	}
+}
+
+// --- Fold background tests ---
+
+func TestCSS_FoldBG_DerivedCollapseVars(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff", FoldBG: "#54aeff"},
+	}
+	engine := newTestEngine(hl, WithCollapsible(CollapsibleConfig{LineThreshold: 20, PreviewLines: 10}))
+	css := engine.CSS()
+	if !strings.Contains(css, "--kz-collapse-closed-bg: #54aeff33") {
+		t.Error("foldBG should derive --kz-collapse-closed-bg at alpha 0.2")
+	}
+	if !strings.Contains(css, "--kz-collapse-closed-border: #54aeff80") {
+		t.Error("foldBG should derive --kz-collapse-closed-border at alpha 0.5")
+	}
+}
+
+func TestCSS_FoldBG_AbsentUsesStaticDefaults(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithCollapsible(CollapsibleConfig{LineThreshold: 20, PreviewLines: 10}))
+	css := engine.CSS()
+	if !strings.Contains(css, "--kz-collapse-closed-bg: rgb(84 174 255 / 20%)") {
+		t.Error("static collapse defaults should remain when foldBG is absent")
+	}
+	if strings.Count(css, "--kz-collapse-closed-bg:") != 1 {
+		t.Error("no derived collapse vars should be emitted without foldBG")
+	}
+}
+
+func TestCSS_FoldBG_CustomizerCanModify(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff", FoldBG: "#54aeff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 20, PreviewLines: 10}),
+		WithThemeCustomizer(func(name string, ti ThemeInfo) ThemeInfo {
+			ti.FoldBG = "#ff0000"
+			return ti
+		}),
+	)
+	css := engine.CSS()
+	if !strings.Contains(css, "--kz-collapse-closed-bg: #ff000033") {
+		t.Error("customizer should be able to override FoldBG before CSS generation")
+	}
+}
+
+// --- Theme adjustments tests ---
+
+func TestThemeAdjustments_HueAppliedToBG(t *testing.T) {
+	hue := 145.0
+	chroma := 0.05
+	ti := applyThemeAdjustments(
+		ThemeInfo{BG: "#3366cc", FG: "#ffffff"},
+		&ThemeAdjustments{Hue: &hue, Chroma: &chroma},
+	)
+	if ti.BG == "#3366cc" {
+		t.Fatal("BG should be tinted")
+	}
+	_, _, h, err := color.ToOKLCH(ti.BG)
+	if err != nil {
+		t.Fatalf("tinted BG %q does not parse: %v", ti.BG, err)
+	}
+	if h < 143 || h > 147 {
+		t.Errorf("tinted BG hue = %f, want ~145", h)
+	}
+	if ti.FG != "#ffffff" {
+		t.Error("default targets should leave foregrounds unchanged")
+	}
+}
+
+func TestThemeAdjustments_ChromaOnly(t *testing.T) {
+	chroma := 0.0
+	ti := applyThemeAdjustments(
+		ThemeInfo{BG: "#3366cc"},
+		&ThemeAdjustments{Chroma: &chroma},
+	)
+	lBefore, _, _, _ := color.ToOKLCH("#3366cc")
+	lAfter, c, _, err := color.ToOKLCH(ti.BG)
+	if err != nil {
+		t.Fatalf("tinted BG %q does not parse: %v", ti.BG, err)
+	}
+	if c > 0.005 {
+		t.Errorf("chroma 0 should desaturate, got chroma %f", c)
+	}
+	if lAfter < lBefore-0.01 || lAfter > lBefore+0.01 {
+		t.Errorf("lightness should be preserved: %f -> %f", lBefore, lAfter)
+	}
+}
+
+func TestThemeAdjustments_TargetsSelective(t *testing.T) {
+	hue := 30.0
+	chroma := 0.08
+	ti := applyThemeAdjustments(
+		ThemeInfo{BG: "#1e1e2e", FG: "#3366cc", LineNumberFG: "#3366cc"},
+		&ThemeAdjustments{Hue: &hue, Chroma: &chroma, Targets: AdjustForegrounds},
+	)
+	if ti.BG != "#1e1e2e" {
+		t.Error("AdjustForegrounds should leave BG unchanged")
+	}
+	if ti.FG == "#3366cc" {
+		t.Error("AdjustForegrounds should tint FG")
+	}
+	if ti.LineNumberFG == "#3366cc" {
+		t.Error("AdjustForegrounds should tint LineNumberFG")
+	}
+}
+
+func TestThemeAdjustments_NilFieldsUnchanged(t *testing.T) {
+	in := ThemeInfo{BG: "#1e1e2e", FG: "#cdd6f4", SelectionBG: "#45475a"}
+	if out := applyThemeAdjustments(in, &ThemeAdjustments{}); out != in {
+		t.Error("adjustments with nil Hue and Chroma should be a no-op")
+	}
+	if out := applyThemeAdjustments(in, nil); out != in {
+		t.Error("nil adjustments should be a no-op")
+	}
+}
+
+func TestThemeAdjustments_CustomizerRunsAfter(t *testing.T) {
+	hue := 145.0
+	chroma := 0.05
+	var customizerSawBG string
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#3366cc"},
+	}
+	engine := newTestEngine(hl,
+		WithThemeAdjustments(ThemeAdjustments{Hue: &hue, Chroma: &chroma}),
+		WithThemeCustomizer(func(name string, ti ThemeInfo) ThemeInfo {
+			customizerSawBG = ti.BG
+			ti.BG = "#123456"
+			return ti
+		}),
+	)
+	if customizerSawBG == "" || customizerSawBG == "#3366cc" {
+		t.Errorf("customizer should receive the adjusted BG, saw %q", customizerSawBG)
+	}
+	if !strings.Contains(engine.CSS(), "--kz-editor-bg: #123456") {
+		t.Error("customizer must get final say over adjusted colors")
+	}
+}
+
+func TestRender_ThemeAdjustments_EndToEndCSS(t *testing.T) {
+	hue := 250.0
+	chroma := 0.03
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#222222"},
+	}
+	engine := newTestEngine(hl, WithThemeAdjustments(ThemeAdjustments{Hue: &hue, Chroma: &chroma}))
+	css := engine.CSS()
+	if strings.Contains(css, "--kz-editor-bg: #222222") {
+		t.Error("editor BG should be tinted in generated CSS")
+	}
+	if !strings.Contains(css, "--kz-editor-fg: #24292f") {
+		t.Error("editor FG should be untouched by default targets")
+	}
+}
+
+// --- CreateInlineSVGURL tests ---
+
+func TestCreateInlineSVGURL(t *testing.T) {
+	got := CreateInlineSVGURL("<svg viewBox='0 0 1 1'/>")
+	want := "data:image/svg+xml,%3Csvg viewBox='0 0 1 1'/%3E"
+	if got != want {
+		t.Errorf("CreateInlineSVGURL():\ngot:  %s\nwant: %s", got, want)
 	}
 }

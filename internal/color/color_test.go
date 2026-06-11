@@ -254,3 +254,118 @@ func TestToHexRGBA(t *testing.T) {
 		t.Errorf("ToHexRGBA(1,0,0,0.5) = %q, want #ff000080", got)
 	}
 }
+
+// --- OKLCH conversion ---
+
+func TestOKLCH_RoundTrip(t *testing.T) {
+	colors := []string{"#ff0000", "#00ff00", "#0000ff", "#1e1e2e", "#f5f5f5", "#808080", "#cf222e", "#54aeff"}
+	for _, hex := range colors {
+		l, c, h, err := ToOKLCH(hex)
+		if err != nil {
+			t.Fatalf("ToOKLCH(%q) error: %v", hex, err)
+		}
+		got := FromOKLCH(l, c, h)
+		r1, g1, b1, _, _ := ParseHex(hex)
+		r2, g2, b2, _, err := ParseHex(got)
+		if err != nil {
+			t.Fatalf("FromOKLCH produced unparseable color %q for %q", got, hex)
+		}
+		const tol = 1.5 / 255
+		if absDiff(r1, r2) > tol || absDiff(g1, g2) > tol || absDiff(b1, b2) > tol {
+			t.Errorf("round trip %q -> %q exceeds tolerance", hex, got)
+		}
+	}
+}
+
+func TestOKLCH_KnownColors(t *testing.T) {
+	// sRGB red: L=0.6280, C=0.2577, H=29.23 per the OKLab reference values.
+	l, c, h, err := ToOKLCH("#ff0000")
+	if err != nil {
+		t.Fatalf("ToOKLCH error: %v", err)
+	}
+	if absDiff(l, 0.6280) > 0.001 {
+		t.Errorf("red lightness = %f, want ~0.6280", l)
+	}
+	if absDiff(c, 0.2577) > 0.001 {
+		t.Errorf("red chroma = %f, want ~0.2577", c)
+	}
+	if absDiff(h, 29.23) > 0.1 {
+		t.Errorf("red hue = %f, want ~29.23", h)
+	}
+
+	// White is achromatic with full lightness.
+	l, c, _, _ = ToOKLCH("#ffffff")
+	if absDiff(l, 1.0) > 0.001 {
+		t.Errorf("white lightness = %f, want ~1.0", l)
+	}
+	if c > 0.001 {
+		t.Errorf("white chroma = %f, want ~0", c)
+	}
+
+	// Black has zero lightness.
+	l, _, _, _ = ToOKLCH("#000000")
+	if l > 0.001 {
+		t.Errorf("black lightness = %f, want ~0", l)
+	}
+}
+
+func TestFromOKLCH_GamutClamping(t *testing.T) {
+	// Chroma 0.4 at this lightness/hue is far outside sRGB; the result must
+	// still parse and land in gamut.
+	got := FromOKLCH(0.5, 0.4, 145)
+	if _, _, _, _, err := ParseHex(got); err != nil {
+		t.Fatalf("clamped color %q does not parse: %v", got, err)
+	}
+	l, c, h, _ := ToOKLCH(got)
+	if absDiff(l, 0.5) > 0.02 {
+		t.Errorf("clamping should preserve lightness, got %f", l)
+	}
+	if c >= 0.4 {
+		t.Errorf("clamping should reduce chroma, got %f", c)
+	}
+	if absDiff(h, 145) > 2 {
+		t.Errorf("clamping should preserve hue, got %f", h)
+	}
+}
+
+func TestSetHueChroma_PreservesLightness(t *testing.T) {
+	before, _, _, _ := ToOKLCH("#3366cc")
+	out := SetHueChroma("#3366cc", 145, 0.1)
+	after, c, h, err := ToOKLCH(out)
+	if err != nil {
+		t.Fatalf("SetHueChroma produced unparseable color %q", out)
+	}
+	if absDiff(before, after) > 0.01 {
+		t.Errorf("lightness changed: %f -> %f", before, after)
+	}
+	if absDiff(h, 145) > 1 {
+		t.Errorf("hue = %f, want ~145", h)
+	}
+	if absDiff(c, 0.1) > 0.01 {
+		t.Errorf("chroma = %f, want ~0.1", c)
+	}
+}
+
+func TestSetHueChroma_PreservesAlpha(t *testing.T) {
+	out := SetHueChroma("#3366cc80", 200, 0.05)
+	_, _, _, a, err := ParseHex(out)
+	if err != nil {
+		t.Fatalf("result %q does not parse: %v", out, err)
+	}
+	if absDiff(a, 0.5) > 0.01 {
+		t.Errorf("alpha = %f, want ~0.5", a)
+	}
+}
+
+func TestSetHueChroma_InvalidColorPassesThrough(t *testing.T) {
+	if got := SetHueChroma("not-a-color", 100, 0.1); got != "not-a-color" {
+		t.Errorf("invalid input should pass through, got %q", got)
+	}
+}
+
+func absDiff(a, b float64) float64 {
+	if a > b {
+		return a - b
+	}
+	return b - a
+}

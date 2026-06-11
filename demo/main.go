@@ -136,6 +136,18 @@ with no frame wrapper.`
 		log.Fatalf("Render plain: %v", err)
 	}
 
+	// Word wrap: long lines wrap instead of scrolling horizontally, and
+	// continuation lines align at the original indent column.
+	wrapCode := `func configure(opts *Options) {
+	opts.Logger = log.New(os.Stdout, "[kazari] a deliberately long prefix string that forces this line to wrap inside the demo container", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
+	opts.Description = "Word wrap keeps long lines visible without horizontal scrolling, and preserved indentation keeps wrapped continuations aligned with the code structure."
+}`
+
+	wrapHTML, err := engine.RenderWithMeta(wrapCode, `go title="wrap.go" showLineNumbers wrap`)
+	if err != nil {
+		log.Fatalf("Render wrap: %v", err)
+	}
+
 	// Line markers: mark, ins, del
 	markerCode := `package main
 
@@ -560,6 +572,25 @@ const nope = false;`
 	}
 	customizerCSS := customizerEngine.CSS()
 
+	// OKLCH theme adjustments: tint editor backgrounds toward teal.
+	// Scoped CSS root keeps the tinted variables from leaking into the page.
+	tintHue := 195.0
+	tintChroma := 0.04
+	tintedEngine := kazari.New(
+		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
+		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithMinify(false),
+		kazari.WithThemeCSSRoot(".kazari-tinted"),
+		kazari.WithThemeAdjustments(kazari.ThemeAdjustments{Hue: &tintHue, Chroma: &tintChroma}),
+	)
+
+	tintedCode := `fmt.Println("Backgrounds tinted toward teal in OKLCH space")`
+	tintedHTML, err := tintedEngine.Render(tintedCode, kazari.Options{Lang: "go", Title: "tinted-theme.go"})
+	if err != nil {
+		log.Fatalf("Render tinted: %v", err)
+	}
+	tintedCSS := tintedEngine.CSS()
+
 	// Scoped CSS root
 	scopedEngine := kazari.New(
 		kazari.WithHighlighter(kazari.NewNuriHighlighter(ctx, hl)),
@@ -659,7 +690,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <body>
 <h1>Kazari Demo</h1>
 <p>Dual-theme code blocks with frames, copy buttons, and dark mode.</p>
-<button onclick="document.documentElement.classList.toggle('dark')">Toggle Dark Mode</button>
+<button onclick="document.documentElement.classList.toggle('dark'); document.querySelectorAll('.kazari-tinted, .kazari-scoped').forEach((el) => el.classList.toggle('dark'))">Toggle Dark Mode</button>
 
 <h2>Editor Frame (explicit title)</h2>
 %s
@@ -683,6 +714,9 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 %s
 
 <h2>No Frame</h2>
+%s
+
+<h2>Word Wrap (long lines wrap, indent preserved)</h2>
 %s
 
 <h2>Line Markers (mark, ins, del)</h2>
@@ -754,6 +788,13 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 <style>%s</style>
 %s
 
+<h2>Theme Adjustments (OKLCH teal tint, <code>WithThemeAdjustments</code>)</h2>
+<p><small>Toggle dark mode to see the tint: the pure white light background has no chroma headroom in OKLCH, so gamut clamping leaves it white.</small></p>
+<div class="kazari-tinted">
+<style>%s</style>
+%s
+</div>
+
 <h2>Locale: French (<code>WithLocale("fr-FR")</code>)</h2>
 <p>Copy button shows "Copier" / "Copié !", fullscreen shows "Plein écran".</p>
 <style>%s</style>
@@ -778,7 +819,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 %s
 </script>
 </body>
-</html>`, css, dotsCSS, goHTML, jsHTML, bashHTML, psHTML, minimalDotsHTML, lnHTML, lnStartHTML, plainHTML,
+</html>`, css, dotsCSS, goHTML, jsHTML, bashHTML, psHTML, minimalDotsHTML, lnHTML, lnStartHTML, plainHTML, wrapHTML,
 		markerHTML, labelHTML, focusHTML, inlineHTML, sqHTML, combinedHTML,
 		thresholdHTML, rangeHTML, multiRangeHTML, gapHTML,
 		csStartHTML, csEndHTML, csAutoHTML,
@@ -786,6 +827,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; color: #555; }
 		themeOverrideHTML, themeOverrideAltHTML, diffHTML, codeGroupHTML,
 		ansiHTML, syncGroupHTML,
 		customizerCSS, customizerHTML,
+		tintedCSS, tintedHTML,
 		frCSS, frHTML,
 		iconCSS, iconGoHTML, iconPyHTML, iconJsHTML, iconRsHTML,
 		scopedCSS, scopedHTML, js)

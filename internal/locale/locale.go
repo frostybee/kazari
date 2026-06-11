@@ -14,6 +14,7 @@ type UIStrings struct {
 	CollapsedLineSingular string
 	CollapsedLinePlural   string
 	CodeGroupFallback     string
+	TerminalWindowLabel   string
 }
 
 var locales = map[string]UIStrings{
@@ -29,6 +30,7 @@ var locales = map[string]UIStrings{
 		CollapsedLineSingular: "1 collapsed line",
 		CollapsedLinePlural:   "%d collapsed lines",
 		CodeGroupFallback:     "Code",
+		TerminalWindowLabel:   "Terminal window",
 	},
 	"fr-FR": {
 		CopyLabel:             "Copier",
@@ -42,6 +44,7 @@ var locales = map[string]UIStrings{
 		CollapsedLineSingular: "1 ligne masquée",
 		CollapsedLinePlural:   "%d lignes masquées",
 		CodeGroupFallback:     "Code",
+		TerminalWindowLabel:   "Fenêtre de terminal",
 	},
 	"ja-JP": {
 		CopyLabel:             "コピー",
@@ -55,6 +58,7 @@ var locales = map[string]UIStrings{
 		CollapsedLineSingular: "1 行を折りたたみ",
 		CollapsedLinePlural:   "%d 行を折りたたみ",
 		CodeGroupFallback:     "コード",
+		TerminalWindowLabel:   "ターミナルウィンドウ",
 	},
 }
 
@@ -96,6 +100,8 @@ func applyOverride(s *UIStrings, key, val string) {
 		s.CollapsedLinePlural = val
 	case "codegroup.fallback":
 		s.CodeGroupFallback = val
+	case "terminal.label":
+		s.TerminalWindowLabel = val
 	}
 }
 

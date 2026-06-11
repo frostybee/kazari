@@ -12,6 +12,19 @@
   transition: all 0.2s ease;
   color: var(--kz-copy-fg, #d4d4d8);
   background: var(--kz-copy-bg, rgba(51, 51, 55, 0.9));
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+@media (hover: hover) {
+  .kazari-code .frame .kz-copy-btn {
+    opacity: var(--kz-copy-idle-opacity, 0);
+    transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .kazari-code .frame:hover .kz-copy-btn,
+  .kazari-code .frame:focus-within .kz-copy-btn,
+  .kazari-code .frame .kz-copy-btn.copied {
+    opacity: 1;
+  }
 }
 .kazari-code .kz-copy-btn:hover {
   background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));

@@ -67,12 +67,34 @@ func ExtractFileName(code, lang string) (string, string) {
 	for i := 0; i < limit; i++ {
 		trimmed := strings.TrimSpace(lines[i])
 		if title := extractFromComment(trimmed); title != "" {
-			modified := removeLineFromCode(lines, i)
+			modified := removeEmptyFrontmatter(removeLineFromCode(lines, i))
 			return title, modified
 		}
 	}
 
 	return "", code
+}
+
+// removeEmptyFrontmatter strips a frontmatter block that became empty after
+// the file name comment was removed: two adjacent delimiter lines at the top
+// of the code, plus one following blank line.
+func removeEmptyFrontmatter(code string) string {
+	lines := strings.Split(code, "\n")
+	if len(lines) < 2 {
+		return code
+	}
+	delim := strings.TrimSpace(lines[0])
+	if delim != "---" && delim != "+++" {
+		return code
+	}
+	if strings.TrimSpace(lines[1]) != delim {
+		return code
+	}
+	rest := lines[2:]
+	if len(rest) > 0 && strings.TrimSpace(rest[0]) == "" {
+		rest = rest[1:]
+	}
+	return strings.Join(rest, "\n")
 }
 
 func hasFileIndicator(code string) bool {

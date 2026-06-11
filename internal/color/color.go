@@ -231,6 +231,97 @@ func SetLuminance(hex string, targetLuminance float64) string {
 	)
 }
 
+// ToOKLCH converts a hex color to OKLCH components: lightness (0-1),
+// chroma (0-0.4 typical), hue in degrees (0-360). Alpha is ignored.
+// Uses the OKLab transform by Björn Ottosson.
+func ToOKLCH(hex string) (l, c, h float64, err error) {
+	r, g, b, _, err := ParseHex(hex)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	lab, labA, labB := linearSRGBToOKLab(linearize(r), linearize(g), linearize(b))
+	c = math.Sqrt(labA*labA + labB*labB)
+	h = math.Atan2(labB, labA) * 180 / math.Pi
+	if h < 0 {
+		h += 360
+	}
+	return lab, c, h, nil
+}
+
+// FromOKLCH converts OKLCH components back to a "#rrggbb" hex color.
+// Colors outside the sRGB gamut are clamped by reducing chroma until they fit.
+func FromOKLCH(l, c, h float64) string {
+	hRad := h * math.Pi / 180
+	for ; c >= 0; c -= 0.001 {
+		labA := c * math.Cos(hRad)
+		labB := c * math.Sin(hRad)
+		r, g, b := okLabToLinearSRGB(l, labA, labB)
+		if inUnitRange(r) && inUnitRange(g) && inUnitRange(b) {
+			return ToHex(
+				delinearize(clamp01(r)),
+				delinearize(clamp01(g)),
+				delinearize(clamp01(b)),
+			)
+		}
+	}
+	// Chroma 0 is always in gamut for l in [0,1]; clamp l as a last resort.
+	r, g, b := okLabToLinearSRGB(clamp01(l), 0, 0)
+	return ToHex(
+		clamp01(delinearize(clamp01(r))),
+		clamp01(delinearize(clamp01(g))),
+		clamp01(delinearize(clamp01(b))),
+	)
+}
+
+// SetHueChroma sets the OKLCH hue (degrees) and chroma of a hex color while
+// preserving its lightness. Alpha is preserved.
+func SetHueChroma(hex string, hue, chroma float64) string {
+	l, _, _, err := ToOKLCH(hex)
+	if err != nil {
+		return hex
+	}
+	out := FromOKLCH(l, chroma, hue)
+	_, _, _, a, _ := ParseHex(hex)
+	if a < 1 {
+		out = SetAlpha(out, a)
+	}
+	return out
+}
+
+func linearSRGBToOKLab(r, g, b float64) (okL, okA, okB float64) {
+	l := 0.4122214708*r + 0.5363325363*g + 0.0514459929*b
+	m := 0.2119034982*r + 0.6806995451*g + 0.1073969566*b
+	s := 0.0883024619*r + 0.2817188376*g + 0.6299787005*b
+
+	lc := math.Cbrt(l)
+	mc := math.Cbrt(m)
+	sc := math.Cbrt(s)
+
+	okL = 0.2104542553*lc + 0.7936177850*mc - 0.0040720468*sc
+	okA = 1.9779984951*lc - 2.4285922050*mc + 0.4505937099*sc
+	okB = 0.0259040371*lc + 0.7827717662*mc - 0.8086757660*sc
+	return
+}
+
+func okLabToLinearSRGB(okL, okA, okB float64) (r, g, b float64) {
+	lc := okL + 0.3963377774*okA + 0.2158037573*okB
+	mc := okL - 0.1055613458*okA - 0.0638541728*okB
+	sc := okL - 0.0894841775*okA - 1.2914855480*okB
+
+	l := lc * lc * lc
+	m := mc * mc * mc
+	s := sc * sc * sc
+
+	r = 4.0767416621*l - 3.3077115913*m + 0.2309699292*s
+	g = -1.2684380046*l + 2.6097574011*m - 0.3413193965*s
+	b = -0.0041960863*l - 0.7034186147*m + 1.7076147010*s
+	return
+}
+
+func inUnitRange(v float64) bool {
+	return v >= -1e-6 && v <= 1+1e-6
+}
+
 // ParseRGBA parses a CSS rgba(R,G,B,A) string into r, g, b, a components (0-1 range).
 // R, G, B are integers 0-255; A is a float 0-1.
 func ParseRGBA(s string) (r, g, b, a float64, err error) {

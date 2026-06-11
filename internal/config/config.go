@@ -197,6 +197,7 @@ type Config struct {
 	UIStrings                  *locale.UIStrings
 	FileIcons                  bool
 	FileIconResolver           func(string) string
+	WarningHandler             func(string)
 }
 
 // DefaultConfig returns the engine configuration with all documented defaults.

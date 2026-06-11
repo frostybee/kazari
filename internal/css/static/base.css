@@ -38,4 +38,9 @@
 .kazari-code pre.wrap .kz-line .code {
   white-space: pre-wrap;
   overflow-wrap: break-word;
+  text-indent: calc(var(--kz-indent, 0ch) * -1);
+  padding-inline-start: calc(var(--kz-code-padding-inline) + var(--kz-indent, 0ch));
+}
+.kazari-code pre.wrap .kz-line .code .indent {
+  white-space: pre;
 }

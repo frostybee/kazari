@@ -6,6 +6,7 @@ import (
 
 	"github.com/frostybee/kazari/internal/color"
 	"github.com/frostybee/kazari/internal/config"
+	"github.com/frostybee/kazari/internal/svgutil"
 )
 
 // ThemeColors holds colors extracted from a syntax theme.
@@ -14,6 +15,7 @@ type ThemeColors struct {
 	EditorFG     string
 	SelectionBG  string
 	LineNumberFG string
+	FoldBG       string
 }
 
 // GenerateVars produces CSS variable declarations for both themes,
@@ -75,6 +77,13 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-focus-dimmed-opacity", "0.35"},
 	}
 
+	// Copy button defaults (conditional)
+	if cfg.CopyButton {
+		staticVars = append(staticVars,
+			nv("--kz-copy-idle-opacity", "0"),
+		)
+	}
+
 	// Collapsible defaults (conditional)
 	if cfg.Collapsible != nil {
 		staticVars = append(staticVars,
@@ -120,9 +129,11 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 
 	// Minimal terminal dots (conditional)
 	if cfg.TerminalDotStyle == config.DotsMinimal {
+		dotsSVG := "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'>" +
+			"<circle cx='8' cy='8' r='8'/><circle cx='30' cy='8' r='8'/><circle cx='52' cy='8' r='8'/></svg>"
 		staticVars = append(staticVars,
 			nv("--kz-terminal-dots-opacity", "0.15"),
-			nv("--kz-terminal-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3Ccircle cx='30' cy='8' r='8'/%3E%3Ccircle cx='52' cy='8' r='8'/%3E%3C/svg%3E")`),
+			nv("--kz-terminal-icon", fmt.Sprintf("url(\"%s\")", svgutil.InlineSVGURL(dotsSVG))),
 		)
 	}
 
@@ -181,23 +192,33 @@ func TokenSwitchingCSS(cfg *config.Config) string {
 		return sb.String()
 	}
 
+	darkRules := ".kazari-code .kz-line span[style] { color: var(--sd); }\n" +
+		".kazari-code .kz-line span[style*=\"--sdbg\"] { background-color: var(--sdbg); }\n"
+
 	switch cfg.DarkMode.Kind {
 	case config.DarkModeSelectorKind:
-		sb.WriteString(fmt.Sprintf("%s .kazari-code .kz-line span[style] { color: var(--sd); }\n", cfg.DarkMode.Selector))
+		writeScopedRules(&sb, cfg.DarkMode.Selector, darkRules)
 
 	case config.DarkModeMediaQueryKind:
 		sb.WriteString("@media (prefers-color-scheme: dark) {\n")
-		sb.WriteString(".kazari-code .kz-line span[style] { color: var(--sd); }\n")
+		sb.WriteString(darkRules)
 		sb.WriteString("}\n")
 
 	case config.DarkModeBothKind:
 		sb.WriteString("@media (prefers-color-scheme: dark) {\n")
-		sb.WriteString(".kazari-code .kz-line span[style] { color: var(--sd); }\n")
+		sb.WriteString(darkRules)
 		sb.WriteString("}\n")
-		sb.WriteString(fmt.Sprintf("%s .kazari-code .kz-line span[style] { color: var(--sd); }\n", cfg.DarkMode.Selector))
+		writeScopedRules(&sb, cfg.DarkMode.Selector, darkRules)
 	}
 
 	return sb.String()
+}
+
+// writeScopedRules prefixes each rule line with the dark mode selector.
+func writeScopedRules(sb *strings.Builder, selector, rules string) {
+	for _, line := range strings.Split(strings.TrimRight(rules, "\n"), "\n") {
+		sb.WriteString(selector + " " + line + "\n")
+	}
 }
 
 func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value string } {
@@ -265,6 +286,15 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 		} else {
 			vars = append(vars, nv("--kz-terminal-dots-fg", "#e6edf3"))
 		}
+	}
+
+	// Collapse section colors derived from the theme's fold background.
+	// Emitted after the static defaults, so they win the cascade.
+	if cfg.Collapsible != nil && tc.FoldBG != "" {
+		vars = append(vars,
+			nv("--kz-collapse-closed-bg", color.SetAlpha(tc.FoldBG, 0.2)),
+			nv("--kz-collapse-closed-border", color.SetAlpha(tc.FoldBG, 0.5)),
+		)
 	}
 
 	// Code group tab colors derived from theme luminance.

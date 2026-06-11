@@ -88,6 +88,8 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	}
 	if resolved.Title != "" {
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
+	} else {
+		sb.WriteString(fmt.Sprintf("<span class=\"sr-only\">%s</span>", html.EscapeString(cfg.UIStrings.TerminalWindowLabel)))
 	}
 	if cfg.CopyButton {
 		sb.WriteString("<div class=\"kz-terminal-actions\">")
@@ -191,20 +193,21 @@ func renderPreCode(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 		contrastCache:    make(map[string]string),
 	}
 
+	preClass := ""
+	if resolved.Wrap {
+		preClass = " class=\"wrap\""
+	}
+	sb.WriteString(fmt.Sprintf("<pre%s data-language=\"%s\">", preClass, html.EscapeString(resolved.Lang)))
+
+	lnWidth := 0
 	if resolved.LineNumbers {
 		endNum := resolved.StartLineNumber + len(lines) - 1
 		maxDigits := max(digitCount(resolved.StartLineNumber), digitCount(endNum))
 		if maxDigits > 2 {
-			sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
-			renderCodeOpen(sb, lctx, maxDigits)
-		} else {
-			sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
-			renderCodeOpen(sb, lctx, 0)
+			lnWidth = maxDigits
 		}
-	} else {
-		sb.WriteString(fmt.Sprintf("<pre data-language=\"%s\">", html.EscapeString(resolved.Lang)))
-		renderCodeOpen(sb, lctx, 0)
 	}
+	renderCodeOpen(sb, lctx, lnWidth)
 
 	for i, line := range lines {
 		lineNum := resolved.StartLineNumber + i
@@ -311,13 +314,32 @@ func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineCont
 		classes += " focused"
 	}
 
+	tokens := line.Tokens
+	indentAttr := ""
+	indentWS := ""
+	if lctx.resolved.Wrap {
+		ws, rest := splitLeadingWhitespace(line.Tokens)
+		indent := lctx.resolved.HangingIndent
+		if lctx.resolved.PreserveIndent {
+			indent += len(ws)
+		}
+		if indent > 0 {
+			indentAttr = fmt.Sprintf(" style=\"--kz-indent:%dch\"", indent)
+			indentWS = ws
+			tokens = rest
+		}
+	}
+
 	sb.WriteString(fmt.Sprintf("<div class=\"%s\">", classes))
 	if lctx.resolved.LineNumbers {
 		sb.WriteString(fmt.Sprintf("<div class=\"gutter\"><div class=\"ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
 	}
-	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s>", labelAttr))
+	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s%s>", labelAttr, indentAttr))
+	if indentWS != "" {
+		sb.WriteString(fmt.Sprintf("<span class=\"indent\">%s</span>", indentWS))
+	}
 	if len(lctx.resolved.InlineMarkers) > 0 {
-		annotated := marker.ProcessInlineMarkers(line.Tokens, lctx.resolved.InlineMarkers)
+		annotated := marker.ProcessInlineMarkers(tokens, lctx.resolved.InlineMarkers)
 		for _, at := range annotated {
 			if at.Token.Content == "" {
 				continue
@@ -325,7 +347,7 @@ func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineCont
 			renderAnnotatedToken(sb, at, lctx, markerType)
 		}
 	} else {
-		for _, tok := range line.Tokens {
+		for _, tok := range tokens {
 			if tok.Content == "" {
 				continue
 			}
@@ -333,6 +355,24 @@ func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineCont
 		}
 	}
 	sb.WriteString("</div></div>")
+}
+
+// splitLeadingWhitespace separates the leading whitespace run from a token
+// stream. The returned rest slice is a copy with the first token trimmed,
+// so callers can render it without mutating the input line.
+func splitLeadingWhitespace(tokens []MergedToken) (string, []MergedToken) {
+	var ws strings.Builder
+	for i, tok := range tokens {
+		trimmed := strings.TrimLeft(tok.Content, " \t")
+		ws.WriteString(tok.Content[:len(tok.Content)-len(trimmed)])
+		if trimmed != "" {
+			rest := make([]MergedToken, len(tokens)-i)
+			copy(rest, tokens[i:])
+			rest[0].Content = trimmed
+			return ws.String(), rest
+		}
+	}
+	return ws.String(), nil
 }
 
 func markerElement(mtype config.MarkerType) string {

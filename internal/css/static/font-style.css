@@ -1,3 +1,4 @@
+.kazari-code .kz-line span[style*="--slbg"] { background-color: var(--slbg); }
 .kazari-code .kz-line span[style*="--sfs"] { font-style: var(--sfs); }
 .kazari-code .kz-line span[style*="--sfw"] { font-weight: var(--sfw); }
 .kazari-code .kz-line span[style*="--std"] { text-decoration: var(--std); }

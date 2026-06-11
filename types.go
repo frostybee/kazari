@@ -30,7 +30,25 @@ type ThemeInfo struct {
 	BG           string // default background (e.g. "#ffffff")
 	SelectionBG  string // editor.selectionBackground
 	LineNumberFG string // editorLineNumber.foreground
+	FoldBG       string // editor.foldBackground
 }
+
+// ThemeAdjustments tints extracted theme colors in OKLCH space.
+// Nil fields leave that channel unchanged. Adjustments apply to the editor
+// colors used for CSS variables, not to individual syntax token colors.
+type ThemeAdjustments struct {
+	Hue     *float64      // target hue in degrees (0-360); nil = unchanged
+	Chroma  *float64      // target chroma (0-0.4 typical); nil = unchanged
+	Targets AdjustTargets // bitmask; zero value = AdjustBackgrounds
+}
+
+// AdjustTargets selects which extracted colors a ThemeAdjustments affects.
+type AdjustTargets int
+
+const (
+	AdjustBackgrounds AdjustTargets = 1 << iota // BG, SelectionBG, FoldBG
+	AdjustForegrounds                           // FG, LineNumberFG
+)
 
 // Token represents a single colored token from the highlighter.
 type Token struct {

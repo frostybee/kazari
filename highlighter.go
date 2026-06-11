@@ -98,6 +98,7 @@ func (n *NuriHighlighter) GetThemeColors(themeName string) (ThemeInfo, error) {
 		BG:           tc.Background,
 		SelectionBG:  tc.SelectionBackground,
 		LineNumberFG: tc.Colors["editorLineNumber.foreground"],
+		FoldBG:       tc.Colors["editor.foldBackground"],
 	}, nil
 }
 

@@ -5,6 +5,7 @@ package kazari
 import (
 	"fmt"
 	"html"
+	"log"
 	"strings"
 
 	"github.com/frostybee/kazari/internal/ansi"
@@ -44,30 +45,12 @@ func New(opts ...Option) *Engine {
 
 	// Extract theme colors at construction time for CSS generation.
 	if e.hl != nil {
-		if info, err := e.hl.GetThemeColors(e.cfg.LightTheme); err == nil {
-			ti := ThemeInfo{BG: info.BG, FG: info.FG, SelectionBG: info.SelectionBG, LineNumberFG: info.LineNumberFG}
-			if b.themeCustomizer != nil {
-				ti = b.themeCustomizer(e.cfg.LightTheme, ti)
-			}
-			e.lightColors = theme.ThemeColors{
-				EditorBG:     ti.BG,
-				EditorFG:     ti.FG,
-				SelectionBG:  ti.SelectionBG,
-				LineNumberFG: ti.LineNumberFG,
-			}
+		if colors, ok := extractThemeColors(e.hl, e.cfg.LightTheme, b); ok {
+			e.lightColors = colors
 		}
 		if e.cfg.DarkTheme != "" {
-			if info, err := e.hl.GetThemeColors(e.cfg.DarkTheme); err == nil {
-				ti := ThemeInfo{BG: info.BG, FG: info.FG, SelectionBG: info.SelectionBG, LineNumberFG: info.LineNumberFG}
-				if b.themeCustomizer != nil {
-					ti = b.themeCustomizer(e.cfg.DarkTheme, ti)
-				}
-				e.darkColors = theme.ThemeColors{
-					EditorBG:     ti.BG,
-					EditorFG:     ti.FG,
-					SelectionBG:  ti.SelectionBG,
-					LineNumberFG: ti.LineNumberFG,
-				}
+			if colors, ok := extractThemeColors(e.hl, e.cfg.DarkTheme, b); ok {
+				e.darkColors = colors
 			}
 		}
 	}
@@ -84,6 +67,70 @@ func New(opts ...Option) *Engine {
 	e.cfg.UIStrings = locale.Resolve(e.cfg.Locale, e.cfg.UIStringOverrides)
 
 	return e
+}
+
+// extractThemeColors pulls editor colors from a theme, then applies theme
+// adjustments and the theme customizer in that order (customizer gets final say).
+func extractThemeColors(hl Highlighter, themeName string, b *engineBuilder) (theme.ThemeColors, bool) {
+	info, err := hl.GetThemeColors(themeName)
+	if err != nil {
+		return theme.ThemeColors{}, false
+	}
+	ti := applyThemeAdjustments(info, b.themeAdjustments)
+	if b.themeCustomizer != nil {
+		ti = b.themeCustomizer(themeName, ti)
+	}
+	return theme.ThemeColors{
+		EditorBG:     ti.BG,
+		EditorFG:     ti.FG,
+		SelectionBG:  ti.SelectionBG,
+		LineNumberFG: ti.LineNumberFG,
+		FoldBG:       ti.FoldBG,
+	}, true
+}
+
+// applyThemeAdjustments tints the selected extracted colors in OKLCH space,
+// preserving each color's lightness and alpha.
+func applyThemeAdjustments(ti ThemeInfo, adj *ThemeAdjustments) ThemeInfo {
+	if adj == nil || (adj.Hue == nil && adj.Chroma == nil) {
+		return ti
+	}
+
+	tint := func(hex string) string {
+		if hex == "" {
+			return hex
+		}
+		l, c, h, err := color.ToOKLCH(hex)
+		if err != nil {
+			return hex
+		}
+		if adj.Hue != nil {
+			h = *adj.Hue
+		}
+		if adj.Chroma != nil {
+			c = *adj.Chroma
+		}
+		out := color.FromOKLCH(l, c, h)
+		if _, _, _, a, err := color.ParseHex(hex); err == nil && a < 1 {
+			out = color.SetAlpha(out, a)
+		}
+		return out
+	}
+
+	targets := adj.Targets
+	if targets == 0 {
+		targets = AdjustBackgrounds
+	}
+	if targets&AdjustBackgrounds != 0 {
+		ti.BG = tint(ti.BG)
+		ti.SelectionBG = tint(ti.SelectionBG)
+		ti.FoldBG = tint(ti.FoldBG)
+	}
+	if targets&AdjustForegrounds != 0 {
+		ti.FG = tint(ti.FG)
+		ti.LineNumberFG = tint(ti.LineNumberFG)
+	}
+	return ti
 }
 
 // Render renders a code block with structured options.
@@ -277,6 +324,18 @@ func (e *Engine) tokenize(code, lang, themeOverride string) ([]render.TokenLine,
 
 	lightTheme, darkTheme := e.resolveThemes(themeOverride)
 
+	lines, err := e.tokenizeThemes(code, lang, lightTheme, darkTheme)
+	if err != nil {
+		if !e.isKnownLanguage(lang) {
+			e.warn(fmt.Sprintf("kazari: unknown language %q, falling back to plaintext", lang))
+			return plaintextLines(code), nil
+		}
+		return nil, err
+	}
+	return lines, nil
+}
+
+func (e *Engine) tokenizeThemes(code, lang, lightTheme, darkTheme string) ([]render.TokenLine, error) {
 	if darkTheme != "" {
 		if dual, ok := e.hl.(DualThemeTokenizer); ok {
 			light, dark, err := dual.TokenizeDual(code, lang, lightTheme, darkTheme)
@@ -301,6 +360,23 @@ func (e *Engine) tokenize(code, lang, themeOverride string) ([]render.TokenLine,
 	}
 
 	return mergeTokens(lightTokens, darkTokens), nil
+}
+
+func (e *Engine) isKnownLanguage(lang string) bool {
+	for _, loaded := range e.hl.GetLoadedLanguages() {
+		if strings.EqualFold(loaded, lang) {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *Engine) warn(msg string) {
+	if e.cfg.WarningHandler != nil {
+		e.cfg.WarningHandler(msg)
+		return
+	}
+	log.Print(msg)
 }
 
 func (e *Engine) resolveThemes(override string) (light, dark string) {
