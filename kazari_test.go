@@ -319,12 +319,11 @@ func TestRender_TitleLeft_BadgeRight(t *testing.T) {
 	if !strings.Contains(html, `<span class="kz-title">main.go</span>`) {
 		t.Error("missing title in left section")
 	}
-	// Badge should be in right section when title is set
 	if !strings.Contains(html, `kz-toolbar-right`) {
 		t.Error("missing toolbar right")
 	}
 	if !strings.Contains(html, `<span class="kz-lang">Go</span>`) {
-		t.Error("missing language badge in right section")
+		t.Error("missing language badge")
 	}
 }
 

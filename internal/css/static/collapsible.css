@@ -16,24 +16,61 @@
     z-index: 1;
 }
 
+.kazari-code .kz-collapse-bar {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+    position: relative;
+    z-index: 2;
+}
+
 .kazari-code .kz-collapse-btn {
-    display: block;
-    width: 100%;
-    padding: 8px 16px;
-    border: none;
-    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    border: 1px solid var(--kz-collapse-btn-border, rgba(128, 128, 128, 0.3));
+    border-radius: 1rem;
     background: var(--kz-collapse-btn-bg, rgba(255, 255, 255, 0.08));
     color: var(--kz-collapse-btn-fg, rgba(255, 255, 255, 0.7));
-    font-size: 0.85em;
+    font-size: 0.8rem;
+    font-family: var(--kz-ui-font-family);
     cursor: pointer;
-    text-align: center;
-    transition: background var(--kz-collapse-transition, 300ms ease);
-    z-index: 2;
-    position: relative;
+    transition: background 200ms ease, border-color 200ms ease;
 }
 
 .kazari-code .kz-collapse-btn:hover {
     background: var(--kz-collapse-btn-hover-bg, rgba(255, 255, 255, 0.15));
+    border-color: var(--kz-collapse-btn-border-hover, rgba(128, 128, 128, 0.5));
+}
+
+/* --- Toolbar collapse toggle --- */
+
+.kazari-code .kz-collapse-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem;
+    border: 1px solid transparent;
+    border-radius: var(--kz-copy-radius, 0.375rem);
+    background: transparent;
+    color: var(--kz-copy-fg, rgba(255,255,255,0.6));
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kazari-code .kz-collapse-toggle:hover {
+    background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));
+    color: var(--kz-copy-fg-hover, #ffffff);
+}
+
+.kazari-code .kz-collapse-toggle-icon {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.kazari-code:not(.kz-collapsed) .kz-collapse-toggle-icon {
+    transform: rotate(180deg);
 }
 
 .kazari-code .frame {

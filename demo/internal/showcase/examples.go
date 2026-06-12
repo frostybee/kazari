@@ -388,7 +388,6 @@ const ref = useRef(null);`
 			DefaultCollapsed: true,
 			PreserveIndent:   true,
 		}),
-		kazari.WithTerminalDotStyle(kazari.DotsMinimal),
 	)
 	thresholdCode := `package main
 
@@ -753,6 +752,7 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 
 	css := strings.Join([]string{
 		collapseEngine.CSS(),
+		dotsEngine.CSS(),
 		customizerEngine.ThemeCSS(),
 		tintedEngine.ThemeCSS(),
 		scopedEngine.ThemeCSS(),

@@ -26,6 +26,8 @@ const copySVG = `<svg class="kz-copy-icon" fill="none" stroke="currentColor" vie
 
 const fullscreenSVG = `<svg class="kz-fs-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>`
 
+const chevronSVG = `<svg class="kz-collapse-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`
+
 // RenderBlock produces the full HTML for a code block.
 func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config) string {
 	var sb strings.Builder
@@ -132,13 +134,19 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 
 	// Right section: action buttons only
 	sb.WriteString("<div class=\"kz-toolbar-right\">")
+	if cfg.CopyButton {
+		renderCopyButton(sb, resolved.RawCode, cfg)
+	}
 	if cfg.FullscreenButton {
 		sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\">", html.EscapeString(cfg.UIStrings.FullscreenLabel)))
 			sb.WriteString(fullscreenSVG)
 			sb.WriteString("</button>")
 	}
-	if cfg.CopyButton {
-		renderCopyButton(sb, resolved.RawCode, cfg)
+	if resolved.CollapseThreshold {
+		sb.WriteString(fmt.Sprintf("<button class=\"kz-collapse-toggle\" aria-expanded=\"false\" aria-label=\"%s\">",
+			html.EscapeString(cfg.UIStrings.CollapseButtonText)))
+		sb.WriteString(chevronSVG)
+		sb.WriteString("</button>")
 	}
 	sb.WriteString("</div>")
 
@@ -717,6 +725,7 @@ func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock,
 	}
 
 	sb.WriteString("<div class=\"kz-collapse-gradient\"></div>")
+	sb.WriteString("<div class=\"kz-collapse-bar\">")
 	sb.WriteString(fmt.Sprintf(
 		"<button class=\"kz-collapse-btn\" aria-expanded=\"false\" data-expand=\"%s\" data-collapse=\"%s\" data-expanded-msg=\"%s\" data-collapsed-msg=\"%s\">%s</button>",
 		html.EscapeString(expandText),
@@ -725,5 +734,6 @@ func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock,
 		html.EscapeString(collapsedAnnouncement),
 		html.EscapeString(expandText),
 	))
+	sb.WriteString("</div>")
 	sb.WriteString("<div class=\"kz-sr-announce\" aria-live=\"polite\"></div>")
 }

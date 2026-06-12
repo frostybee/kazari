@@ -46,7 +46,6 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
-  --kz-copy-idle-opacity: 0;
   --kz-collapse-btn-bg: rgba(255,255,255,0.08);
   --kz-collapse-btn-fg: rgba(255,255,255,0.7);
   --kz-collapse-btn-hover-bg: rgba(255,255,255,0.15);
@@ -70,8 +69,6 @@
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
-  --kz-terminal-dots-opacity: 0.15;
-  --kz-terminal-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3Ccircle cx='30' cy='8' r='8'/%3E%3Ccircle cx='52' cy='8' r='8'/%3E%3C/svg%3E");
   --kz-editor-bg: #f7f7f7;
   --kz-ln-fg: #7f7f7f;
   --kz-ln-highlight-fg: #24292f;
@@ -79,13 +76,13 @@
   --kz-toolbar-bg: rgba(229, 231, 235, 0.15);
   --kz-toolbar-border: rgba(209, 213, 219, 0.5);
   --kz-lang-fg: #4b5563;
-  --kz-lang-bg: rgba(209, 213, 219, 0.4);
   --kz-copy-fg: #4b5563;
-  --kz-copy-bg: rgba(209, 213, 219, 0.4);
-  --kz-copy-border: rgba(156, 163, 175, 0.2);
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
-  --kz-terminal-dots-fg: #24292f;
+  --kz-collapse-btn-fg: #4b5563;
+  --kz-collapse-btn-bg: rgba(0, 0, 0, 0.04);
+  --kz-collapse-btn-hover-bg: rgba(0, 0, 0, 0.08);
+  --kz-collapse-btn-border: rgba(0, 0, 0, 0.15);
   --kz-group-tab-active-bg: rgba(255,255,255,0.8);
   --kz-group-tab-active-fg: #24292f;
   --kz-group-border: rgba(0,0,0,0.1);
@@ -99,13 +96,13 @@
   --kz-toolbar-bg: rgba(39, 39, 42, 0.6);
   --kz-toolbar-border: rgba(63, 63, 70, 0.4);
   --kz-lang-fg: #a1a1aa;
-  --kz-lang-bg: rgba(51, 51, 55, 0.8);
   --kz-copy-fg: #d4d4d8;
-  --kz-copy-bg: rgba(51, 51, 55, 0.9);
-  --kz-copy-border: rgba(63, 63, 70, 0.5);
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
-  --kz-terminal-dots-fg: #e6edf3;
+  --kz-collapse-btn-fg: #d4d4d8;
+  --kz-collapse-btn-bg: rgba(255, 255, 255, 0.1);
+  --kz-collapse-btn-hover-bg: rgba(255, 255, 255, 0.18);
+  --kz-collapse-btn-border: rgba(255, 255, 255, 0.2);
   --kz-group-tab-active-bg: rgba(255,255,255,0.1);
   --kz-group-tab-active-fg: #e6edf3;
   --kz-group-border: rgba(255,255,255,0.1);
@@ -351,7 +348,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--kz-toolbar-padding, 0.625rem 1rem);
+  padding: var(--kz-toolbar-padding, 0.375rem 1rem);
   background: var(--kz-toolbar-bg, rgba(39, 39, 42, 0.6));
   border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
 }
@@ -362,14 +359,15 @@
   gap: 0.5rem;
 }
 .kazari-code .kz-lang {
-  font-size: var(--kz-lang-font-size, 0.75rem);
+  font-size: var(--kz-lang-font-size, 0.8rem);
+  font-weight: var(--kz-lang-font-weight, 500);
   font-family: var(--kz-ui-font-family);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--kz-lang-radius, 0.25rem);
   color: var(--kz-lang-fg, #a1a1aa);
-  background: var(--kz-lang-bg, rgba(51, 51, 55, 0.8));
+}
+.kazari-code .kz-lang + .kz-title {
+  margin-left: 0.625rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--kz-separator-color, rgba(161, 161, 170, 0.3));
 }
 .kazari-code .kz-title {
   font-size: 0.875rem;
@@ -387,6 +385,14 @@
   opacity: var(--kz-file-icon-opacity);
   vertical-align: middle;
   flex-shrink: 0;
+}
+.kazari-code .kz-lang + .kz-file-icon {
+  margin-left: 0.625rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--kz-separator-color, rgba(161, 161, 170, 0.3));
+}
+.kazari-code .kz-file-icon + .kz-title {
+  margin-left: 0.25rem;
 }
 .kazari-code .kz-terminal-header {
   display: flex;
@@ -410,57 +416,36 @@
   margin-inline-start: auto;
   z-index: 1;
 }
-.kazari-code .kz-terminal-header.kz-dots-minimal {
-  min-height: 2rem;
+.kazari-code .kz-terminal-dots {
+  display: flex;
+  gap: 0.4rem;
+  z-index: 1;
 }
-.kazari-code .kz-terminal-header.kz-dots-minimal::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  left: var(--kz-code-padding-inline);
-  width: 2.1rem;
-  height: 0.56rem;
-  background-color: var(--kz-terminal-dots-fg);
-  opacity: var(--kz-terminal-dots-opacity);
-  -webkit-mask-image: var(--kz-terminal-icon);
-  mask-image: var(--kz-terminal-icon);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+.kazari-code .kz-terminal-dots span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
 }
+.kazari-code .kz-terminal-dots span:nth-child(1) { background: var(--kz-terminal-dot-red, #ff5f57); }
+.kazari-code .kz-terminal-dots span:nth-child(2) { background: var(--kz-terminal-dot-yellow, #febc2e); }
+.kazari-code .kz-terminal-dots span:nth-child(3) { background: var(--kz-terminal-dot-green, #28c840); }
 .kazari-code .kz-copy-btn {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  font-family: var(--kz-ui-font-family);
-  border: 1px solid var(--kz-copy-border, rgba(63, 63, 70, 0.5));
+  justify-content: center;
+  padding: 0.375rem;
+  border: 1px solid transparent;
   border-radius: var(--kz-copy-radius, 0.375rem);
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--kz-copy-fg, #d4d4d8);
-  background: var(--kz-copy-bg, rgba(51, 51, 55, 0.9));
+  background: transparent;
   direction: ltr;
   unicode-bidi: isolate;
-}
-@media (hover: hover) {
-  .kazari-code .frame .kz-copy-btn {
-    opacity: var(--kz-copy-idle-opacity, 0);
-    transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-  }
-  .kazari-code .frame:hover .kz-copy-btn,
-  .kazari-code .frame:focus-within .kz-copy-btn,
-  .kazari-code .frame .kz-copy-btn.copied {
-    opacity: 1;
-  }
 }
 .kazari-code .kz-copy-btn:hover {
   background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));
   color: var(--kz-copy-fg-hover, #ffffff);
-  border-color: var(--kz-copy-border-hover, rgba(82, 82, 91, 0.5));
 }
 .kazari-code .kz-copy-btn.copied {
   background: var(--kz-copy-success-bg, rgba(34, 197, 94, 0.9));
@@ -476,9 +461,9 @@
   align-items: center;
   justify-content: center;
   padding: 0.375rem;
-  border: 1px solid var(--kz-copy-border, rgba(63, 63, 70, 0.5));
+  border: 1px solid transparent;
   border-radius: var(--kz-copy-radius, 0.375rem);
-  background: var(--kz-copy-bg, rgba(51, 51, 55, 0.9));
+  background: transparent;
   color: var(--kz-copy-fg, rgba(255,255,255,0.6));
   cursor: pointer;
   transition: all 0.2s ease;
@@ -486,7 +471,6 @@
 .kazari-code .kz-fs-btn:hover {
   background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));
   color: var(--kz-copy-fg-hover, #ffffff);
-  border-color: var(--kz-copy-border-hover, rgba(82, 82, 91, 0.5));
 }
 .kazari-code .kz-fs-icon {
   width: 1rem;
@@ -510,24 +494,61 @@
     z-index: 1;
 }
 
+.kazari-code .kz-collapse-bar {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+    position: relative;
+    z-index: 2;
+}
+
 .kazari-code .kz-collapse-btn {
-    display: block;
-    width: 100%;
-    padding: 8px 16px;
-    border: none;
-    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    border: 1px solid var(--kz-collapse-btn-border, rgba(128, 128, 128, 0.3));
+    border-radius: 1rem;
     background: var(--kz-collapse-btn-bg, rgba(255, 255, 255, 0.08));
     color: var(--kz-collapse-btn-fg, rgba(255, 255, 255, 0.7));
-    font-size: 0.85em;
+    font-size: 0.8rem;
+    font-family: var(--kz-ui-font-family);
     cursor: pointer;
-    text-align: center;
-    transition: background var(--kz-collapse-transition, 300ms ease);
-    z-index: 2;
-    position: relative;
+    transition: background 200ms ease, border-color 200ms ease;
 }
 
 .kazari-code .kz-collapse-btn:hover {
     background: var(--kz-collapse-btn-hover-bg, rgba(255, 255, 255, 0.15));
+    border-color: var(--kz-collapse-btn-border-hover, rgba(128, 128, 128, 0.5));
+}
+
+/* --- Toolbar collapse toggle --- */
+
+.kazari-code .kz-collapse-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem;
+    border: 1px solid transparent;
+    border-radius: var(--kz-copy-radius, 0.375rem);
+    background: transparent;
+    color: var(--kz-copy-fg, rgba(255,255,255,0.6));
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kazari-code .kz-collapse-toggle:hover {
+    background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));
+    color: var(--kz-copy-fg-hover, #ffffff);
+}
+
+.kazari-code .kz-collapse-toggle-icon {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.kazari-code:not(.kz-collapsed) .kz-collapse-toggle-icon {
+    transform: rotate(180deg);
 }
 
 .kazari-code .frame {
@@ -797,6 +818,462 @@
 }
 
 @layer kazari {
+:root {
+  --kz-radius: 0.5rem;
+  --kz-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  --kz-border: 1px solid transparent;
+  --kz-border-hover: 1px solid var(--kz-accent);
+  --kz-transition: 150ms ease;
+  --kz-font-family: 'JetBrains Mono', monospace;
+  --kz-font-size: 0.875rem;
+  --kz-font-weight: 400;
+  --kz-line-height: 1.6;
+  --kz-ui-font-family: system-ui, sans-serif;
+  --kz-ui-font-size: 0.9rem;
+  --kz-ui-font-weight: 400;
+  --kz-ui-line-height: 1.65;
+  --kz-code-padding-block: 1rem;
+  --kz-code-padding-inline: 1.35rem;
+  --kz-title-font-size: 0.8rem;
+  --kz-title-padding: 0.5rem 1rem;
+  --kz-ln-padding-inline: 2ch;
+  --kz-gutter-border-width: 1px;
+  --kz-mark-bg: rgba(255,200,0,0.12);
+  --kz-mark-border: rgba(255,200,0,0.5);
+  --kz-mark-border-width: 3px;
+  --kz-ins-bg: rgba(46,160,67,0.12);
+  --kz-ins-border: rgba(46,160,67,0.5);
+  --kz-ins-indicator: '+';
+  --kz-del-bg: rgba(248,81,73,0.12);
+  --kz-del-border: rgba(248,81,73,0.5);
+  --kz-del-indicator: '-';
+  --kz-mark-accent-margin: 0rem;
+  --kz-diff-indicator-margin: 0.3rem;
+  --kz-ins-indicator-color: rgba(46,160,67,0.8);
+  --kz-del-indicator-color: rgba(248,81,73,0.8);
+  --kz-label-fg: #ffffff;
+  --kz-label-padding: 0.1rem 0.3rem;
+  --kz-label-font-size: 0.75rem;
+  --kz-label-radius: 0.2rem;
+  --kz-inline-mark-bg: rgba(255,200,0,0.2);
+  --kz-inline-mark-border: rgba(255,200,0,0.5);
+  --kz-inline-mark-radius: 0.2rem;
+  --kz-inline-mark-padding: 0.15rem;
+  --kz-inline-mark-border-width: 1.5px;
+  --kz-inline-ins-bg: rgba(46,160,67,0.2);
+  --kz-inline-ins-border: rgba(46,160,67,0.5);
+  --kz-inline-del-bg: rgba(248,81,73,0.2);
+  --kz-inline-del-border: rgba(248,81,73,0.5);
+  --kz-focus-dimmed-opacity: 0.35;
+  --kz-file-icon-size: 1rem;
+  --kz-file-icon-margin: 0 0.4rem 0 0;
+  --kz-file-icon-opacity: 0.8;
+  --kz-terminal-dots-opacity: 0.15;
+  --kz-terminal-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3Ccircle cx='30' cy='8' r='8'/%3E%3Ccircle cx='52' cy='8' r='8'/%3E%3C/svg%3E");
+  --kz-editor-bg: #f7f7f7;
+  --kz-ln-fg: #7f7f7f;
+  --kz-ln-highlight-fg: #24292f;
+  --kz-gutter-border-color: rgba(0,0,0,0.1);
+  --kz-toolbar-bg: rgba(229, 231, 235, 0.15);
+  --kz-toolbar-border: rgba(209, 213, 219, 0.5);
+  --kz-lang-fg: #4b5563;
+  --kz-copy-fg: #4b5563;
+  --kz-copy-fg-hover: #111827;
+  --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
+  --kz-terminal-dots-fg: #24292f;
+}
+:root.dark {
+  --kz-editor-bg: #0d1117;
+  --kz-editor-fg: #e6edf3;
+  --kz-ln-fg: #6e7681;
+  --kz-ln-highlight-fg: #e6edf3;
+  --kz-gutter-border-color: rgba(255,255,255,0.1);
+  --kz-toolbar-bg: rgba(39, 39, 42, 0.6);
+  --kz-toolbar-border: rgba(63, 63, 70, 0.4);
+  --kz-lang-fg: #a1a1aa;
+  --kz-copy-fg: #d4d4d8;
+  --kz-copy-fg-hover: #ffffff;
+  --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
+  --kz-terminal-dots-fg: #e6edf3;
+}
+.kazari-code .kz-line span[style] { color: var(--sl); }
+.dark .kazari-code .kz-line span[style] { color: var(--sd); }
+.dark .kazari-code .kz-line span[style*="--sdbg"] { background-color: var(--sdbg); }
+.kazari-code .kz-line span[style*="--slbg"] { background-color: var(--slbg); }
+.kazari-code .kz-line span[style*="--sfs"] { font-style: var(--sfs); }
+.kazari-code .kz-line span[style*="--sfw"] { font-weight: var(--sfw); }
+.kazari-code .kz-line span[style*="--std"] { text-decoration: var(--std); }
+.kazari-code {
+  position: relative;
+  margin: 1rem 0;
+}
+.kazari-code pre {
+  margin: 0;
+  padding: 0;
+  background: var(--kz-editor-bg);
+  color: var(--kz-editor-fg);
+  font-family: var(--kz-font-family);
+  font-size: var(--kz-font-size);
+  font-weight: var(--kz-font-weight);
+  line-height: var(--kz-line-height);
+  border-radius: var(--kz-radius);
+  overflow-x: auto;
+}
+.kazari-code .frame pre {
+  border-radius: 0;
+}
+.kazari-code .frame.is-terminal pre {
+  background: var(--kz-terminal-bg, var(--kz-editor-bg));
+}
+.kazari-code pre code {
+  display: block;
+  padding: var(--kz-code-padding-block) 0;
+}
+.kazari-code .kz-line {
+  display: grid;
+  grid-template-areas: 'gutter code';
+  grid-template-columns: auto 1fr;
+  min-height: 1lh;
+}
+.kazari-code .kz-line .code {
+  grid-area: code;
+  padding-inline: var(--kz-code-padding-inline);
+  white-space: pre;
+}
+.kazari-code pre.wrap .kz-line .code {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  text-indent: calc(var(--kz-indent, 0ch) * -1);
+  padding-inline-start: calc(var(--kz-code-padding-inline) + var(--kz-indent, 0ch));
+}
+.kazari-code pre.wrap .kz-line .code .indent {
+  white-space: pre;
+}
+.kazari-code .gutter {
+  grid-area: gutter;
+  border-right: var(--kz-gutter-border-width) solid var(--kz-gutter-border-color);
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+.kazari-code .gutter .ln {
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  box-sizing: content-box;
+  min-width: var(--kz-ln-width, 2ch);
+  padding-inline: var(--kz-ln-padding-inline, 2ch);
+  font-variant-numeric: tabular-nums;
+  color: var(--kz-ln-fg);
+  opacity: var(--kz-ln-opacity, 0.4);
+}
+.kazari-code .highlight .gutter .ln {
+  color: var(--kz-ln-highlight-fg);
+  opacity: var(--kz-ln-highlight-opacity, 0.8);
+}
+/* Line marker backgrounds */
+.kazari-code .kz-line.highlight.mark {
+  background: var(--kz-mark-bg);
+}
+.kazari-code .kz-line.highlight.ins {
+  background: var(--kz-ins-bg);
+}
+.kazari-code .kz-line.highlight.del {
+  background: var(--kz-del-bg);
+}
+
+/* Left accent bar via inset box-shadow (no layout shift) */
+.kazari-code .kz-line.highlight {
+  box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-mark-border);
+}
+.kazari-code .kz-line.highlight.ins {
+  box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-ins-border);
+}
+.kazari-code .kz-line.highlight.del {
+  box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-del-border);
+}
+
+/* Line number opacity bump on highlighted lines */
+.kazari-code .kz-line.highlight .ln {
+  opacity: 0.6;
+}
+
+/* Diff indicators via ::before on .code */
+.kazari-code .kz-line.ins .code,
+.kazari-code .kz-line.del .code {
+  position: relative;
+}
+.kazari-code .kz-line.ins .code::before {
+  content: var(--kz-ins-indicator);
+  color: var(--kz-ins-indicator-color);
+  position: absolute;
+  left: 0;
+  margin-left: var(--kz-diff-indicator-margin);
+  white-space: pre;
+  pointer-events: none;
+}
+.kazari-code .kz-line.del .code::before {
+  content: var(--kz-del-indicator);
+  color: var(--kz-del-indicator-color);
+  position: absolute;
+  left: 0;
+  margin-left: var(--kz-diff-indicator-margin);
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* Labeled ranges — inline badge before code content on the first line.
+   data-label on .code div, read via attr() (avoids CSS injection).
+   On ins/del lines, this overrides the diff indicator ::before. */
+.kazari-code .kz-line.tm-label .code::before {
+  content: attr(data-label);
+  color: var(--kz-label-fg);
+  padding: var(--kz-label-padding);
+  font-size: var(--kz-label-font-size);
+  border-radius: var(--kz-label-radius);
+  margin-right: 0.75em;
+  position: static;
+  left: auto;
+  margin-left: 0;
+  display: inline;
+  white-space: nowrap;
+}
+.kazari-code .kz-line.mark.tm-label .code::before {
+  background: var(--kz-mark-border);
+}
+.kazari-code .kz-line.ins.tm-label .code::before {
+  background: var(--kz-ins-border);
+}
+.kazari-code .kz-line.del.tm-label .code::before {
+  background: var(--kz-del-border);
+}
+/* Inline text markers */
+.kazari-code mark,
+.kazari-code ins,
+.kazari-code del {
+  background: var(--kz-inline-mark-bg);
+  border: var(--kz-inline-mark-border-width) solid var(--kz-inline-mark-border);
+  border-radius: var(--kz-inline-mark-radius);
+  padding: var(--kz-inline-mark-padding);
+  text-decoration: none;
+}
+.kazari-code ins {
+  background: var(--kz-inline-ins-bg);
+  border-color: var(--kz-inline-ins-border);
+  text-decoration: none;
+}
+.kazari-code del {
+  background: var(--kz-inline-del-bg);
+  border-color: var(--kz-inline-del-border);
+  text-decoration: none;
+}
+
+/* Multi-token spanning — remove borders/radius at joins */
+.kazari-code mark.open-start,
+.kazari-code ins.open-start,
+.kazari-code del.open-start {
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding-left: 0;
+}
+.kazari-code mark.open-end,
+.kazari-code ins.open-end,
+.kazari-code del.open-end {
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-right: 0;
+}
+/* Focus lines — container-level class, CSS handles dimming */
+.kazari-code code.has-focus .kz-line:not(.focused) {
+  opacity: var(--kz-focus-dimmed-opacity);
+}
+.kazari-code code.has-focus .kz-line.highlight:not(.focused) {
+  opacity: var(--kz-focus-dimmed-opacity);
+}
+.kazari-code figure {
+  all: revert;
+  position: relative;
+  margin: 0;
+  border-radius: var(--kz-radius);
+  box-shadow: var(--kz-shadow);
+  border: var(--kz-border);
+  overflow: hidden;
+}
+.kazari-code pre::-webkit-scrollbar {
+  width: var(--kz-scrollbar-width, 8px);
+  height: var(--kz-scrollbar-width, 8px);
+}
+.kazari-code pre::-webkit-scrollbar-thumb {
+  background: var(--kz-scrollbar-thumb, rgba(255,255,255,0.15));
+  border-radius: 4px;
+}
+.kazari-code pre::-webkit-scrollbar-thumb:hover {
+  background: var(--kz-scrollbar-thumb-hover, rgba(255,255,255,0.3));
+}
+.kazari-code pre::-webkit-scrollbar-track {
+  background: var(--kz-scrollbar-track, transparent);
+}
+.kazari-code .frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--kz-radius);
+  box-shadow: var(--kz-shadow);
+  border: var(--kz-border);
+}
+.kazari-code .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.kazari-code .kz-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--kz-toolbar-padding, 0.375rem 1rem);
+  background: var(--kz-toolbar-bg, rgba(39, 39, 42, 0.6));
+  border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
+}
+.kazari-code .kz-toolbar-left,
+.kazari-code .kz-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.kazari-code .kz-lang {
+  font-size: var(--kz-lang-font-size, 0.8rem);
+  font-weight: var(--kz-lang-font-weight, 500);
+  font-family: var(--kz-ui-font-family);
+  color: var(--kz-lang-fg, #a1a1aa);
+}
+.kazari-code .kz-lang + .kz-title {
+  margin-left: 0.625rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--kz-separator-color, rgba(161, 161, 170, 0.3));
+}
+.kazari-code .kz-title {
+  font-size: 0.875rem;
+  font-family: var(--kz-ui-font-family);
+  color: var(--kz-editor-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kazari-code .kz-file-icon {
+  display: inline-block;
+  width: var(--kz-file-icon-size);
+  height: var(--kz-file-icon-size);
+  margin: var(--kz-file-icon-margin);
+  opacity: var(--kz-file-icon-opacity);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.kazari-code .kz-lang + .kz-file-icon {
+  margin-left: 0.625rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--kz-separator-color, rgba(161, 161, 170, 0.3));
+}
+.kazari-code .kz-file-icon + .kz-title {
+  margin-left: 0.25rem;
+}
+.kazari-code .kz-terminal-header {
+  display: flex;
+  align-items: center;
+  padding: var(--kz-toolbar-padding, 0.625rem 1rem);
+  background: var(--kz-terminal-titlebar-bg, var(--kz-toolbar-bg));
+  border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
+  position: relative;
+}
+.kazari-code .kz-terminal-header .kz-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  font-family: var(--kz-ui-font-family);
+  color: var(--kz-editor-fg);
+  pointer-events: none;
+}
+.kazari-code .kz-terminal-actions {
+  margin-inline-start: auto;
+  z-index: 1;
+}
+.kazari-code .kz-terminal-header.kz-dots-minimal {
+  min-height: 2rem;
+}
+.kazari-code .kz-terminal-header.kz-dots-minimal::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  left: var(--kz-code-padding-inline);
+  width: 2.1rem;
+  height: 0.56rem;
+  background-color: var(--kz-terminal-dots-fg);
+  opacity: var(--kz-terminal-dots-opacity);
+  -webkit-mask-image: var(--kz-terminal-icon);
+  mask-image: var(--kz-terminal-icon);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.kazari-code .kz-copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border: 1px solid transparent;
+  border-radius: var(--kz-copy-radius, 0.375rem);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--kz-copy-fg, #d4d4d8);
+  background: transparent;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.kazari-code .kz-copy-btn:hover {
+  background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));
+  color: var(--kz-copy-fg-hover, #ffffff);
+}
+.kazari-code .kz-copy-btn.copied {
+  background: var(--kz-copy-success-bg, rgba(34, 197, 94, 0.9));
+  color: var(--kz-copy-success-fg, #ffffff);
+  border-color: var(--kz-copy-success-border, rgba(34, 197, 94, 0.8));
+}
+.kazari-code .kz-copy-icon {
+  width: 1rem;
+  height: 1rem;
+}
+.kazari-code .kz-fs-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border: 1px solid transparent;
+  border-radius: var(--kz-copy-radius, 0.375rem);
+  background: transparent;
+  color: var(--kz-copy-fg, rgba(255,255,255,0.6));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.kazari-code .kz-fs-btn:hover {
+  background: var(--kz-copy-bg-hover, rgba(63, 63, 70, 0.8));
+  color: var(--kz-copy-fg-hover, #ffffff);
+}
+.kazari-code .kz-fs-icon {
+  width: 1rem;
+  height: 1rem;
+}
+}
+
+@layer kazari {
 .kazari-customizer {
   --kz-radius: 0.5rem;
   --kz-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -844,7 +1321,6 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
-  --kz-copy-idle-opacity: 0;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -855,10 +1331,7 @@
   --kz-toolbar-bg: rgba(229, 231, 235, 0.15);
   --kz-toolbar-border: rgba(209, 213, 219, 0.5);
   --kz-lang-fg: #4b5563;
-  --kz-lang-bg: rgba(209, 213, 219, 0.4);
   --kz-copy-fg: #4b5563;
-  --kz-copy-bg: rgba(209, 213, 219, 0.4);
-  --kz-copy-border: rgba(156, 163, 175, 0.2);
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
 }
@@ -871,10 +1344,7 @@
   --kz-toolbar-bg: rgba(39, 39, 42, 0.6);
   --kz-toolbar-border: rgba(63, 63, 70, 0.4);
   --kz-lang-fg: #a1a1aa;
-  --kz-lang-bg: rgba(51, 51, 55, 0.8);
   --kz-copy-fg: #d4d4d8;
-  --kz-copy-bg: rgba(51, 51, 55, 0.9);
-  --kz-copy-border: rgba(63, 63, 70, 0.5);
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
 }
@@ -931,7 +1401,6 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
-  --kz-copy-idle-opacity: 0;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -942,10 +1411,7 @@
   --kz-toolbar-bg: rgba(229, 231, 235, 0.15);
   --kz-toolbar-border: rgba(209, 213, 219, 0.5);
   --kz-lang-fg: #4b5563;
-  --kz-lang-bg: rgba(209, 213, 219, 0.4);
   --kz-copy-fg: #4b5563;
-  --kz-copy-bg: rgba(209, 213, 219, 0.4);
-  --kz-copy-border: rgba(156, 163, 175, 0.2);
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
 }
@@ -958,10 +1424,7 @@
   --kz-toolbar-bg: rgba(39, 39, 42, 0.6);
   --kz-toolbar-border: rgba(63, 63, 70, 0.4);
   --kz-lang-fg: #a1a1aa;
-  --kz-lang-bg: rgba(51, 51, 55, 0.8);
   --kz-copy-fg: #d4d4d8;
-  --kz-copy-bg: rgba(51, 51, 55, 0.9);
-  --kz-copy-border: rgba(63, 63, 70, 0.5);
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
 }
@@ -1018,7 +1481,6 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
-  --kz-copy-idle-opacity: 0;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1029,10 +1491,7 @@
   --kz-toolbar-bg: rgba(229, 231, 235, 0.15);
   --kz-toolbar-border: rgba(209, 213, 219, 0.5);
   --kz-lang-fg: #4b5563;
-  --kz-lang-bg: rgba(209, 213, 219, 0.4);
   --kz-copy-fg: #4b5563;
-  --kz-copy-bg: rgba(209, 213, 219, 0.4);
-  --kz-copy-border: rgba(156, 163, 175, 0.2);
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
 }
@@ -1045,10 +1504,7 @@
   --kz-toolbar-bg: rgba(39, 39, 42, 0.6);
   --kz-toolbar-border: rgba(63, 63, 70, 0.4);
   --kz-lang-fg: #a1a1aa;
-  --kz-lang-bg: rgba(51, 51, 55, 0.8);
   --kz-copy-fg: #d4d4d8;
-  --kz-copy-bg: rgba(51, 51, 55, 0.9);
-  --kz-copy-border: rgba(63, 63, 70, 0.5);
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
 }

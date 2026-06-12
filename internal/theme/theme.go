@@ -256,6 +256,14 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 			nv("--kz-copy-fg-hover", "#111827"),
 			nv("--kz-copy-bg-hover", "rgba(156, 163, 175, 0.2)"),
 		)
+		if cfg.Collapsible != nil {
+			vars = append(vars,
+				nv("--kz-collapse-btn-fg", "#4b5563"),
+				nv("--kz-collapse-btn-bg", "rgba(0, 0, 0, 0.04)"),
+				nv("--kz-collapse-btn-hover-bg", "rgba(0, 0, 0, 0.08)"),
+				nv("--kz-collapse-btn-border", "rgba(0, 0, 0, 0.15)"),
+			)
+		}
 	} else {
 		vars = append(vars,
 			nv("--kz-toolbar-bg", "rgba(39, 39, 42, 0.6)"),
@@ -265,6 +273,14 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 			nv("--kz-copy-fg-hover", "#ffffff"),
 			nv("--kz-copy-bg-hover", "rgba(63, 63, 70, 0.8)"),
 		)
+		if cfg.Collapsible != nil {
+			vars = append(vars,
+				nv("--kz-collapse-btn-fg", "#d4d4d8"),
+				nv("--kz-collapse-btn-bg", "rgba(255, 255, 255, 0.1)"),
+				nv("--kz-collapse-btn-hover-bg", "rgba(255, 255, 255, 0.18)"),
+				nv("--kz-collapse-btn-border", "rgba(255, 255, 255, 0.2)"),
+			)
+		}
 	}
 
 	// Minimal terminal dots color derived from theme luminance.
