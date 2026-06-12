@@ -75,6 +75,8 @@ var exampleDescriptions = map[string]string{
 	"line-numbers":          "Adds a numbered gutter so readers can reference specific lines precisely.",
 	"line-numbers-start":    "Continues numbering from the source file's original location when showing an excerpt.",
 	"word-wrap":             "Wraps long lines within the block while preserving indentation for readable continuations.",
+	"word-wrap-no-preserve": "Wrapped continuations start at the left edge instead of aligning with the original indentation.",
+	"word-wrap-hanging":     "Adds a fixed hanging indent to wrapped continuations so new logical lines are easy to spot.",
 	"line-markers":          "Distinguishes highlighted, inserted, and deleted lines with clear full-line treatments.",
 	"labeled-range":         "Attaches explanatory labels to marked line ranges so each change can carry context.",
 	"focus-lines":           "Keeps selected lines prominent while dimming the surrounding code for emphasis.",
@@ -283,6 +285,26 @@ html, err := engine.Render(code, kazari.Options{
 html, err := engine.Render(code, kazari.Options{
 	Lang: "go", Title: "wrap.go", LineNumbers: &enabled, Wrap: &wrap,
 })`),
+				},
+			},
+			{
+				ID:          "word-wrap-no-preserve",
+				Title:       "Word Wrap (preserveIndent=false)",
+				NavTitle:    "No preserve indent",
+				Description: "Wrapped continuations start at the left edge instead of aligning with the original indentation.",
+				HTML:        b.renderMeta(engine, wrapCode, `go title="no-preserve.go" showLineNumbers wrap preserveIndent=false`),
+				Recipes: []Recipe{
+					recipe("Meta", `go title="no-preserve.go" showLineNumbers wrap preserveIndent=false`),
+				},
+			},
+			{
+				ID:          "word-wrap-hanging",
+				Title:       "Word Wrap (hangingIndent=4)",
+				NavTitle:    "Hanging indent",
+				Description: "Adds a fixed 4-character hanging indent to all wrapped continuations, making it easy to spot where a new logical line begins.",
+				HTML:        b.renderMeta(engine, wrapCode, `go title="hanging.go" showLineNumbers wrap preserveIndent=false hangingIndent=4`),
+				Recipes: []Recipe{
+					recipe("Meta", `go title="hanging.go" showLineNumbers wrap preserveIndent=false hangingIndent=4`),
 				},
 			},
 		},
@@ -752,7 +774,6 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 
 	css := strings.Join([]string{
 		collapseEngine.CSS(),
-		dotsEngine.CSS(),
 		customizerEngine.ThemeCSS(),
 		tintedEngine.ThemeCSS(),
 		scopedEngine.ThemeCSS(),

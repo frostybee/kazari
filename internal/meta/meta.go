@@ -43,6 +43,20 @@ func Parse(meta string) *ParseResult {
 			v := true
 			result.BlockOptions.Wrap = &v
 
+		case tok == "preserveIndent":
+			v := true
+			result.BlockOptions.PreserveIndent = &v
+
+		case tok == "preserveIndent=false":
+			v := false
+			result.BlockOptions.PreserveIndent = &v
+
+		case strings.HasPrefix(tok, "hangingIndent="):
+			val := strings.TrimPrefix(tok, "hangingIndent=")
+			if n, err := strconv.Atoi(val); err == nil {
+				result.BlockOptions.HangingIndent = &n
+			}
+
 		case tok == "collapse":
 			if result.Collapse == nil {
 				result.Collapse = &config.CollapseSpec{}

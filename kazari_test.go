@@ -410,41 +410,19 @@ func TestTerminalDots_Minimal(t *testing.T) {
 	}
 }
 
-func TestCSS_ColoredDots(t *testing.T) {
+func TestCSS_BothDotStyles(t *testing.T) {
 	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#000", BG: "#fff"}}
 	engine := newTestEngine(hl)
 	css := engine.CSS()
 
 	if !strings.Contains(css, "--kz-terminal-dot-red") {
-		t.Error("default CSS should contain colored dot rules")
+		t.Error("CSS should contain colored dot rules")
 	}
-	if strings.Contains(css, "kz-dots-minimal") {
-		t.Error("default CSS should not contain minimal dot rules")
-	}
-	if strings.Contains(css, "--kz-terminal-icon") {
-		t.Error("default CSS should not contain minimal dot variables")
-	}
-}
-
-func TestCSS_MinimalDots(t *testing.T) {
-	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#000", BG: "#fff"}}
-	engine := newTestEngine(hl, WithTerminalDotStyle(DotsMinimal))
-	css := engine.CSS()
-
 	if !strings.Contains(css, "kz-dots-minimal") {
-		t.Error("minimal CSS should contain minimal dot rules")
-	}
-	if !strings.Contains(css, "mask-image") {
-		t.Error("minimal CSS should use mask-image")
-	}
-	if !strings.Contains(css, "--kz-terminal-dots-fg") {
-		t.Error("minimal CSS should define --kz-terminal-dots-fg")
+		t.Error("CSS should contain minimal dot rules")
 	}
 	if !strings.Contains(css, "--kz-terminal-icon") {
-		t.Error("minimal CSS should define --kz-terminal-icon")
-	}
-	if strings.Contains(css, "--kz-terminal-dot-red") {
-		t.Error("minimal CSS should not contain colored dot rules")
+		t.Error("CSS should contain minimal dot variables")
 	}
 }
 

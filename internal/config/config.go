@@ -254,6 +254,8 @@ type BlockOptions struct {
 	LineNumbers     *bool // nil = use default
 	StartLineNumber *int  // nil = use default (1)
 	Wrap            *bool // nil = use default
+	PreserveIndent  *bool // nil = use default
+	HangingIndent   *int  // nil = use default
 }
 
 // ResolvedBlock is the final merged config for rendering a single code block.
@@ -329,6 +331,12 @@ func (c *Config) Resolve(lang string, blockOpts *BlockOptions) *ResolvedBlock {
 		}
 		if blockOpts.Wrap != nil {
 			resolved.Wrap = *blockOpts.Wrap
+		}
+		if blockOpts.PreserveIndent != nil {
+			resolved.PreserveIndent = *blockOpts.PreserveIndent
+		}
+		if blockOpts.HangingIndent != nil {
+			resolved.HangingIndent = *blockOpts.HangingIndent
 		}
 	}
 

@@ -127,6 +127,40 @@ func TestParse_Wrap(t *testing.T) {
 	}
 }
 
+func TestParse_PreserveIndent(t *testing.T) {
+	result := Parse("go wrap preserveIndent")
+	if result.BlockOptions.PreserveIndent == nil || !*result.BlockOptions.PreserveIndent {
+		t.Error("preserveIndent should set PreserveIndent to true")
+	}
+}
+
+func TestParse_PreserveIndentFalse(t *testing.T) {
+	result := Parse("go wrap preserveIndent=false")
+	if result.BlockOptions.PreserveIndent == nil || *result.BlockOptions.PreserveIndent {
+		t.Error("preserveIndent=false should set PreserveIndent to false")
+	}
+}
+
+func TestParse_HangingIndent(t *testing.T) {
+	result := Parse("go wrap hangingIndent=2")
+	if result.BlockOptions.HangingIndent == nil || *result.BlockOptions.HangingIndent != 2 {
+		t.Error("hangingIndent=2 should set HangingIndent to 2")
+	}
+}
+
+func TestParse_WrapCombo(t *testing.T) {
+	result := Parse("go wrap preserveIndent=false hangingIndent=4")
+	if result.BlockOptions.Wrap == nil || !*result.BlockOptions.Wrap {
+		t.Error("expected Wrap=true")
+	}
+	if result.BlockOptions.PreserveIndent == nil || *result.BlockOptions.PreserveIndent {
+		t.Error("expected PreserveIndent=false")
+	}
+	if result.BlockOptions.HangingIndent == nil || *result.BlockOptions.HangingIndent != 4 {
+		t.Error("expected HangingIndent=4")
+	}
+}
+
 func TestParse_Title(t *testing.T) {
 	result := Parse(`go title="My Title"`)
 	if result.BlockOptions.Title != "My Title" {
