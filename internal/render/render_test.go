@@ -333,6 +333,56 @@ func TestRenderBlock_FullscreenButton(t *testing.T) {
 	if !strings.Contains(out, "kz-fs-btn") {
 		t.Error("expected fullscreen button")
 	}
+	if !strings.Contains(out, "kz-fs-exit-icon") {
+		t.Error("expected exit fullscreen icon for icon switching")
+	}
+	if !strings.Contains(out, `aria-expanded="false"`) {
+		t.Error("expected aria-expanded on fullscreen button")
+	}
+}
+
+func TestRenderBlock_FullscreenFontControls(t *testing.T) {
+	cfg := defaultCfg()
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	for _, want := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-hint"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in output", want)
+		}
+	}
+}
+
+func TestRenderBlock_NoFullscreenNoFontControls(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.FullscreenButton = false
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	for _, absent := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-hint", "kz-fs-btn"} {
+		if strings.Contains(out, absent) {
+			t.Errorf("should not contain %q when fullscreen disabled", absent)
+		}
+	}
+}
+
+func TestRenderBlock_TerminalFullscreenFontControls(t *testing.T) {
+	cfg := defaultCfg()
+	r := resolved()
+	r.Frame = config.FrameTerminal
+	lines := []TokenLine{simpleLine("$ echo hi", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	for _, want := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-btn", "kz-fs-hint"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("terminal frame: expected %q in output", want)
+		}
+	}
 }
 
 // --- Wrap ---

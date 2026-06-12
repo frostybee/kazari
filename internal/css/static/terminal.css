@@ -17,6 +17,9 @@
   pointer-events: none;
 }
 .kazari-code .kz-terminal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-inline-start: auto;
   z-index: 1;
 }

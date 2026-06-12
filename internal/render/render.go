@@ -26,7 +26,13 @@ const copySVG = `<svg class="kz-copy-icon" fill="none" stroke="currentColor" vie
 
 const fullscreenSVG = `<svg class="kz-fs-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>`
 
+const fullscreenExitSVG = `<svg class="kz-fs-exit-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg>`
+
 const chevronSVG = `<svg class="kz-collapse-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`
+
+const fontIncreaseSVG = `<svg class="kz-font-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg>`
+
+const fontDecreaseSVG = `<svg class="kz-font-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg>`
 
 // RenderBlock produces the full HTML for a code block.
 func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config) string {
@@ -66,6 +72,7 @@ func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.
 	sb.WriteString(fmt.Sprintf("<figure class=\"%s\" data-lang=\"%s\">", classes, html.EscapeString(resolved.Lang)))
 
 	renderToolbar(sb, resolved, cfg)
+	renderFullscreenHint(sb, cfg)
 	renderCollapseContentStart(sb, resolved)
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 	renderCollapseContentEnd(sb, resolved)
@@ -95,13 +102,20 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	} else {
 		sb.WriteString(fmt.Sprintf("<span class=\"sr-only\">%s</span>", html.EscapeString(cfg.UIStrings.TerminalWindowLabel)))
 	}
-	if cfg.CopyButton {
+	if cfg.CopyButton || cfg.FullscreenButton {
 		sb.WriteString("<div class=\"kz-terminal-actions\">")
-		renderCopyButton(sb, resolved.RawCode, cfg)
+		if cfg.CopyButton {
+			renderCopyButton(sb, resolved.RawCode, cfg)
+		}
+		if cfg.FullscreenButton {
+			renderFontControls(sb, cfg)
+			renderFullscreenButton(sb, cfg)
+		}
 		sb.WriteString("</div>")
 	}
 	sb.WriteString("</div>")
 
+	renderFullscreenHint(sb, cfg)
 	renderCollapseContentStart(sb, resolved)
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
 	renderCollapseContentEnd(sb, resolved)
@@ -142,9 +156,8 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 		renderCopyButton(sb, resolved.RawCode, cfg)
 	}
 	if cfg.FullscreenButton {
-		sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\">", html.EscapeString(cfg.UIStrings.FullscreenLabel)))
-			sb.WriteString(fullscreenSVG)
-			sb.WriteString("</button>")
+		renderFontControls(sb, cfg)
+		renderFullscreenButton(sb, cfg)
 	}
 	if resolved.CollapseThreshold {
 		sb.WriteString(fmt.Sprintf("<button class=\"kz-collapse-toggle\" aria-expanded=\"false\" aria-label=\"%s\">",
@@ -167,6 +180,35 @@ func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 	))
 	sb.WriteString(copySVG)
 	sb.WriteString("</button>")
+}
+
+func renderFullscreenButton(sb *strings.Builder, cfg *config.Config) {
+	sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\" aria-expanded=\"false\">",
+		html.EscapeString(cfg.UIStrings.FullscreenLabel)))
+	sb.WriteString(fullscreenSVG)
+	sb.WriteString(fullscreenExitSVG)
+	sb.WriteString("</button>")
+}
+
+func renderFontControls(sb *strings.Builder, cfg *config.Config) {
+	sb.WriteString("<div class=\"kz-font-controls\">")
+	sb.WriteString(fmt.Sprintf("<button class=\"kz-font-dec\" aria-label=\"%s\" title=\"%s\">",
+		html.EscapeString(cfg.UIStrings.FontDecreaseLabel),
+		html.EscapeString(cfg.UIStrings.FontResetLabel)))
+	sb.WriteString(fontDecreaseSVG)
+	sb.WriteString("</button>")
+	sb.WriteString(fmt.Sprintf("<button class=\"kz-font-inc\" aria-label=\"%s\">",
+		html.EscapeString(cfg.UIStrings.FontIncreaseLabel)))
+	sb.WriteString(fontIncreaseSVG)
+	sb.WriteString("</button>")
+	sb.WriteString("</div>")
+}
+
+func renderFullscreenHint(sb *strings.Builder, cfg *config.Config) {
+	if cfg.FullscreenButton {
+		sb.WriteString(fmt.Sprintf("<div class=\"kz-fs-hint\" aria-hidden=\"true\">%s</div>",
+			html.EscapeString(cfg.UIStrings.FullscreenHint)))
+	}
 }
 
 func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {

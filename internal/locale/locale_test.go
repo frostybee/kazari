@@ -10,6 +10,18 @@ func TestResolve_EnUS_Defaults(t *testing.T) {
 	if s.FullscreenLabel != "Fullscreen" {
 		t.Errorf("FullscreenLabel = %q, want %q", s.FullscreenLabel, "Fullscreen")
 	}
+	if s.FontIncreaseLabel != "Increase font size" {
+		t.Errorf("FontIncreaseLabel = %q, want %q", s.FontIncreaseLabel, "Increase font size")
+	}
+	if s.FontDecreaseLabel != "Decrease font size" {
+		t.Errorf("FontDecreaseLabel = %q, want %q", s.FontDecreaseLabel, "Decrease font size")
+	}
+	if s.FontResetLabel != "Double-click to reset" {
+		t.Errorf("FontResetLabel = %q, want %q", s.FontResetLabel, "Double-click to reset")
+	}
+	if s.FullscreenHint != "Press Esc to exit fullscreen" {
+		t.Errorf("FullscreenHint = %q, want %q", s.FullscreenHint, "Press Esc to exit fullscreen")
+	}
 	if s.ExpandButtonText != "Show more" {
 		t.Errorf("ExpandButtonText = %q, want %q", s.ExpandButtonText, "Show more")
 	}
@@ -23,6 +35,12 @@ func TestResolve_FrFR(t *testing.T) {
 	if s.CopySuccess != "Copié !" {
 		t.Errorf("CopySuccess = %q, want %q", s.CopySuccess, "Copié !")
 	}
+	if s.FontIncreaseLabel != "Augmenter la taille" {
+		t.Errorf("FontIncreaseLabel = %q, want %q", s.FontIncreaseLabel, "Augmenter la taille")
+	}
+	if s.FullscreenHint != "Appuyez sur Échap pour quitter" {
+		t.Errorf("FullscreenHint = %q, want %q", s.FullscreenHint, "Appuyez sur Échap pour quitter")
+	}
 }
 
 func TestResolve_JaJP(t *testing.T) {
@@ -32,6 +50,9 @@ func TestResolve_JaJP(t *testing.T) {
 	}
 	if s.FullscreenLabel != "全画面" {
 		t.Errorf("FullscreenLabel = %q, want %q", s.FullscreenLabel, "全画面")
+	}
+	if s.FontDecreaseLabel != "フォントサイズを縮小" {
+		t.Errorf("FontDecreaseLabel = %q, want %q", s.FontDecreaseLabel, "フォントサイズを縮小")
 	}
 }
 
@@ -79,6 +100,30 @@ func TestResolve_OverrideOnLocale(t *testing.T) {
 	}
 	if s.FullscreenLabel != "Plein écran" {
 		t.Error("non-overridden fr-FR keys should keep French defaults")
+	}
+}
+
+func TestResolve_OverrideFullscreenHint(t *testing.T) {
+	s := Resolve("en-US", map[string]string{"fullscreen.hint": "Hit Escape"})
+	if s.FullscreenHint != "Hit Escape" {
+		t.Errorf("FullscreenHint = %q, want %q", s.FullscreenHint, "Hit Escape")
+	}
+}
+
+func TestResolve_OverrideFontLabels(t *testing.T) {
+	s := Resolve("en-US", map[string]string{
+		"fullscreen.font.increase": "Bigger",
+		"fullscreen.font.decrease": "Smaller",
+		"fullscreen.font.reset":    "Reset size",
+	})
+	if s.FontIncreaseLabel != "Bigger" {
+		t.Errorf("FontIncreaseLabel = %q, want %q", s.FontIncreaseLabel, "Bigger")
+	}
+	if s.FontDecreaseLabel != "Smaller" {
+		t.Errorf("FontDecreaseLabel = %q, want %q", s.FontDecreaseLabel, "Smaller")
+	}
+	if s.FontResetLabel != "Reset size" {
+		t.Errorf("FontResetLabel = %q, want %q", s.FontResetLabel, "Reset size")
 	}
 }
 

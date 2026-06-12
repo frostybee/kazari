@@ -7,6 +7,10 @@ type UIStrings struct {
 	CopyTitle             string
 	CopySuccess           string
 	FullscreenLabel       string
+	FontIncreaseLabel     string
+	FontDecreaseLabel     string
+	FontResetLabel        string
+	FullscreenHint        string
 	ExpandButtonText      string
 	CollapseButtonText    string
 	ExpandedAnnouncement  string
@@ -23,6 +27,10 @@ var locales = map[string]UIStrings{
 		CopyTitle:             "Copy to clipboard",
 		CopySuccess:           "Copied!",
 		FullscreenLabel:       "Fullscreen",
+		FontIncreaseLabel:     "Increase font size",
+		FontDecreaseLabel:     "Decrease font size",
+		FontResetLabel:        "Double-click to reset",
+		FullscreenHint:        "Press Esc to exit fullscreen",
 		ExpandButtonText:      "Show more",
 		CollapseButtonText:    "Show less",
 		ExpandedAnnouncement:  "Code block expanded",
@@ -37,6 +45,10 @@ var locales = map[string]UIStrings{
 		CopyTitle:             "Copier dans le presse-papiers",
 		CopySuccess:           "Copié !",
 		FullscreenLabel:       "Plein écran",
+		FontIncreaseLabel:     "Augmenter la taille",
+		FontDecreaseLabel:     "Réduire la taille",
+		FontResetLabel:        "Double-cliquez pour réinitialiser",
+		FullscreenHint:        "Appuyez sur Échap pour quitter",
 		ExpandButtonText:      "Afficher plus",
 		CollapseButtonText:    "Afficher moins",
 		ExpandedAnnouncement:  "Bloc de code déplié",
@@ -51,6 +63,10 @@ var locales = map[string]UIStrings{
 		CopyTitle:             "クリップボードにコピー",
 		CopySuccess:           "コピーしました",
 		FullscreenLabel:       "全画面",
+		FontIncreaseLabel:     "フォントサイズを拡大",
+		FontDecreaseLabel:     "フォントサイズを縮小",
+		FontResetLabel:        "ダブルクリックでリセット",
+		FullscreenHint:        "Escで全画面を終了",
 		ExpandButtonText:      "もっと見る",
 		CollapseButtonText:    "閉じる",
 		ExpandedAnnouncement:  "コードブロックを展開しました",
@@ -86,6 +102,14 @@ func applyOverride(s *UIStrings, key, val string) {
 		s.CopySuccess = val
 	case "fullscreen.label":
 		s.FullscreenLabel = val
+	case "fullscreen.font.increase":
+		s.FontIncreaseLabel = val
+	case "fullscreen.font.decrease":
+		s.FontDecreaseLabel = val
+	case "fullscreen.font.reset":
+		s.FontResetLabel = val
+	case "fullscreen.hint":
+		s.FullscreenHint = val
 	case "collapse.expand":
 		s.ExpandButtonText = val
 	case "collapse.collapse":
