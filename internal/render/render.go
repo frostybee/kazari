@@ -66,10 +66,12 @@ func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.
 	sb.WriteString(fmt.Sprintf("<figure class=\"%s\" data-lang=\"%s\">", classes, html.EscapeString(resolved.Lang)))
 
 	renderToolbar(sb, resolved, cfg)
+	renderCollapseContentStart(sb, resolved)
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
+	renderCollapseContentEnd(sb, resolved)
 
 	if resolved.CollapseThreshold {
-		renderThresholdOverlay(sb, resolved, cfg)
+		renderCollapseBar(sb, resolved, cfg)
 	}
 
 	sb.WriteString("</figure>\n")
@@ -100,10 +102,12 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	}
 	sb.WriteString("</div>")
 
+	renderCollapseContentStart(sb, resolved)
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
+	renderCollapseContentEnd(sb, resolved)
 
 	if resolved.CollapseThreshold {
-		renderThresholdOverlay(sb, resolved, cfg)
+		renderCollapseBar(sb, resolved, cfg)
 	}
 
 	sb.WriteString("</figure>\n")
@@ -166,10 +170,12 @@ func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 }
 
 func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {
+	renderCollapseContentStart(sb, resolved)
 	renderPreCode(sb, lines, resolved, cfg, dualTheme)
+	renderCollapseContentEnd(sb, resolved)
 
 	if resolved.CollapseThreshold {
-		renderThresholdOverlay(sb, resolved, cfg)
+		renderCollapseBar(sb, resolved, cfg)
 	}
 }
 
@@ -699,7 +705,20 @@ func renderHiddenLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *li
 	sb.WriteString("</div></div>")
 }
 
-func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
+func renderCollapseContentStart(sb *strings.Builder, resolved *config.ResolvedBlock) {
+	if resolved.CollapseThreshold {
+		sb.WriteString("<div class=\"kz-collapse-content\">")
+	}
+}
+
+func renderCollapseContentEnd(sb *strings.Builder, resolved *config.ResolvedBlock) {
+	if resolved.CollapseThreshold {
+		sb.WriteString("<div class=\"kz-collapse-gradient\"></div>")
+		sb.WriteString("</div>")
+	}
+}
+
+func renderCollapseBar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
 	expandText := cfg.UIStrings.ExpandButtonText
 	collapseText := cfg.UIStrings.CollapseButtonText
 	expandedAnnouncement := cfg.UIStrings.ExpandedAnnouncement
@@ -719,12 +738,10 @@ func renderThresholdOverlay(sb *strings.Builder, resolved *config.ResolvedBlock,
 		}
 	}
 
-	// Badge fallback: append highlighted line count when markers are beyond 2× cap
 	if resolved.CollapseBeyondCap > 0 {
 		expandText = fmt.Sprintf("%s (+%d highlighted)", expandText, resolved.CollapseBeyondCap)
 	}
 
-	sb.WriteString("<div class=\"kz-collapse-gradient\"></div>")
 	sb.WriteString("<div class=\"kz-collapse-bar\">")
 	sb.WriteString(fmt.Sprintf(
 		"<button class=\"kz-collapse-btn\" aria-expanded=\"false\" data-expand=\"%s\" data-collapse=\"%s\" data-expanded-msg=\"%s\" data-collapsed-msg=\"%s\">%s</button>",
