@@ -531,8 +531,8 @@ func TestRender_CopyButton(t *testing.T) {
 	if !strings.Contains(html, "<svg") {
 		t.Error("missing copy SVG icon")
 	}
-	if !strings.Contains(html, "<span>Copy</span>") {
-		t.Error("missing copy text label")
+	if !strings.Contains(html, `title="Copy to clipboard"`) {
+		t.Error("missing copy title attribute")
 	}
 }
 
@@ -2755,14 +2755,11 @@ func TestRender_Locale_CopyButton(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, ">Copier</span>") {
-		t.Error("copy button should use French label")
+	if !strings.Contains(html, `title="Copier dans le presse-papiers"`) {
+		t.Error("copy button should use French title")
 	}
 	if !strings.Contains(html, `data-copied="Copié !"`) {
 		t.Error("copy button should use French success text")
-	}
-	if !strings.Contains(html, `title="Copier dans le presse-papiers"`) {
-		t.Error("copy button should use French title")
 	}
 }
 
@@ -2832,8 +2829,8 @@ func TestRender_Locale_CustomOverride(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, ">Copy code</span>") {
-		t.Error("copy button should use overridden label")
+	if !strings.Contains(html, "kz-copy-btn") {
+		t.Error("copy button should be present")
 	}
 }
 
@@ -2847,8 +2844,8 @@ func TestRender_Locale_DefaultEnglish(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, ">Copy</span>") {
-		t.Error("default should use English copy label")
+	if !strings.Contains(html, `title="Copy to clipboard"`) {
+		t.Error("default should use English copy title")
 	}
 	if !strings.Contains(html, `aria-label="Fullscreen"`) {
 		t.Error("default should use English fullscreen label")
@@ -3377,21 +3374,15 @@ func TestRender_TerminalSRLabel_Localized(t *testing.T) {
 
 // --- Copy button visibility tests ---
 
-func TestCSS_CopyButton_HoverVisibility(t *testing.T) {
+func TestCSS_CopyButton_AlwaysVisible(t *testing.T) {
 	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
 	engine := New(WithHighlighter(hl), WithMinify(false), WithCopyButton(true))
 	css := engine.CSS()
-	if !strings.Contains(css, "@media (hover: hover)") {
-		t.Error("copy CSS should gate idle hiding behind hover media query")
+	if strings.Contains(css, "--kz-copy-idle-opacity") {
+		t.Error("copy CSS should not use idle opacity hiding")
 	}
-	if !strings.Contains(css, "opacity: var(--kz-copy-idle-opacity, 0)") {
-		t.Error("copy CSS should use --kz-copy-idle-opacity for idle state")
-	}
-	if !strings.Contains(css, "--kz-copy-idle-opacity: 0;") {
-		t.Error("theme vars should declare --kz-copy-idle-opacity default")
-	}
-	if !strings.Contains(css, ".frame:focus-within .kz-copy-btn") {
-		t.Error("copy CSS should reveal button on focus-within")
+	if strings.Contains(css, "@media (hover: hover)") && strings.Contains(css, "kz-copy-btn") {
+		t.Error("copy button should not be gated behind hover media query")
 	}
 }
 

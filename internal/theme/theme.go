@@ -77,12 +77,6 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-focus-dimmed-opacity", "0.35"},
 	}
 
-	// Copy button defaults (conditional)
-	if cfg.CopyButton {
-		staticVars = append(staticVars,
-			nv("--kz-copy-idle-opacity", "0"),
-		)
-	}
 
 	// Collapsible defaults (conditional)
 	if cfg.Collapsible != nil {
@@ -258,10 +252,7 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 			nv("--kz-toolbar-bg", "rgba(229, 231, 235, 0.15)"),
 			nv("--kz-toolbar-border", "rgba(209, 213, 219, 0.5)"),
 			nv("--kz-lang-fg", "#4b5563"),
-			nv("--kz-lang-bg", "rgba(209, 213, 219, 0.4)"),
 			nv("--kz-copy-fg", "#4b5563"),
-			nv("--kz-copy-bg", "rgba(209, 213, 219, 0.4)"),
-			nv("--kz-copy-border", "rgba(156, 163, 175, 0.2)"),
 			nv("--kz-copy-fg-hover", "#111827"),
 			nv("--kz-copy-bg-hover", "rgba(156, 163, 175, 0.2)"),
 		)
@@ -270,10 +261,7 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 			nv("--kz-toolbar-bg", "rgba(39, 39, 42, 0.6)"),
 			nv("--kz-toolbar-border", "rgba(63, 63, 70, 0.4)"),
 			nv("--kz-lang-fg", "#a1a1aa"),
-			nv("--kz-lang-bg", "rgba(51, 51, 55, 0.8)"),
 			nv("--kz-copy-fg", "#d4d4d8"),
-			nv("--kz-copy-bg", "rgba(51, 51, 55, 0.9)"),
-			nv("--kz-copy-border", "rgba(63, 63, 70, 0.5)"),
 			nv("--kz-copy-fg-hover", "#ffffff"),
 			nv("--kz-copy-bg-hover", "rgba(63, 63, 70, 0.8)"),
 		)

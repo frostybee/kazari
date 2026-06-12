@@ -110,8 +110,11 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
 	sb.WriteString("<div class=\"kz-toolbar\">")
 
-	// Left section
+	// Left section: language label, then separator + title (if present)
 	sb.WriteString("<div class=\"kz-toolbar-left\">")
+	if cfg.LanguageBadge && resolved.Lang != "" {
+		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
+	}
 	if resolved.Title != "" {
 		if cfg.FileIcons {
 			ext := fileExt(resolved.Title)
@@ -124,16 +127,11 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 			}
 		}
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
-	} else if cfg.LanguageBadge && resolved.Lang != "" {
-		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
 	}
 	sb.WriteString("</div>")
 
-	// Right section
+	// Right section: action buttons only
 	sb.WriteString("<div class=\"kz-toolbar-right\">")
-	if resolved.Title != "" && cfg.LanguageBadge && resolved.Lang != "" {
-		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
-	}
 	if cfg.FullscreenButton {
 		sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\">", html.EscapeString(cfg.UIStrings.FullscreenLabel)))
 			sb.WriteString(fullscreenSVG)
@@ -156,7 +154,6 @@ func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 		html.EscapeString(encoded),
 	))
 	sb.WriteString(copySVG)
-	sb.WriteString(fmt.Sprintf("<span>%s</span>", html.EscapeString(cfg.UIStrings.CopyLabel)))
 	sb.WriteString("</button>")
 }
 

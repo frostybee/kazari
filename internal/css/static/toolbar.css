@@ -13,14 +13,16 @@
   gap: 0.5rem;
 }
 .kazari-code .kz-lang {
-  font-size: var(--kz-lang-font-size, 0.75rem);
+  font-size: var(--kz-lang-font-size, 0.8rem);
+  font-weight: var(--kz-lang-font-weight, 500);
   font-family: var(--kz-ui-font-family);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--kz-lang-radius, 0.25rem);
   color: var(--kz-lang-fg, #a1a1aa);
-  background: var(--kz-lang-bg, rgba(51, 51, 55, 0.8));
+}
+.kazari-code .kz-lang + .kz-title,
+.kazari-code .kz-lang + .kz-file-icon {
+  margin-left: 0.625rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--kz-separator-color, rgba(161, 161, 170, 0.3));
 }
 .kazari-code .kz-title {
   font-size: 0.875rem;
