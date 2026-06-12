@@ -238,6 +238,13 @@ func (e *Engine) CSS() string {
 	return css.Generate(e.cfg, e.lightColors, e.darkColors)
 }
 
+// ThemeCSS returns only theme variables and token switching CSS, without
+// structural rules. Use this for secondary engines on multi-engine pages
+// where one primary engine provides the full CSS via CSS().
+func (e *Engine) ThemeCSS() string {
+	return css.GenerateThemeOnly(e.cfg, e.lightColors, e.darkColors)
+}
+
 // JS returns the JavaScript module for this engine configuration.
 func (e *Engine) JS() string {
 	return js.Generate(e.cfg)

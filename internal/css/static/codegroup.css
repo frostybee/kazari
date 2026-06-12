@@ -6,14 +6,14 @@
 }
 
 /* Tab bar */
-.kz-group-tabs {
+.kazari-code .kz-group-tabs {
   display: flex;
   border-bottom: 1px solid var(--kz-group-border);
   background: var(--kz-editor-bg);
   overflow-x: auto;
 }
 
-.kz-group-tabs button[role="tab"] {
+.kazari-code .kz-group-tabs button[role="tab"] {
   padding: var(--kz-group-tab-padding);
   background: var(--kz-group-tab-bg);
   color: var(--kz-group-tab-fg);
@@ -28,29 +28,29 @@
   transition: color var(--kz-transition), background var(--kz-transition), border-color var(--kz-transition);
 }
 
-.kz-group-tabs button[role="tab"]:hover {
+.kazari-code .kz-group-tabs button[role="tab"]:hover {
   background: var(--kz-group-tab-active-bg);
 }
 
-.kz-group-tabs button[role="tab"][aria-selected="true"] {
+.kazari-code .kz-group-tabs button[role="tab"][aria-selected="true"] {
   background: var(--kz-group-tab-active-bg);
   color: var(--kz-group-tab-active-fg);
   border-bottom-color: var(--kz-group-tab-active-border);
 }
 
 /* Panels */
-.kz-group-panels [role="tabpanel"][hidden] {
+.kazari-code .kz-group-panels [role="tabpanel"][hidden] {
   display: none;
 }
 
 /* Neutralize inner kazari-code wrapper inside group panels */
-.kz-group-panels .kazari-code {
+.kazari-code .kz-group-panels .kazari-code {
   border-radius: 0;
   box-shadow: none;
 }
 
 /* Remove figure border-radius and shadow inside group */
-.kz-group-panels .frame {
+.kazari-code .kz-group-panels .frame {
   border-radius: 0;
   box-shadow: none;
 }

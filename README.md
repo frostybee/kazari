@@ -33,6 +33,10 @@ Editor and terminal frames, file name extraction, copy and fullscreen buttons, l
 
 All visual customization goes through `--kz-*` CSS variables. No rebuilds needed.
 
+## Usage Pattern
+
+Create one engine per site configuration. Per-block variation (titles, markers, line numbers, collapse, theme overrides) flows through the meta string or `Options` struct, not through separate engines. Call `CSS()` once in `<head>` and `JS()` once before `</body>`. If you genuinely need two engine configurations on the same page, scope the second with `WithThemeCSSRoot()` to avoid CSS variable collisions and use `ThemeCSS()` instead of `CSS()` to emit only its theme variables without duplicating structural rules.
+
 ## Installation
 
 ```bash

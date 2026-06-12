@@ -89,3 +89,21 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	}
 	return content
 }
+
+// GenerateThemeOnly produces only theme variables and token switching CSS,
+// without structural rules. Use this for secondary engines on multi-engine
+// pages where one primary engine provides the full CSS via Generate().
+func GenerateThemeOnly(cfg *config.Config, light, dark theme.ThemeColors) string {
+	var sb strings.Builder
+	sb.WriteString(theme.GenerateVars(cfg, light, dark))
+	sb.WriteString(theme.TokenSwitchingCSS(cfg))
+
+	content := sb.String()
+	if cfg.CascadeLayer != "" {
+		content = fmt.Sprintf("@layer %s {\n%s}\n", cfg.CascadeLayer, content)
+	}
+	if cfg.Minify {
+		return minify.CSS(content)
+	}
+	return content
+}

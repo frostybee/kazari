@@ -665,6 +665,57 @@ func TestCSS_ContainsCopyStyles(t *testing.T) {
 	}
 }
 
+func TestThemeCSS_ContainsVars(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false))
+
+	css := engine.ThemeCSS()
+	if !strings.Contains(css, "--kz-editor-bg") {
+		t.Error("ThemeCSS should contain theme variables")
+	}
+	if !strings.Contains(css, ":root") {
+		t.Error("ThemeCSS should contain root selector")
+	}
+}
+
+func TestThemeCSS_NoStructuralCSS(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false))
+
+	css := engine.ThemeCSS()
+	if strings.Contains(css, ".kz-toolbar") {
+		t.Error("ThemeCSS should not contain structural CSS")
+	}
+	if strings.Contains(css, ".kz-copy-btn") {
+		t.Error("ThemeCSS should not contain structural CSS")
+	}
+	if strings.Contains(css, "grid-template") {
+		t.Error("ThemeCSS should not contain layout CSS")
+	}
+}
+
+func TestThemeCSS_CustomRoot(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithThemeCSSRoot(".my-scope"))
+
+	css := engine.ThemeCSS()
+	if !strings.Contains(css, ".my-scope") {
+		t.Error("ThemeCSS should use custom CSS root")
+	}
+	if strings.Contains(css, ".kz-toolbar") {
+		t.Error("ThemeCSS should not contain structural CSS")
+	}
+}
+
+func TestThemeCSS_CascadeLayer(t *testing.T) {
+	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
+	engine := New(WithHighlighter(hl), WithMinify(false), WithCascadeLayer("kazari"))
+
+	if !strings.Contains(engine.ThemeCSS(), "@layer kazari") {
+		t.Error("ThemeCSS should respect cascade layer")
+	}
+}
+
 func TestAssets_Hashing(t *testing.T) {
 	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
 	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"))

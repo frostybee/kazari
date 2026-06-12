@@ -220,3 +220,22 @@ func TestGenerate_StyleResetConditional(t *testing.T) {
 		t.Errorf("style reset should be included when StyleReset is true, output length: %d", len(out))
 	}
 }
+
+func TestGenerateThemeOnly_NoStructural(t *testing.T) {
+	cfg := defaultCfg()
+	light, dark := colors()
+	out := GenerateThemeOnly(cfg, light, dark)
+
+	if !strings.Contains(out, "--kz-editor-bg") {
+		t.Error("ThemeOnly should contain theme variables")
+	}
+	if strings.Contains(out, ".kz-toolbar") {
+		t.Error("ThemeOnly should not contain structural CSS")
+	}
+	if strings.Contains(out, ".kz-copy-btn") {
+		t.Error("ThemeOnly should not contain structural CSS selectors")
+	}
+	if strings.Contains(out, "grid-template") {
+		t.Error("ThemeOnly should not contain layout CSS")
+	}
+}

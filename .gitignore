@@ -2,6 +2,8 @@ my-docs/
 #demo/
 
 showcase.html
+demo/nuri/showcase.css
+demo/nuri/showcase.js
 
 *.png
 

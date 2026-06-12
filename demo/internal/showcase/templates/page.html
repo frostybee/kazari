@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="showcase.css">
+</head>
+<body id="top">
+<a class="skip-link" href="#showcase-content">Skip to examples</a>
+<header class="demo-header">
+  <div class="demo-header-inner">
+    <div class="demo-brand">
+      <h1>Kazari Showcase</h1>
+      <p>{{.Subtitle}}</p>
+    </div>
+    <div class="header-actions">
+      <nav class="backend-switcher" aria-label="Syntax highlighter backend">
+        {{range .Backends}}
+          {{if .Active}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.Href}}" data-backend-link>{{.Name}}</a>{{end}}
+        {{end}}
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+    </div>
+  </div>
+</header>
+
+<div class="demo-shell">
+<aside class="demo-sidebar">
+  <nav class="demo-nav" aria-label="Showcase examples">
+    <p class="demo-nav-title">Examples</p>
+    {{range .Categories}}
+    <div class="nav-category" data-nav-category="{{.ID}}">
+      <a class="category-link" href="#{{.ID}}" data-category-link="{{.ID}}">{{.Title}}</a>
+      {{range .Examples}}<a href="#{{.ID}}" data-example-link="{{.ID}}">{{.NavTitle}}</a>{{end}}
+    </div>
+    {{end}}
+  </nav>
+</aside>
+
+<main class="demo-content" id="showcase-content">
+  <div class="mobile-jump">
+    <label for="example-jump">Jump to an example</label>
+    <select id="example-jump">
+      <option value="">Choose an example...</option>
+      {{range .Categories}}
+      <optgroup label="{{.Title}}" data-jump-category="{{.ID}}">
+        {{range .Examples}}<option value="#{{.ID}}" data-jump-example="{{.ID}}">{{.NavTitle}}</option>{{end}}
+      </optgroup>
+      {{end}}
+    </select>
+  </div>
+
+  <section class="showcase-filters" aria-label="Filter examples">
+    <div class="filter-field search-field">
+      <label for="example-search">Search examples</label>
+      <input id="example-search" type="search" placeholder="Try markers, terminal, theme..." autocomplete="off">
+    </div>
+    <div class="filter-field category-field">
+      <label for="category-filter">Category</label>
+      <select id="category-filter">
+        <option value="all">All categories</option>
+        {{range .Categories}}<option value="{{.ID}}">{{.Title}}</option>{{end}}
+      </select>
+    </div>
+    <button class="clear-filters" id="clear-filters" type="button">Clear</button>
+    <p class="result-count" id="result-count" role="status" aria-live="polite">{{.ExampleCount}} examples</p>
+  </section>
+
+  <div class="no-results" id="no-results" hidden>
+    <h2>No examples found</h2>
+    <p>Try a different search term or category.</p>
+  </div>
+
+  {{range .Categories}}
+  <section class="demo-category" id="{{.ID}}" data-category="{{.ID}}">
+    <h2>{{.Title}}</h2>
+    <p class="category-description">{{.Description}}</p>
+    {{range .Examples}}
+    {{$example := .}}
+    <article class="demo-example" id="{{.ID}}" data-example="{{.ID}}" data-search="{{.SearchText}}">
+      <div class="example-heading">
+        <h3>{{.Title}}</h3>
+        <button class="copy-action copy-link" type="button" data-copy-link="{{.ID}}" aria-label="Copy link to {{.Title}}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
+          <span>Copy link</span>
+        </button>
+      </div>
+      {{if .Description}}<p class="example-description">{{.Description}}</p>{{end}}
+      <div class="example-output{{if .WrapperClass}} {{.WrapperClass}}{{end}}">{{.HTML}}</div>
+      <details class="recipe-disclosure">
+        <summary>How to build this</summary>
+        <div class="recipe-content" data-recipe-group>
+          {{if $example.HasRecipeTabs}}
+          <div class="recipe-tabs" role="tablist" aria-label="Implementation recipes">
+            {{range $index, $recipe := .Recipes}}<button type="button" role="tab" data-recipe-tab aria-selected="{{if eq $index 0}}true{{else}}false{{end}}" tabindex="{{if eq $index 0}}0{{else}}-1{{end}}">{{$recipe.Label}}</button>{{end}}
+          </div>
+          {{end}}
+          {{range $index, $recipe := .Recipes}}
+          <section class="recipe-panel" data-recipe-panel {{if and $example.HasRecipeTabs (ne $index 0)}}hidden{{end}}>
+            {{if not $example.HasRecipeTabs}}<h4>{{$recipe.Label}}</h4>{{end}}
+            <button class="copy-action copy-recipe" type="button" data-copy-label="{{$recipe.Label}}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy {{$recipe.Label}}</span>
+            </button>
+            <pre><code>{{$recipe.Code}}</code></pre>
+          </section>
+          {{end}}
+        </div>
+      </details>
+    </article>
+    {{end}}
+    <a class="back-to-top" href="#top">Back to top</a>
+  </section>
+  {{end}}
+</main>
+</div>
+
+<div class="sr-announcement" id="showcase-announcement" role="status" aria-live="polite"></div>
+<script defer src="showcase.js"></script>
+</body>
+</html>
