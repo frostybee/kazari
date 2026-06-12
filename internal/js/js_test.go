@@ -73,6 +73,7 @@ func TestGenerate_NothingEnabled(t *testing.T) {
 	cfg := defaultCfg()
 	cfg.CopyButton = false
 	cfg.FullscreenButton = false
+	cfg.WrapButton = false
 	cfg.Collapsible = nil
 	cfg.CodeGroups = false
 

@@ -34,6 +34,10 @@ const fontIncreaseSVG = `<svg class="kz-font-icon" fill="none" stroke="currentCo
 
 const fontDecreaseSVG = `<svg class="kz-font-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg>`
 
+const wrapSVG = `<svg class="kz-wrap-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg>`
+
+const wrapOffSVG = `<svg class="kz-wrap-off-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg>`
+
 // RenderBlock produces the full HTML for a code block.
 func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config) string {
 	var sb strings.Builder
@@ -102,10 +106,13 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	} else {
 		sb.WriteString(fmt.Sprintf("<span class=\"sr-only\">%s</span>", html.EscapeString(cfg.UIStrings.TerminalWindowLabel)))
 	}
-	if cfg.CopyButton || cfg.FullscreenButton {
+	if cfg.CopyButton || cfg.WrapButton || cfg.FullscreenButton {
 		sb.WriteString("<div class=\"kz-terminal-actions\">")
 		if cfg.CopyButton {
 			renderCopyButton(sb, resolved.RawCode, cfg)
+		}
+		if cfg.WrapButton {
+			renderWrapButton(sb, resolved, cfg)
 		}
 		if cfg.FullscreenButton {
 			renderFontControls(sb, cfg)
@@ -155,6 +162,9 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 	if cfg.CopyButton {
 		renderCopyButton(sb, resolved.RawCode, cfg)
 	}
+	if cfg.WrapButton {
+		renderWrapButton(sb, resolved, cfg)
+	}
 	if cfg.FullscreenButton {
 		renderFontControls(sb, cfg)
 		renderFullscreenButton(sb, cfg)
@@ -179,6 +189,25 @@ func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 		html.EscapeString(encoded),
 	))
 	sb.WriteString(copySVG)
+	sb.WriteString("</button>")
+}
+
+func renderWrapButton(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
+	pressed := "false"
+	title := cfg.UIStrings.WrapEnableLabel
+	if resolved.Wrap {
+		pressed = "true"
+		title = cfg.UIStrings.WrapDisableLabel
+	}
+	sb.WriteString(fmt.Sprintf(
+		"<button class=\"kz-wrap-btn\" aria-pressed=\"%s\" title=\"%s\" data-enable=\"%s\" data-disable=\"%s\">",
+		pressed,
+		html.EscapeString(title),
+		html.EscapeString(cfg.UIStrings.WrapEnableLabel),
+		html.EscapeString(cfg.UIStrings.WrapDisableLabel),
+	))
+	sb.WriteString(wrapSVG)
+	sb.WriteString(wrapOffSVG)
 	sb.WriteString("</button>")
 }
 

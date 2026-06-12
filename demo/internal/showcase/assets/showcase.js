@@ -59,6 +59,15 @@
 
   var themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) {
+    var saved = localStorage.getItem('kz-demo-theme');
+    if (saved === 'dark' && !root.classList.contains('dark')) {
+      root.classList.add('dark');
+      document.querySelectorAll('.kazari-tinted, .kazari-scoped, .kazari-customizer').forEach(function (element) {
+        element.classList.add('dark');
+      });
+      themeToggle.setAttribute('aria-pressed', 'true');
+      themeToggle.textContent = 'Light mode';
+    }
     themeToggle.addEventListener('click', function () {
       var isDark = root.classList.toggle('dark');
       document.querySelectorAll('.kazari-tinted, .kazari-scoped, .kazari-customizer').forEach(function (element) {
@@ -66,6 +75,7 @@
       });
       themeToggle.setAttribute('aria-pressed', String(isDark));
       themeToggle.textContent = isDark ? 'Light mode' : 'Dark mode';
+      localStorage.setItem('kz-demo-theme', isDark ? 'dark' : 'light');
     });
   }
 

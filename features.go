@@ -10,6 +10,10 @@ func WithFullscreenButton(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.FullscreenButton = enabled }
 }
 
+func WithWrapButton(enabled bool) Option {
+	return func(b *engineBuilder) { b.cfg.WrapButton = enabled }
+}
+
 func WithLineNumbers(enabled bool) Option {
 	return func(b *engineBuilder) {
 		b.cfg.LineNumbers = enabled

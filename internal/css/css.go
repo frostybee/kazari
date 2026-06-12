@@ -71,6 +71,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	if cfg.FullscreenButton {
 		sb.WriteString(readCSS("fullscreen.css"))
 	}
+	if cfg.WrapButton {
+		sb.WriteString(readCSS("wrap.css"))
+	}
 	if cfg.Collapsible != nil {
 		sb.WriteString(readCSS("collapsible.css"))
 	}

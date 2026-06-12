@@ -264,6 +264,12 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 				nv("--kz-collapse-btn-border", "rgba(0, 0, 0, 0.15)"),
 			)
 		}
+		if cfg.ThemedScrollbars {
+			vars = append(vars,
+				nv("--kz-scrollbar-thumb", "rgba(0, 0, 0, 0.2)"),
+				nv("--kz-scrollbar-thumb-hover", "rgba(0, 0, 0, 0.35)"),
+			)
+		}
 	} else {
 		vars = append(vars,
 			nv("--kz-toolbar-bg", "rgba(39, 39, 42, 0.6)"),
@@ -279,6 +285,12 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 				nv("--kz-collapse-btn-bg", "rgba(255, 255, 255, 0.1)"),
 				nv("--kz-collapse-btn-hover-bg", "rgba(255, 255, 255, 0.18)"),
 				nv("--kz-collapse-btn-border", "rgba(255, 255, 255, 0.2)"),
+			)
+		}
+		if cfg.ThemedScrollbars {
+			vars = append(vars,
+				nv("--kz-scrollbar-thumb", "rgba(255, 255, 255, 0.15)"),
+				nv("--kz-scrollbar-thumb-hover", "rgba(255, 255, 255, 0.3)"),
 			)
 		}
 	}

@@ -11,6 +11,8 @@ type UIStrings struct {
 	FontDecreaseLabel     string
 	FontResetLabel        string
 	FullscreenHint        string
+	WrapEnableLabel       string
+	WrapDisableLabel      string
 	ExpandButtonText      string
 	CollapseButtonText    string
 	ExpandedAnnouncement  string
@@ -31,6 +33,8 @@ var locales = map[string]UIStrings{
 		FontDecreaseLabel:     "Decrease font size",
 		FontResetLabel:        "Double-click to reset",
 		FullscreenHint:        "Press Esc to exit fullscreen",
+		WrapEnableLabel:       "Enable word wrap",
+		WrapDisableLabel:      "Disable word wrap",
 		ExpandButtonText:      "Show more",
 		CollapseButtonText:    "Show less",
 		ExpandedAnnouncement:  "Code block expanded",
@@ -49,6 +53,8 @@ var locales = map[string]UIStrings{
 		FontDecreaseLabel:     "Réduire la taille",
 		FontResetLabel:        "Double-cliquez pour réinitialiser",
 		FullscreenHint:        "Appuyez sur Échap pour quitter",
+		WrapEnableLabel:       "Activer le retour à la ligne",
+		WrapDisableLabel:      "Désactiver le retour à la ligne",
 		ExpandButtonText:      "Afficher plus",
 		CollapseButtonText:    "Afficher moins",
 		ExpandedAnnouncement:  "Bloc de code déplié",
@@ -67,6 +73,8 @@ var locales = map[string]UIStrings{
 		FontDecreaseLabel:     "フォントサイズを縮小",
 		FontResetLabel:        "ダブルクリックでリセット",
 		FullscreenHint:        "Escで全画面を終了",
+		WrapEnableLabel:       "折り返しを有効にする",
+		WrapDisableLabel:      "折り返しを無効にする",
 		ExpandButtonText:      "もっと見る",
 		CollapseButtonText:    "閉じる",
 		ExpandedAnnouncement:  "コードブロックを展開しました",
@@ -110,6 +118,10 @@ func applyOverride(s *UIStrings, key, val string) {
 		s.FontResetLabel = val
 	case "fullscreen.hint":
 		s.FullscreenHint = val
+	case "wrap.enable":
+		s.WrapEnableLabel = val
+	case "wrap.disable":
+		s.WrapDisableLabel = val
 	case "collapse.expand":
 		s.ExpandButtonText = val
 	case "collapse.collapse":

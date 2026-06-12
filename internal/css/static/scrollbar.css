@@ -1,14 +1,18 @@
 .kazari-code pre::-webkit-scrollbar {
-  width: var(--kz-scrollbar-width, 8px);
-  height: var(--kz-scrollbar-width, 8px);
+  width: var(--kz-scrollbar-width, 5px);
+  height: var(--kz-scrollbar-height, 5px);
 }
 .kazari-code pre::-webkit-scrollbar-thumb {
   background: var(--kz-scrollbar-thumb, rgba(255,255,255,0.15));
-  border-radius: 4px;
+  border-radius: 999px;
 }
 .kazari-code pre::-webkit-scrollbar-thumb:hover {
   background: var(--kz-scrollbar-thumb-hover, rgba(255,255,255,0.3));
 }
 .kazari-code pre::-webkit-scrollbar-track {
   background: var(--kz-scrollbar-track, transparent);
+}
+.kazari-code pre {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kz-scrollbar-thumb, rgba(255,255,255,0.15)) transparent;
 }

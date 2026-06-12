@@ -5,6 +5,11 @@ showcase.html
 demo/nuri/showcase.css
 demo/nuri/showcase.js
 
+demo/chroma/showcase.css
+demo/chroma/showcase.js
+
+
+
 *.png
 
 # If you prefer the allow list template instead of the deny list, see community template:

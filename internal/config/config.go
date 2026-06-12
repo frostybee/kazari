@@ -167,6 +167,7 @@ type Config struct {
 	DarkTheme          string
 	CopyButton         bool
 	FullscreenButton   bool
+	WrapButton         bool
 	LineNumbers        bool
 	FrameDetection     bool
 	FileNameExtraction bool
@@ -207,6 +208,7 @@ func DefaultConfig() *Config {
 		DarkTheme:          "github-dark",
 		CopyButton:         true,
 		FullscreenButton:   true,
+		WrapButton:         true,
 		LineNumbers:        false,
 		FrameDetection:     true,
 		FileNameExtraction: true,

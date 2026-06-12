@@ -749,7 +749,7 @@ func TestJS_ContainsFullscreenHandler(t *testing.T) {
 
 func TestJS_EmptyWhenNoFeatures(t *testing.T) {
 	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
-	engine := New(WithHighlighter(hl), WithCopyButton(false), WithFullscreenButton(false))
+	engine := New(WithHighlighter(hl), WithCopyButton(false), WithFullscreenButton(false), WithWrapButton(false))
 
 	if engine.JS() != "" {
 		t.Error("JS should be empty when no features enabled")

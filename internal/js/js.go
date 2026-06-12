@@ -29,6 +29,9 @@ func Generate(cfg *config.Config) string {
 	if cfg.FullscreenButton {
 		sb.WriteString(readJS("fullscreen.js"))
 	}
+	if cfg.WrapButton {
+		sb.WriteString(readJS("wrap.js"))
+	}
 	if cfg.Collapsible != nil {
 		sb.WriteString(readJS("collapsible.js"))
 	}
