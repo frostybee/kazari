@@ -136,7 +136,7 @@ const greet = (name) => {
 	bashCode := `npm install kazari
 go build ./...
 echo "Done!"`
-	psCode := `Write-Output "This one has a title!"`
+	psCode := `Get-ChildItem -Path ./dist -Recurse | Measure-Object -Property Length -Sum`
 	plainCode := `Just some plain text
 with no frame wrapper.`
 
@@ -221,7 +221,7 @@ html, err := engine.Render(code, kazari.Options{Lang: "text", Frame: &frame})`),
 	}
 
 	lineNumbers := true
-	startLine := 15
+	startLine := 22
 	lineCode := `package main
 
 import (
@@ -239,7 +239,7 @@ func main() {
 	name := strings.Join(args, " ")
 	fmt.Printf("Hello, %s!\n", name)
 }`
-	lineStartCode := "\tname := strings.Join(args, \" \")\n\tfmt.Printf(\"Hello, %s!\\n\", name)\n}"
+	lineStartCode := "\tresult := evaluate(strings.Join(args, \" \"))\n\tfmt.Printf(\"= %v\\n\", result)\n}"
 	wrapCode := `func configure(opts *Options) {
 	opts.Logger = log.New(os.Stdout, "[kazari] a deliberately long prefix string that forces this line to wrap inside the demo container", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
 	opts.Description = "Word wrap keeps long lines visible without horizontal scrolling, and preserved indentation keeps wrapped continuations aligned with the code structure."
@@ -267,12 +267,12 @@ html, err := engine.Render(code, kazari.Options{
 				ID:       "line-numbers-start",
 				Title:    "Line Numbers (custom start)",
 				NavTitle: "Custom start",
-				HTML:     b.render(engine, lineStartCode, kazari.Options{Lang: "go", Title: "main.go (lines 15-17)", LineNumbers: &lineNumbers, StartLineNumber: &startLine}),
+				HTML:     b.render(engine, lineStartCode, kazari.Options{Lang: "go", Title: "calc.go (lines 22-24)", LineNumbers: &lineNumbers, StartLineNumber: &startLine}),
 				Recipes: []Recipe{
-					recipe("Meta", `go title="main.go (lines 15-17)" showLineNumbers startLineNumber=15`),
-					recipe("Go", `enabled, start := true, 15
+					recipe("Meta", `go title="calc.go (lines 22-24)" showLineNumbers startLineNumber=22`),
+					recipe("Go", `enabled, start := true, 22
 html, err := engine.Render(code, kazari.Options{
-	Lang: "go", Title: "main.go (lines 15-17)",
+	Lang: "go", Title: "calc.go (lines 22-24)",
 	LineNumbers: &enabled, StartLineNumber: &start,
 })`),
 				},
@@ -328,23 +328,27 @@ func newGreet(name string) {
 func main() {
 	newGreet("Kazari")
 }`
-	labelCode := `<button
-  role="button"
-  {...props}
+	labelCode := `class UserController extends Controller
+{
+    private UserRepository $users;
 
-  value={value}
-  className={buttonClassName}
+    public function __construct(
+        UserRepository $users,
+        LoggerInterface $logger
+    ) {
+        $this->users = $users;
+        $this->logger = $logger;
+    }
 
-  disabled={disabled}
-  active={active}
->
-
-  {children &&
-    !active &&
-    (typeof children === 'string'
-      ? <span>{children}</span>
-      : children)}
-</button>`
+    public function show(int $id): Response
+    {
+        $user = $this->users->find($id);
+        if ($user === null) {
+            throw new NotFoundHttpException();
+        }
+        return $this->json($user);
+    }
+}`
 	focusCode := `func process(items []string) error {
 	for _, item := range items {
 		if err := validate(item); err != nil {
@@ -354,18 +358,25 @@ func main() {
 	}
 	return nil
 }`
-	inlineCode := `import { useState, useEffect } from 'react';
+	inlineCode := `interface CacheEntry<T> {
+  key: string;
+  value: T;
+  expiresAt: number;
+}
 
-function App() {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    document.title = count;
-  }, [count]);
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+function getOrSet<T>(cache: Map<string, CacheEntry<T>>, key: string, factory: () => T): T {
+  const entry = cache.get(key);
+  if (entry && entry.expiresAt > Date.now()) {
+    return entry.value;
+  }
+  const value = factory();
+  cache.set(key, { key, value, expiresAt: Date.now() + 3600_000 });
+  return value;
 }`
-	singleQuoteCode := `import { useState, useEffect, useRef } from 'react';
-const [name, setName] = useState('');
-const ref = useRef(null);`
+	singleQuoteCode := `var query = context.Users
+    .Where(u => u.IsActive)
+    .OrderBy(u => u.CreatedAt)
+    .Select(u => new UserDto(u.Name, u.Email));`
 	combinedCode := `func main() {
 	db := connect()
 	defer db.Close()
@@ -389,22 +400,22 @@ const ref = useRef(null);`
 				`go title="diff.go" showLineNumbers {3} del={5-7} ins={9-11}`,
 				`html, err := engine.RenderWithMeta(code, `+"`"+`go title="diff.go" showLineNumbers {3} del={5-7} ins={9-11}`+"`"+`)`),
 			metaGoExample(b, engine, "labeled-range", "Labeled Range", "Labeled range", labelCode,
-				`jsx title="labeled-line-markers.jsx" showLineNumbers {"1. Provide the value prop here:":4-6} del={"2. Remove the disabled and active states:":7-10} ins={"3. Add this to render the children inside the button:":11-16}`,
+				`php title="UserController.php" showLineNumbers {"1. Inject dependencies via constructor:":5-11} del={"2. Remove inline lookup logic:":15-18} ins={"3. Return a JSON response:":19-20}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "labeled-range-no-ln", "Labeled Range (no line numbers)", "No line numbers", labelCode,
-				`jsx title="labeled-line-markers.jsx" {"1. Provide the value prop here:":4-6} del={"2. Remove the disabled and active states:":7-10} ins={"3. Add this to render the children inside the button:":11-16}`,
+				`php title="UserController.php" {"1. Inject dependencies via constructor:":5-11} del={"2. Remove inline lookup logic:":15-18} ins={"3. Return a JSON response:":19-20}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "labeled-range-numbers", "Labeled Range (numbered)", "Numbered labels", labelCode,
-				`jsx title="labeled-line-markers.jsx" {"1":5-6} del={"2":8-9} ins={"3":12-16}`,
+				`php title="UserController.php" {"1":5-8} del={"2":16-17} ins={"3":19-20}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "focus-lines", "Focus Lines", "Focus lines", focusCode,
 				`go title="process.go" showLineNumbers focus={3-5}`,
 				`html, err := engine.RenderWithMeta(code, `+"`"+`go title="process.go" showLineNumbers focus={3-5}`+"`"+`)`),
 			metaGoExample(b, engine, "inline-markers", "Inline Markers", "Inline markers", inlineCode,
-				`javascript title="App.jsx" showLineNumbers "useState" ins="useEffect"`,
-				`html, err := engine.RenderWithMeta(code, `+"`"+`javascript title="App.jsx" showLineNumbers "useState" ins="useEffect"`+"`"+`)`),
+				`typescript title="cache.ts" showLineNumbers "CacheEntry" ins="factory"`,
+				`html, err := engine.RenderWithMeta(code, `+"`"+`typescript title="cache.ts" showLineNumbers "CacheEntry" ins="factory"`+"`"+`)`),
 			metaGoExample(b, engine, "inline-markers-single", "Inline Markers (single quotes)", "Single quotes", singleQuoteCode,
-				`javascript title="single-quotes.jsx" showLineNumbers 'useState' ins='useRef' del='useEffect'`,
+				`csharp title="UserQuery.cs" showLineNumbers 'context' ins='OrderBy' del='Select'`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "combined-markers", "Combined (markers + inline + focus)", "Combined markers", combinedCode,
 				`go title="combined.go" showLineNumbers {4-5} ins={10-12} del={6-8} "db" focus={4-5,10-12}`,
@@ -601,7 +612,7 @@ html, err := engine.Render(code, kazari.Options{
 	json.NewDecoder(resp.Body).Decode(&users)
 	return users, nil
 }`
-	captureCode := "const yes = true;\nconst yep = true;\nconst nope = false;"
+	captureCode := "haystack = \"yes\"\nconfirm = \"yep\"\nreject = \"nope\""
 	diffCode := " import (\n-\t\"fmt\"\n+\t\"log\"\n \t\"os\"\n )\n \n func main() {\n-\tfmt.Println(\"hello\")\n+\tlog.Println(\"hello\")\n }"
 	codeGroupMarkdown := ":::code-group\n\n```go title=\"main.go\"\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello from Go!\")\n}\n```\n\n```python title=\"main.py\"\ndef main():\n    print(\"Hello from Python!\")\n\nif __name__ == \"__main__\":\n    main()\n```\n\n```javascript title=\"index.js\"\nfunction main() {\n  console.log(\"Hello from JavaScript!\");\n}\n\nmain();\n```\n\n:::\n"
 	ansiCode := "\x1b[1;34mINFO\x1b[0m  Server started on \x1b[32m:8080\x1b[0m\n" +
@@ -628,8 +639,8 @@ html, err := engine.Render(code, kazari.Options{
 				`go title="regex-markers.go" showLineNumbers /err\b/ ins=/func\s+\w+/ del=/fmt\.Errorf/`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "regex-capture", `Regex Capture Group (/ye(s|p)/ marks only "s" or "p")`, "Regex capture", captureCode,
-				`javascript title="capture-group.js" /ye(s|p)/`,
-				`html, err := engine.RenderWithMeta(code, `+"`"+`javascript title="capture-group.js" /ye(s|p)/`+"`"+`)`),
+				`python title="capture_group.py" /ye(s|p)/`,
+				`html, err := engine.RenderWithMeta(code, `+"`"+`python title="capture_group.py" /ye(s|p)/`+"`"+`)`),
 			metaGoExample(b, engine, "hybrid-diff", `Hybrid Diff + Syntax Highlighting (diff lang="go")`, "Hybrid diff", diffCode,
 				`diff lang="go" title="hybrid-diff.go" showLineNumbers`,
 				`html, err := engine.RenderWithMeta(code, `+"`"+`diff lang="go" title="hybrid-diff.go" showLineNumbers`+"`"+`)`),
