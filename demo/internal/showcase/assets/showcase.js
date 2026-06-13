@@ -57,25 +57,44 @@
     onSuccess();
   }
 
+  function applyTheme(isDark) {
+    root.classList.toggle('dark', isDark);
+    document.body.classList.toggle('dark', isDark);
+    document.querySelectorAll('.kazari-tinted, .kazari-scoped, .kazari-customizer').forEach(function (element) {
+      element.classList.toggle('dark', isDark);
+    });
+    localStorage.setItem('kz-demo-theme', isDark ? 'dark' : 'light');
+  }
+
+  var saved = localStorage.getItem('kz-demo-theme');
+  if (saved === 'dark') applyTheme(true);
+
   var themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) {
-    var saved = localStorage.getItem('kz-demo-theme');
-    if (saved === 'dark' && !root.classList.contains('dark')) {
-      root.classList.add('dark');
-      document.querySelectorAll('.kazari-tinted, .kazari-scoped, .kazari-customizer').forEach(function (element) {
-        element.classList.add('dark');
-      });
+    if (saved === 'dark') {
       themeToggle.setAttribute('aria-pressed', 'true');
       themeToggle.textContent = 'Light mode';
     }
     themeToggle.addEventListener('click', function () {
       var isDark = root.classList.toggle('dark');
-      document.querySelectorAll('.kazari-tinted, .kazari-scoped, .kazari-customizer').forEach(function (element) {
-        element.classList.toggle('dark', isDark);
-      });
+      applyTheme(isDark);
       themeToggle.setAttribute('aria-pressed', String(isDark));
       themeToggle.textContent = isDark ? 'Light mode' : 'Dark mode';
-      localStorage.setItem('kz-demo-theme', isDark ? 'dark' : 'light');
+      var navToggle = document.getElementById('dark-toggle');
+      if (navToggle) navToggle.checked = isDark;
+    });
+  }
+
+  var darkToggle = document.getElementById('dark-toggle');
+  if (darkToggle) {
+    if (saved === 'dark') darkToggle.checked = true;
+    darkToggle.addEventListener('change', function () {
+      var isDark = darkToggle.checked;
+      applyTheme(isDark);
+      if (themeToggle) {
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+        themeToggle.textContent = isDark ? 'Light mode' : 'Dark mode';
+      }
     });
   }
 

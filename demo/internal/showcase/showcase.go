@@ -20,6 +20,13 @@ type Config struct {
 	HTMLFile    string
 	OtherName   string
 	OtherHref   string
+	NavLinks    []NavLink
+}
+
+type NavLink struct {
+	Label  string
+	Href   string
+	Active bool
 }
 
 type BackendLink struct {
@@ -59,6 +66,7 @@ type Page struct {
 	Title        string
 	Subtitle     string
 	Backends     []BackendLink
+	NavLinks     []NavLink
 	Categories   []Category
 	ExampleCount int
 }
@@ -108,6 +116,7 @@ func Build(cfg Config, highlighter kazari.Highlighter) (Output, error) {
 		Subtitle:     "All Kazari features powered by " + cfg.BackendName + ".",
 		Categories:   catalog,
 		ExampleCount: countExamples(catalog),
+		NavLinks:     cfg.NavLinks,
 		Backends: []BackendLink{
 			{Name: cfg.BackendName, Active: true},
 			{Name: cfg.OtherName, Href: cfg.OtherHref},

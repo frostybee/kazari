@@ -23,6 +23,7 @@
 .kazari-code pre code {
   display: block;
   padding: var(--kz-code-padding-block) 0;
+  font-family: inherit;
 }
 .kazari-code .kz-line {
   display: grid;

@@ -3,11 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <title>{{.Title}}</title>
 <link rel="stylesheet" href="showcase.css">
 </head>
 <body id="top">
 <a class="skip-link" href="#showcase-content">Skip to examples</a>
+{{if .NavLinks}}
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a class="site-brand" href="showcase.html">Kazari</a>
+    <div class="site-nav-links">
+      {{range .NavLinks}}<a href="{{.Href}}"{{if .Active}} class="active" aria-current="page"{{end}}>{{.Label}}</a>
+      {{end}}
+    </div>
+    <label class="site-dark-toggle"><input type="checkbox" id="dark-toggle"> Dark mode</label>
+  </div>
+</nav>
+{{end}}
 <header class="demo-header">
   <div class="demo-header-inner">
     <div class="demo-brand">
@@ -20,7 +35,7 @@
           {{if .Active}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.Href}}" data-backend-link>{{.Name}}</a>{{end}}
         {{end}}
       </nav>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+      {{if not .NavLinks}}<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>{{end}}
     </div>
   </div>
 </header>

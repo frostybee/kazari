@@ -23,6 +23,11 @@ func main() {
 		HTMLFile:    "showcase.html",
 		OtherName:   "Chroma",
 		OtherHref:   "../chroma/showcase-chroma.html",
+		NavLinks: []showcase.NavLink{
+			{Label: "Showcase", Href: "showcase.html", Active: true},
+			{Label: "Nuri vs Shiki", Href: "../comparison/comparison.html"},
+			{Label: "Nuri vs Chroma", Href: "../comparison-chroma/comparison-chroma.html"},
+		},
 	}
 	if err := showcase.Generate(".", config, kazarinuri.New(ctx, highlighter)); err != nil {
 		log.Fatalf("generate showcase: %v", err)
