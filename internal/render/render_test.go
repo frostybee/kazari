@@ -348,7 +348,7 @@ func TestRenderBlock_FullscreenFontControls(t *testing.T) {
 
 	out := RenderBlock(lines, r, cfg)
 
-	for _, want := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-hint"} {
+	for _, want := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected %q in output", want)
 		}
@@ -363,7 +363,7 @@ func TestRenderBlock_NoFullscreenNoFontControls(t *testing.T) {
 
 	out := RenderBlock(lines, r, cfg)
 
-	for _, absent := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-hint", "kz-fs-btn"} {
+	for _, absent := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-btn"} {
 		if strings.Contains(out, absent) {
 			t.Errorf("should not contain %q when fullscreen disabled", absent)
 		}
@@ -378,7 +378,7 @@ func TestRenderBlock_TerminalFullscreenFontControls(t *testing.T) {
 
 	out := RenderBlock(lines, r, cfg)
 
-	for _, want := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-btn", "kz-fs-hint"} {
+	for _, want := range []string{"kz-font-controls", "kz-font-inc", "kz-font-dec", "kz-fs-btn"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("terminal frame: expected %q in output", want)
 		}

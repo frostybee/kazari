@@ -240,10 +240,6 @@ func renderFontControls(sb *strings.Builder, cfg *config.Config) {
 }
 
 func renderFullscreenHint(sb *strings.Builder, cfg *config.Config) {
-	if cfg.FullscreenButton {
-		sb.WriteString(fmt.Sprintf("<div class=\"kz-fs-hint\" aria-hidden=\"true\">%s</div>",
-			html.EscapeString(cfg.UIStrings.FullscreenHint)))
-	}
 }
 
 func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config, dualTheme bool) {

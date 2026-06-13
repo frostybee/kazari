@@ -57,6 +57,7 @@ func (c *ChromaHighlighter) Tokenize(code, lang, theme string) ([][]kazari.Token
 	lexer = chroma.Coalesce(lexer)
 
 	style := c.resolveStyle(theme)
+	themeBG := style.Get(chroma.Background).Background
 
 	iter, err := lexer.Tokenise(nil, code)
 	if err != nil {
@@ -84,7 +85,7 @@ func (c *ChromaHighlighter) Tokenize(code, lang, theme string) ([][]kazari.Token
 			if entry.Colour.IsSet() {
 				tok.Color = entry.Colour.String()
 			}
-			if entry.Background.IsSet() {
+			if entry.Background.IsSet() && entry.Background != themeBG {
 				tok.BgColor = entry.Background.String()
 			}
 
