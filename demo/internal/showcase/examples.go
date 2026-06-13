@@ -331,6 +331,7 @@ func main() {
 	labelCode := `class UserController extends Controller
 {
     private UserRepository $users;
+    private LoggerInterface $logger;
 
     public function __construct(
         UserRepository $users,
@@ -342,10 +343,12 @@ func main() {
 
     public function show(int $id): Response
     {
+
         $user = $this->users->find($id);
         if ($user === null) {
             throw new NotFoundHttpException();
         }
+
         return $this->json($user);
     }
 }`
@@ -400,13 +403,13 @@ function getOrSet<T>(cache: Map<string, CacheEntry<T>>, key: string, factory: ()
 				`go title="diff.go" showLineNumbers {3} del={5-7} ins={9-11}`,
 				`html, err := engine.RenderWithMeta(code, `+"`"+`go title="diff.go" showLineNumbers {3} del={5-7} ins={9-11}`+"`"+`)`),
 			metaGoExample(b, engine, "labeled-range", "Labeled Range", "Labeled range", labelCode,
-				`php title="UserController.php" showLineNumbers {"1. Inject dependencies via constructor:":5-11} del={"2. Remove inline lookup logic:":15-18} ins={"3. Return a JSON response:":19-20}`,
+				`php title="UserController.php" showLineNumbers {"1. Inject dependencies via constructor:":5-12} del={"2. Remove inline lookup logic:":16-20} ins={"3. Return a JSON response:":21-22}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "labeled-range-no-ln", "Labeled Range (no line numbers)", "No line numbers", labelCode,
-				`php title="UserController.php" {"1. Inject dependencies via constructor:":5-11} del={"2. Remove inline lookup logic:":15-18} ins={"3. Return a JSON response:":19-20}`,
+				`php title="UserController.php" {"1. Inject dependencies via constructor:":5-12} del={"2. Remove inline lookup logic:":16-20} ins={"3. Return a JSON response:":21-22}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "labeled-range-numbers", "Labeled Range (numbered)", "Numbered labels", labelCode,
-				`php title="UserController.php" {"1":5-8} del={"2":16-17} ins={"3":19-20}`,
+				`php title="UserController.php" {"1":6-9} del={"2":17-19} ins={"3":21-22}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "focus-lines", "Focus Lines", "Focus lines", focusCode,
 				`go title="process.go" showLineNumbers focus={3-5}`,

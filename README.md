@@ -56,7 +56,7 @@ Coming soon.
 
 ## Acknowledgments
 
-Kazari is inspired by [Expressive Code](https://expressive-code.com/) and brings its feature set to the Go ecosystem with a simpler architecture. There are no plugin hooks or lifecycle systems. Features are built-in and controlled by config flags. Styling lives entirely in CSS custom properties (`--kz-*`). The HTML structure and CSS class conventions are based on Expressive Code by Hippo (MIT license).
+Kazari is inspired by [Expressive Code](https://expressive-code.com/) and brings its feature set to the Go ecosystem with a simpler architecture. There are no plugin hooks or lifecycle systems. Features are built-in and controlled by config flags. Styling lives entirely in CSS custom properties (`--kz-*`). The HTML structure, CSS styling, and class conventions are derived from Expressive Code by Hippo (MIT license).
 
 ## License
 

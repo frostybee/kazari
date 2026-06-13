@@ -49,6 +49,17 @@
   pointer-events: none;
 }
 
+/* Labeled range line backgrounds (stronger than single-line markers) */
+.kazari-code .kz-line.highlight.mark.tm-label {
+  background: var(--kz-label-mark-bg);
+}
+.kazari-code .kz-line.highlight.ins.tm-label {
+  background: var(--kz-label-ins-bg);
+}
+.kazari-code .kz-line.highlight.del.tm-label {
+  background: var(--kz-label-del-bg);
+}
+
 /* Labeled ranges — badge at the left edge of the code area.
    data-label on .code div, read via attr().
    On ins/del lines, this overrides the diff indicator ::before. */

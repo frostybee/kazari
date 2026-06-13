@@ -58,6 +58,9 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-ins-indicator-color", "rgba(46,160,67,0.8)"},
 		{"--kz-del-indicator-color", "rgba(248,81,73,0.8)"},
 		// Label defaults
+		{"--kz-label-mark-bg", "rgba(255,200,0,0.35)"},
+		{"--kz-label-ins-bg", "rgba(46,160,67,0.35)"},
+		{"--kz-label-del-bg", "rgba(248,81,73,0.35)"},
 		{"--kz-label-fg", "#ffffff"},
 		{"--kz-label-padding", "0.1rem 0.3rem"},
 		{"--kz-label-font-size", "0.75rem"},
