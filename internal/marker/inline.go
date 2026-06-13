@@ -120,58 +120,71 @@ func findRegexMatches(text string, m config.InlineMarker) []inlineMatch {
 }
 
 // resolveInlineOverlaps handles overlapping matches using priority (mark < del < ins).
+// Matches are claimed in priority order. When a lower priority match overlaps
+// ranges already claimed by higher priority matches, only the overlapping parts
+// are removed and the surviving fragments are kept.
 func resolveInlineOverlaps(matches []inlineMatch) []inlineMatch {
 	if len(matches) <= 1 {
 		return matches
 	}
 
-	// Sort by start position, then by priority descending (higher priority first).
-	sortMatches(matches)
+	ordered := make([]inlineMatch, len(matches))
+	copy(ordered, matches)
+	sortByPriority(ordered)
 
 	var resolved []inlineMatch
-	for _, m := range matches {
-		merged := false
-		for i := range resolved {
-			r := &resolved[i]
-			// No overlap.
-			if m.start >= r.end || m.end <= r.start {
-				continue
-			}
-			// Overlap detected — higher priority wins.
-			if m.priority > r.priority {
-				// Split the existing lower-priority match around the new one.
-				var replacement []inlineMatch
-				if r.start < m.start {
-					replacement = append(replacement, inlineMatch{
-						start: r.start, end: m.start,
-						mtype: r.mtype, priority: r.priority,
-					})
-				}
-				if r.end > m.end {
-					replacement = append(replacement, inlineMatch{
-						start: m.end, end: r.end,
-						mtype: r.mtype, priority: r.priority,
-					})
-				}
-				// Remove original, add fragments + new match.
-				resolved = append(resolved[:i], resolved[i+1:]...)
-				resolved = append(resolved, replacement...)
-				resolved = append(resolved, m)
-				merged = true
-				break
-			} else {
-				// Lower or equal priority — skip the new match (existing wins).
-				merged = true
+	for _, m := range ordered {
+		fragments := []inlineMatch{m}
+		for _, r := range resolved {
+			fragments = subtractClaimedRange(fragments, r.start, r.end)
+			if len(fragments) == 0 {
 				break
 			}
 		}
-		if !merged {
-			resolved = append(resolved, m)
-		}
+		resolved = append(resolved, fragments...)
 	}
 
 	sortMatches(resolved)
 	return resolved
+}
+
+// subtractClaimedRange removes the interval from start (inclusive) to end
+// (exclusive) out of each fragment, keeping the surviving pieces.
+func subtractClaimedRange(fragments []inlineMatch, start, end int) []inlineMatch {
+	var out []inlineMatch
+	for _, f := range fragments {
+		if f.end <= start || f.start >= end {
+			out = append(out, f)
+			continue
+		}
+		if f.start < start {
+			out = append(out, inlineMatch{
+				start: f.start, end: start,
+				mtype: f.mtype, priority: f.priority,
+			})
+		}
+		if f.end > end {
+			out = append(out, inlineMatch{
+				start: end, end: f.end,
+				mtype: f.mtype, priority: f.priority,
+			})
+		}
+	}
+	return out
+}
+
+// sortByPriority orders matches by priority descending, then by start ascending,
+// so higher priority matches claim their ranges first.
+func sortByPriority(matches []inlineMatch) {
+	for i := 1; i < len(matches); i++ {
+		key := matches[i]
+		j := i - 1
+		for j >= 0 && (matches[j].priority < key.priority || (matches[j].priority == key.priority && matches[j].start > key.start)) {
+			matches[j+1] = matches[j]
+			j--
+		}
+		matches[j+1] = key
+	}
 }
 
 func sortMatches(matches []inlineMatch) {

@@ -167,7 +167,7 @@ func (r *codeGroupRenderer) renderCodeGroup(w util.BufWriter, source []byte, nod
 
 		rendered, err := r.engine.RenderWithMeta(code, metaStr)
 		if err != nil {
-			rendered = fmt.Sprintf("<pre><code>%s</code></pre>", html.EscapeString(code))
+			return ast.WalkStop, err
 		}
 
 		if i == 0 {

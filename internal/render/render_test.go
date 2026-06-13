@@ -572,3 +572,82 @@ func TestEncodeForDataCode(t *testing.T) {
 		t.Error("encoded output should contain DEL characters")
 	}
 }
+
+// --- Per-block theme override tests ---
+
+func TestRenderBlock_ThemeOverrideWrapper(t *testing.T) {
+	cfg := defaultCfg()
+	r := resolved()
+	r.ThemeOverrideStyle = "--kz-ovl-editor-bg:#282a36;--kz-ovl-editor-fg:#f8f8f2"
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, `class="kazari-code kz-themed"`) {
+		t.Error("wrapper should carry the kz-themed class")
+	}
+	if !strings.Contains(out, `style="--kz-ovl-editor-bg:#282a36;--kz-ovl-editor-fg:#f8f8f2"`) {
+		t.Error("wrapper should carry the inline override style")
+	}
+}
+
+func TestRenderBlock_ThemeOverrideWrapper_ComposesWithDataLinesAndCollapse(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.DataLineCount = true
+	r := resolved()
+	r.ThemeOverrideStyle = "--kz-ovl-editor-bg:#282a36"
+	r.CollapseThreshold = true
+	r.CollapseConfig = &config.CollapsibleConfig{DefaultCollapsed: true}
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, `class="kazari-code kz-themed kz-collapsed"`) {
+		t.Errorf("wrapper classes should compose, got output start %q", out[:120])
+	}
+	if !strings.Contains(out, `data-lines="1"`) {
+		t.Error("data-lines should still be emitted")
+	}
+	if !strings.Contains(out, `style="--kz-ovl-editor-bg:#282a36"`) {
+		t.Error("style attribute should still be emitted")
+	}
+}
+
+func TestRenderBlock_NoThemeOverride_NoThemedClass(t *testing.T) {
+	cfg := defaultCfg()
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if strings.Contains(out, "kz-themed") {
+		t.Error("wrapper should not carry kz-themed without an override")
+	}
+	if strings.Contains(out, `<div class="kazari-code" style=`) {
+		t.Error("wrapper should not carry a style attribute without an override")
+	}
+}
+
+func TestBuildTokenStyle_PrefersResolvedMarkerBGs(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.MinContrast = 5.5
+	cfg.LightMarkerBGs = &config.MarkerEffectiveBGs{Mark: "#ffffff", Ins: "#ffffff", Del: "#ffffff"}
+
+	baseResolved := resolved()
+	overrideResolved := resolved()
+	overrideResolved.LightMarkerBGs = &config.MarkerEffectiveBGs{Mark: "#000000", Ins: "#000000", Del: "#000000"}
+
+	mt := config.MarkerMark
+	tok := MergedToken{Content: "x", LightColor: "#888888"}
+
+	pageStyle := buildTokenStyle(tok, &lineContext{
+		resolved: baseResolved, cfg: cfg, contrastCache: map[string]string{},
+	}, &mt)
+	overrideStyle := buildTokenStyle(tok, &lineContext{
+		resolved: overrideResolved, cfg: cfg, contrastCache: map[string]string{},
+	}, &mt)
+
+	if pageStyle == overrideStyle {
+		t.Errorf("contrast adjustment should differ between page and override marker backgrounds, both produced %q", pageStyle)
+	}
+}

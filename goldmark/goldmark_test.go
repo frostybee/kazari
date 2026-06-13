@@ -2,6 +2,7 @@ package kazarimd
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 
@@ -380,5 +381,34 @@ func TestCodeGroup_SyncMultipleGroups(t *testing.T) {
 	count := strings.Count(html, `data-sync="lang"`)
 	if count != 2 {
 		t.Errorf("expected 2 groups with data-sync, got %d", count)
+	}
+}
+
+type failingHighlighter struct {
+	mockHighlighter
+}
+
+func (f *failingHighlighter) Tokenize(code, lang, theme string) ([][]kazari.Token, error) {
+	return nil, errors.New("tokenize failed")
+}
+
+func TestCodeGroup_RenderErrorPropagates(t *testing.T) {
+	hl := &failingHighlighter{
+		mockHighlighter: mockHighlighter{
+			themeInfo: kazari.ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		},
+	}
+	engine := kazari.New(
+		kazari.WithHighlighter(hl),
+		kazari.WithThemes("light-theme", ""),
+		kazari.WithMinify(false),
+	)
+	exts := []goldmark.Extender{New(engine), CodeGroups(engine)}
+	parser := goldmark.New(goldmark.WithExtensions(exts...))
+
+	md := ":::code-group\n\n```go\nfunc main() {}\n```\n\n:::\n"
+	var buf bytes.Buffer
+	if err := parser.Convert([]byte(md), &buf); err == nil {
+		t.Fatal("expected goldmark.Convert to return the render error from inside the code group")
 	}
 }

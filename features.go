@@ -16,7 +16,6 @@ func WithWrapButton(enabled bool) Option {
 
 func WithLineNumbers(enabled bool) Option {
 	return func(b *engineBuilder) {
-		b.cfg.LineNumbers = enabled
 		b.cfg.Defaults.LineNumbers = enabled
 	}
 }

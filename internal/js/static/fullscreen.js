@@ -5,7 +5,11 @@
   var MAX = 5.0;
   var DEFAULT = 1;
 
-  function getScale() {
+  function getScale(block) {
+    if (block) {
+      var current = parseFloat(block.style.getPropertyValue('--kz-fs-font-scale'));
+      if (current) return current;
+    }
     try { return parseFloat(localStorage.getItem(SCALE_KEY)) || DEFAULT; }
     catch(e) { return DEFAULT; }
   }
@@ -34,14 +38,16 @@
     var btn = e.target.closest('.kazari-code .kz-font-inc');
     if (!btn) return;
     var block = btn.closest('.kazari-code');
-    if (block) setScale(block, getScale() + STEP);
+    if (block) setScale(block, getScale(block) + STEP);
   });
 
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('.kazari-code .kz-font-dec');
     if (!btn) return;
+    // The second click of a double click is handled by the dblclick reset.
+    if (e.detail > 1) return;
     var block = btn.closest('.kazari-code');
-    if (block) setScale(block, getScale() - STEP);
+    if (block) setScale(block, getScale(block) - STEP);
   });
 
   document.addEventListener('dblclick', function(e) {
@@ -54,7 +60,7 @@
   document.addEventListener('fullscreenchange', function() {
     var el = document.fullscreenElement;
     if (el && el.classList.contains('kazari-code')) {
-      setScale(el, getScale());
+      setScale(el, getScale(el));
       var btn = el.querySelector('.kz-fs-btn');
       if (btn) btn.setAttribute('aria-expanded', 'true');
     } else {

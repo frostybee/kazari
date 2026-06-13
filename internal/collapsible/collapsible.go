@@ -124,16 +124,6 @@ func ValidateRanges(ranges []config.LineRange, lineCount int) []config.LineRange
 	return result
 }
 
-// ComputePreviewLines returns the furthest visible line number.
-// Kept for simple cases; ComputePreviewSegments is the full implementation.
-func ComputePreviewLines(previewLines int, lineCount int, markers []config.LineMarker, focusLines []config.LineRange) int {
-	segments, _ := ComputePreviewSegments(previewLines, lineCount, markers, focusLines)
-	if len(segments) == 0 {
-		return previewLines
-	}
-	return segments[len(segments)-1].End
-}
-
 // ComputePreviewSegments computes non-contiguous visible segments for threshold preview.
 // Returns the segments to show and the count of marked lines beyond the 2× cap (for badge).
 func ComputePreviewSegments(previewLines int, lineCount int, markers []config.LineMarker, focusLines []config.LineRange) ([]config.PreviewSegment, int) {
@@ -224,9 +214,6 @@ func ComputeMinIndent(code string, startLine, endLine int) int {
 	minIndent := -1
 
 	for i := startLine - 1; i < endLine && i < len(lines); i++ {
-		if i < 0 {
-			continue
-		}
 		line := lines[i]
 		trimmed := strings.TrimLeft(line, " \t")
 		if trimmed == "" {

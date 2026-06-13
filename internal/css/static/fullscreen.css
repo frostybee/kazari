@@ -102,9 +102,6 @@
   border-radius: var(--kz-radius);
   box-shadow: 0 4px 24px rgba(0,0,0,0.3);
   overflow: auto;
-}
-.kazari-code:fullscreen .frame,
-.kazari-code:-webkit-full-screen .frame {
   font-size: calc(1em * var(--kz-fs-font-scale, 1));
 }
 .kazari-code:fullscreen pre,

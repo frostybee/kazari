@@ -27,10 +27,6 @@ func (r *codeBlockRenderer) renderFencedCodeBlock(w util.BufWriter, source []byt
 	if !entering {
 		return ast.WalkContinue, nil
 	}
-	// Skip blocks inside code groups (handled by the code group renderer).
-	if _, ok := node.Parent().(*CodeGroupNode); ok {
-		return ast.WalkContinue, nil
-	}
 
 	fcb := node.(*ast.FencedCodeBlock)
 	code := extractCode(fcb, source)

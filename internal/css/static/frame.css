@@ -5,6 +5,11 @@
   box-shadow: var(--kz-shadow);
   border: var(--kz-border);
 }
+/* Themed blocks need their own backdrop: the translucent toolbar colors
+   composite over the frame, which otherwise shows the page background. */
+.kazari-code.kz-themed .frame {
+  background: var(--kz-editor-bg);
+}
 .kazari-code .sr-only {
   position: absolute;
   width: 1px;

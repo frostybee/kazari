@@ -272,3 +272,14 @@ func TestParse_Color256_Grayscale(t *testing.T) {
 		t.Errorf("256-color grayscale 232 = %q, want #080808", tok.LightColor)
 	}
 }
+
+func TestParse_BrightBackground(t *testing.T) {
+	lines := Parse("\x1b[101mtext\x1b[0m")
+	tok := lines[0].Tokens[0]
+	if tok.LightBG != "#ef2929" {
+		t.Errorf("bright red bg = %q, want #ef2929", tok.LightBG)
+	}
+	if tok.DarkBG != "#ef2929" {
+		t.Errorf("dark bright red bg = %q, want #ef2929", tok.DarkBG)
+	}
+}

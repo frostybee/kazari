@@ -44,14 +44,20 @@ func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.
 	dualTheme := hasDualTheme(lines)
 
 	wrapperClass := "kazari-code"
+	if resolved.ThemeOverrideStyle != "" {
+		wrapperClass += " kz-themed"
+	}
 	if resolved.CollapseThreshold && (resolved.CollapseConfig == nil || resolved.CollapseConfig.DefaultCollapsed) {
 		wrapperClass += " kz-collapsed"
 	}
+	attrs := fmt.Sprintf(" class=\"%s\"", wrapperClass)
 	if cfg.DataLineCount {
-		sb.WriteString(fmt.Sprintf("<div class=\"%s\" data-lines=\"%d\">\n", wrapperClass, len(lines)))
-	} else {
-		sb.WriteString(fmt.Sprintf("<div class=\"%s\">\n", wrapperClass))
+		attrs += fmt.Sprintf(" data-lines=\"%d\"", len(lines))
 	}
+	if resolved.ThemeOverrideStyle != "" {
+		attrs += fmt.Sprintf(" style=\"%s\"", html.EscapeString(resolved.ThemeOverrideStyle))
+	}
+	sb.WriteString(fmt.Sprintf("<div%s>\n", attrs))
 
 	if resolved.Frame == config.FrameNone {
 		renderNoFrame(&sb, lines, resolved, cfg, dualTheme)
@@ -547,11 +553,21 @@ func buildTokenStyle(tok MergedToken, lctx *lineContext, markerType *config.Mark
 	darkColor := tok.DarkColor
 
 	if markerType != nil && lctx.cfg.MinContrast > 0 {
-		if lightColor != "" && lctx.cfg.LightMarkerBGs != nil {
-			lightColor = adjustContrast(lightColor, lctx.cfg.LightMarkerBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+		// Per-block theme overrides carry their own marker backgrounds so
+		// contrast is computed against the override canvas, not the page's.
+		lightBGs := lctx.cfg.LightMarkerBGs
+		if lctx.resolved.LightMarkerBGs != nil {
+			lightBGs = lctx.resolved.LightMarkerBGs
 		}
-		if darkColor != "" && lctx.cfg.DarkMarkerBGs != nil {
-			darkColor = adjustContrast(darkColor, lctx.cfg.DarkMarkerBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+		darkBGs := lctx.cfg.DarkMarkerBGs
+		if lctx.resolved.DarkMarkerBGs != nil {
+			darkBGs = lctx.resolved.DarkMarkerBGs
+		}
+		if lightColor != "" && lightBGs != nil {
+			lightColor = adjustContrast(lightColor, lightBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+		}
+		if darkColor != "" && darkBGs != nil {
+			darkColor = adjustContrast(darkColor, darkBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
 		}
 	}
 
@@ -585,7 +601,9 @@ func buildTokenStyle(tok MergedToken, lctx *lineContext, markerType *config.Mark
 		parts = append(parts, fmt.Sprintf("--std:%s", strings.Join(decs, " ")))
 	}
 
-	return strings.Join(parts, ";")
+	// Escape the assembled style so values from custom Highlighter
+	// implementations cannot break out of the style attribute.
+	return html.EscapeString(strings.Join(parts, ";"))
 }
 
 func adjustContrast(tokenColor, effectiveBG string, minContrast float64, cache map[string]string) string {

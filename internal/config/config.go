@@ -168,7 +168,6 @@ type Config struct {
 	CopyButton         bool
 	FullscreenButton   bool
 	WrapButton         bool
-	LineNumbers        bool
 	FrameDetection     bool
 	FileNameExtraction bool
 	LanguageBadge      bool
@@ -209,7 +208,6 @@ func DefaultConfig() *Config {
 		CopyButton:         true,
 		FullscreenButton:   true,
 		WrapButton:         true,
-		LineNumbers:        false,
 		FrameDetection:     true,
 		FileNameExtraction: true,
 		LanguageBadge:      true,
@@ -274,6 +272,10 @@ type ResolvedBlock struct {
 	LineMarkers   []LineMarker
 	InlineMarkers []InlineMarker
 	FocusLines    []LineRange
+	// Per-block theme override state (populated when Theme is set)
+	ThemeOverrideStyle string              // inline --kz-ovl-*/--kz-ovd-* declarations for the wrapper
+	LightMarkerBGs     *MarkerEffectiveBGs // marker compositing against the override light BG
+	DarkMarkerBGs      *MarkerEffectiveBGs // marker compositing against the override dark BG
 	// Collapse state (populated by collapsible.ResolveCollapse)
 	CollapseThreshold  bool
 	CollapseRanges     []CollapseRange

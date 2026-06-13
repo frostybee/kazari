@@ -3,6 +3,7 @@ package kazari
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/frostybee/kazari/internal/color"
@@ -47,6 +48,8 @@ type dualMockHighlighter struct {
 	mockHighlighter
 	dualCalls     int
 	tokenizeCalls int
+	lastLight     string
+	lastDark      string
 }
 
 func (d *dualMockHighlighter) Tokenize(code, lang, theme string) ([][]Token, error) {
@@ -56,6 +59,8 @@ func (d *dualMockHighlighter) Tokenize(code, lang, theme string) ([][]Token, err
 
 func (d *dualMockHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string) ([][]Token, [][]Token, error) {
 	d.dualCalls++
+	d.lastLight = lightTheme
+	d.lastDark = darkTheme
 	return d.lightTokens, d.darkTokens, nil
 }
 
@@ -1587,6 +1592,55 @@ func TestRenderWithMeta_Collapsible_Nocollapse(t *testing.T) {
 
 	if strings.Contains(html, "kz-collapse-btn") {
 		t.Error("nocollapse should prevent threshold collapse")
+	}
+}
+
+func TestRender_Collapsible_ThresholdAfterFileNameExtraction(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(15),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
+	)
+
+	// 16 lines before extraction, 15 after the filename comment is removed.
+	// The threshold check must use the post extraction count of 15, which
+	// does not exceed the threshold.
+	code := "// main.go\n" + strings.Repeat("line\n", 14) + "line"
+	html, err := engine.Render(code, Options{Lang: "go"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if !strings.Contains(html, "main.go") {
+		t.Fatal("expected filename comment to be extracted into the title")
+	}
+	if strings.Contains(html, "kz-collapse-btn") {
+		t.Error("threshold collapse must use the post extraction line count")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_RangeAfterFileNameExtraction(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(9),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 50, PreviewLines: 8}),
+	)
+
+	// 10 lines before extraction, 9 after the filename comment is removed.
+	// The range end must be clamped to the post extraction line count,
+	// collapsing lines 2 through 9 for a count of 8.
+	code := "// main.go\na\nb\nc\nd\ne\nf\ng\nh\ni"
+	html, err := engine.RenderWithMeta(code, "go collapse={2-10}")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, "8 collapsed lines") {
+		t.Error("collapse range must be clamped to the post extraction line count")
 	}
 }
 
@@ -3540,4 +3594,236 @@ func TestCreateInlineSVGURL(t *testing.T) {
 	if got != want {
 		t.Errorf("CreateInlineSVGURL():\ngot:  %s\nwant: %s", got, want)
 	}
+}
+
+// --- Per-block theme override visual theming tests ---
+
+func overrideMock() *mockHighlighter {
+	return &mockHighlighter{
+		lightTokens:   [][]Token{{{Content: "x", Color: "#aaa"}}},
+		themeInfo:     ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo: ThemeInfo{FG: "#f8f8f2", BG: "#282a36"},
+	}
+}
+
+func TestThemeOverride_EmitsThemedWrapper(t *testing.T) {
+	engine := newTestEngine(overrideMock())
+	html, err := engine.RenderWithMeta("x", `go theme="dracula"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "kz-themed") {
+		t.Error("override block should carry the kz-themed class")
+	}
+	if !strings.Contains(html, "--kz-ovl-editor-bg:#282a36") {
+		t.Error("override block should carry the override background inline")
+	}
+	if !strings.Contains(html, "--kz-ovl-editor-fg:#f8f8f2") {
+		t.Error("override block should carry the override foreground inline")
+	}
+	if strings.Contains(html, "--kz-ovd-") {
+		t.Error("single theme engine should not emit dark slot vars")
+	}
+}
+
+func TestThemeOverride_NoOverride_NoThemedClass(t *testing.T) {
+	engine := newTestEngine(overrideMock())
+	html, err := engine.RenderWithMeta("x", "go")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if strings.Contains(html, "kz-themed") {
+		t.Error("blocks without an override should not carry kz-themed")
+	}
+}
+
+func TestThemeOverride_SameAsEngineThemes_NoOp(t *testing.T) {
+	engine := newTestEngine(overrideMock())
+	html, err := engine.RenderWithMeta("x", `go theme="light-theme"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if strings.Contains(html, "kz-themed") {
+		t.Error("override matching the engine themes should be a no-op")
+	}
+}
+
+func TestThemeOverride_DualThemeEngine_EmitsBothSlots(t *testing.T) {
+	hl := overrideMock()
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+	)
+	html, err := engine.RenderWithMeta("x", `go theme="dracula"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "--kz-ovl-editor-bg:#282a36") {
+		t.Error("should emit light slot override vars")
+	}
+	if !strings.Contains(html, "--kz-ovd-editor-bg:#282a36") {
+		t.Error("dual theme engine should emit dark slot override vars")
+	}
+}
+
+func TestThemeOverride_PartialCommaForm_NoDarkSlot(t *testing.T) {
+	hl := overrideMock()
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+	)
+	html, err := engine.RenderWithMeta("x", `go theme="dracula,"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if !strings.Contains(html, "--kz-ovl-editor-bg:#282a36") {
+		t.Error("light slot vars should be present")
+	}
+	if strings.Contains(html, "--kz-ovd-") {
+		t.Error("empty dark half of a comma override should emit no dark slot vars")
+	}
+}
+
+func TestThemeOverride_SingleValueAppliesToDarkTokenization(t *testing.T) {
+	hl := &dualMockHighlighter{
+		mockHighlighter: mockHighlighter{
+			lightTokens:   [][]Token{{{Content: "x", Color: "#aaa"}}},
+			darkTokens:    [][]Token{{{Content: "x", Color: "#bbb"}}},
+			themeInfo:     ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+			darkThemeInfo: ThemeInfo{FG: "#f8f8f2", BG: "#282a36"},
+		},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+	)
+	if _, err := engine.RenderWithMeta("x", `go theme="dracula"`); err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if hl.lastLight != "dracula" || hl.lastDark != "dracula" {
+		t.Errorf("single value override should tokenize both modes with the override theme, got light=%q dark=%q", hl.lastLight, hl.lastDark)
+	}
+}
+
+func TestThemeOverride_SingleThemePage_StaysSingle(t *testing.T) {
+	hl := &dualMockHighlighter{
+		mockHighlighter: mockHighlighter{
+			lightTokens:   [][]Token{{{Content: "x", Color: "#aaa"}}},
+			darkTokens:    [][]Token{{{Content: "x", Color: "#bbb"}}},
+			themeInfo:     ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+			darkThemeInfo: ThemeInfo{FG: "#f8f8f2", BG: "#282a36"},
+		},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+	)
+	if _, err := engine.RenderWithMeta("x", `go theme="dracula"`); err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if hl.dualCalls != 0 {
+		t.Error("single theme engine must not switch to dual tokenization on override")
+	}
+	if hl.tokenizeCalls == 0 {
+		t.Error("expected single theme tokenization")
+	}
+}
+
+type erroringThemeHighlighter struct {
+	mockHighlighter
+}
+
+func (e *erroringThemeHighlighter) GetThemeColors(theme string) (ThemeInfo, error) {
+	if theme != "light-theme" {
+		return ThemeInfo{}, fmt.Errorf("unknown theme %q", theme)
+	}
+	return e.mockHighlighter.GetThemeColors(theme)
+}
+
+func TestThemeOverride_UnknownThemeWarnsAndSkips(t *testing.T) {
+	hl := &erroringThemeHighlighter{
+		mockHighlighter: mockHighlighter{
+			lightTokens: [][]Token{{{Content: "x", Color: "#aaa"}}},
+			themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		},
+	}
+	var warnings []string
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithWarningHandler(func(msg string) { warnings = append(warnings, msg) }),
+	)
+
+	html, err := engine.RenderWithMeta("x", `go theme="nope"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	if strings.Contains(html, "kz-themed") {
+		t.Error("unknown override theme should not produce a themed wrapper")
+	}
+	if len(warnings) != 1 {
+		t.Fatalf("expected 1 warning, got %d: %v", len(warnings), warnings)
+	}
+
+	if _, err := engine.RenderWithMeta("x", `go theme="nope"`); err != nil {
+		t.Fatalf("second render error: %v", err)
+	}
+	if len(warnings) != 1 {
+		t.Errorf("cached failure should not warn again, got %d warnings", len(warnings))
+	}
+}
+
+func TestThemeOverride_MarkerContrastUsesOverrideBG(t *testing.T) {
+	hl := overrideMock()
+	hl.lightTokens = [][]Token{{{Content: "x", Color: "#777777"}}}
+	engine := newTestEngine(hl)
+
+	extractSL := func(html string) string {
+		idx := strings.Index(html, "--sl:")
+		if idx < 0 {
+			t.Fatal("no --sl token style found")
+		}
+		end := strings.IndexAny(html[idx:], ";\"")
+		return html[idx : idx+end]
+	}
+
+	pageHTML, err := engine.RenderWithMeta("x", "go {1}")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+	overrideHTML, err := engine.RenderWithMeta("x", `go {1} theme="dracula"`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if extractSL(pageHTML) == extractSL(overrideHTML) {
+		t.Errorf("marker contrast should adjust against the override background, both produced %s", extractSL(pageHTML))
+	}
+}
+
+func TestThemeOverride_ConcurrentRenders(t *testing.T) {
+	hl := overrideMock()
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+	)
+
+	var wg sync.WaitGroup
+	metas := []string{`go theme="dracula"`, `go theme="nord"`, `go theme="a,b"`, "go"}
+	for i := 0; i < 16; i++ {
+		wg.Add(1)
+		go func(meta string) {
+			defer wg.Done()
+			if _, err := engine.RenderWithMeta("x", meta); err != nil {
+				t.Errorf("concurrent render error: %v", err)
+			}
+		}(metas[i%len(metas)])
+	}
+	wg.Wait()
 }

@@ -49,21 +49,25 @@
   pointer-events: none;
 }
 
-/* Labeled ranges — inline badge before code content on the first line.
-   data-label on .code div, read via attr() (avoids CSS injection).
+/* Labeled ranges — badge at the left edge of the code area.
+   data-label on .code div, read via attr().
    On ins/del lines, this overrides the diff indicator ::before. */
+.kazari-code .kz-line.tm-label .code {
+  position: relative;
+}
 .kazari-code .kz-line.tm-label .code::before {
   content: attr(data-label);
+  display: block;
+  position: absolute;
+  left: 0;
+  margin-left: 0;
+  z-index: 1;
   color: var(--kz-label-fg);
   padding: var(--kz-label-padding);
   font-size: var(--kz-label-font-size);
   border-radius: var(--kz-label-radius);
-  margin-right: 0.75em;
-  position: static;
-  left: auto;
-  margin-left: 0;
-  display: inline;
   white-space: nowrap;
+  pointer-events: none;
 }
 .kazari-code .kz-line.mark.tm-label .code::before {
   background: var(--kz-mark-border);

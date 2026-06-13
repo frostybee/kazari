@@ -7,6 +7,7 @@ import (
 	"html"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/frostybee/kazari/internal/ansi"
 	"github.com/frostybee/kazari/internal/collapsible"
@@ -28,6 +29,20 @@ type Engine struct {
 	cfg         *config.Config
 	lightColors theme.ThemeColors
 	darkColors  theme.ThemeColors
+
+	// Theme pipeline kept for render-time per-block overrides.
+	themeAdjustments *ThemeAdjustments
+	themeCustomizer  func(string, ThemeInfo) ThemeInfo
+
+	overrideMu    sync.RWMutex
+	overrideCache map[string]overrideEntry
+}
+
+// overrideEntry caches the resolved state for one theme= override string.
+type overrideEntry struct {
+	style    string
+	lightBGs *config.MarkerEffectiveBGs
+	darkBGs  *config.MarkerEffectiveBGs
 }
 
 // New creates a new Engine with the given options.
@@ -39,17 +54,20 @@ func New(opts ...Option) *Engine {
 	}
 
 	e := &Engine{
-		hl:  b.hl,
-		cfg: b.cfg,
+		hl:               b.hl,
+		cfg:              b.cfg,
+		themeAdjustments: b.themeAdjustments,
+		themeCustomizer:  b.themeCustomizer,
+		overrideCache:    make(map[string]overrideEntry),
 	}
 
 	// Extract theme colors at construction time for CSS generation.
 	if e.hl != nil {
-		if colors, ok := extractThemeColors(e.hl, e.cfg.LightTheme, b); ok {
+		if colors, ok := extractThemeColors(e.hl, e.cfg.LightTheme, b.themeAdjustments, b.themeCustomizer); ok {
 			e.lightColors = colors
 		}
 		if e.cfg.DarkTheme != "" {
-			if colors, ok := extractThemeColors(e.hl, e.cfg.DarkTheme, b); ok {
+			if colors, ok := extractThemeColors(e.hl, e.cfg.DarkTheme, b.themeAdjustments, b.themeCustomizer); ok {
 				e.darkColors = colors
 			}
 		}
@@ -71,14 +89,14 @@ func New(opts ...Option) *Engine {
 
 // extractThemeColors pulls editor colors from a theme, then applies theme
 // adjustments and the theme customizer in that order (customizer gets final say).
-func extractThemeColors(hl Highlighter, themeName string, b *engineBuilder) (theme.ThemeColors, bool) {
+func extractThemeColors(hl Highlighter, themeName string, adj *ThemeAdjustments, customizer func(string, ThemeInfo) ThemeInfo) (theme.ThemeColors, bool) {
 	info, err := hl.GetThemeColors(themeName)
 	if err != nil {
 		return theme.ThemeColors{}, false
 	}
-	ti := applyThemeAdjustments(info, b.themeAdjustments)
-	if b.themeCustomizer != nil {
-		ti = b.themeCustomizer(themeName, ti)
+	ti := applyThemeAdjustments(info, adj)
+	if customizer != nil {
+		ti = customizer(themeName, ti)
 	}
 	return theme.ThemeColors{
 		EditorBG:     ti.BG,
@@ -150,9 +168,8 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 			Ranges:   convertRanges(opts.Collapse.Ranges),
 		}
 	}
-	e.resolveCollapse(code, resolved, spec)
 
-	return e.renderResolved(code, resolved)
+	return e.renderResolved(code, resolved, spec)
 }
 
 // RenderWithMeta parses a meta string and renders the code block.
@@ -165,16 +182,23 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	resolved.InlineMarkers = parsed.InlineMarkers
 	resolved.FocusLines = parsed.FocusLines
 	resolved.DiffLang = parsed.DiffLang
-	e.resolveCollapse(code, resolved, parsed.Collapse)
-	return e.renderResolved(code, resolved)
+	return e.renderResolved(code, resolved, parsed.Collapse)
 }
 
-func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock) (string, error) {
+func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock, collapseSpec *config.CollapseSpec) (string, error) {
 	if e.cfg.MermaidPassThrough && resolved.Lang == "mermaid" {
 		return renderMermaidBlock(code), nil
 	}
 
 	code = e.preprocess(code, resolved)
+
+	// Collapse resolution must run on the preprocessed code. Preprocessing can
+	// remove a filename comment line, which shifts line counts and ranges.
+	e.resolveCollapse(code, resolved, collapseSpec)
+
+	if resolved.Theme != "" && e.hl != nil {
+		e.applyThemeOverride(resolved)
+	}
 
 	if resolved.Lang == "ansi" {
 		lines := ansi.Parse(code)
@@ -261,7 +285,9 @@ func (e *Engine) Assets() Assets {
 }
 
 // EnableCodeGroups enables code group CSS/JS in engine output.
-// Called automatically by kazarimd.CodeGroups().
+// Called automatically by kazarimd.CodeGroups(). It mutates the engine
+// configuration without synchronization, so call it during setup before
+// the engine is shared with concurrent Render, CSS, or JS callers.
 func (e *Engine) EnableCodeGroups() {
 	e.cfg.CodeGroups = true
 }
@@ -397,8 +423,69 @@ func (e *Engine) resolveThemes(override string) (light, dark string) {
 		dark = strings.TrimSpace(override[idx+1:])
 	} else {
 		light = override
+		// A single override theme applies to both modes, but only on
+		// dual-theme engines so single-theme pages stay single-theme.
+		if dark != "" {
+			dark = override
+		}
 	}
 	return
+}
+
+// applyThemeOverride populates the per-block theme override state: the inline
+// style for the block wrapper and the marker backgrounds used for contrast
+// adjustment. Entries are cached per override string because engines are
+// shared across many renders and may be used concurrently.
+func (e *Engine) applyThemeOverride(resolved *config.ResolvedBlock) {
+	lightName, darkName := e.resolveThemes(resolved.Theme)
+	if lightName == e.cfg.LightTheme && darkName == e.cfg.DarkTheme {
+		return
+	}
+
+	e.overrideMu.RLock()
+	entry, ok := e.overrideCache[resolved.Theme]
+	e.overrideMu.RUnlock()
+	if !ok {
+		entry = e.buildOverrideEntry(lightName, darkName)
+		e.overrideMu.Lock()
+		e.overrideCache[resolved.Theme] = entry
+		e.overrideMu.Unlock()
+	}
+
+	resolved.ThemeOverrideStyle = entry.style
+	resolved.LightMarkerBGs = entry.lightBGs
+	resolved.DarkMarkerBGs = entry.darkBGs
+}
+
+func (e *Engine) buildOverrideEntry(lightName, darkName string) overrideEntry {
+	light, ok := extractThemeColors(e.hl, lightName, e.themeAdjustments, e.themeCustomizer)
+	if !ok {
+		e.warn(fmt.Sprintf("kazari: unknown theme %q in per-block override, keeping page colors", lightName))
+		return overrideEntry{}
+	}
+
+	var dark theme.ThemeColors
+	if e.cfg.DarkTheme != "" && darkName != "" {
+		if colors, ok := extractThemeColors(e.hl, darkName, e.themeAdjustments, e.themeCustomizer); ok {
+			dark = colors
+		} else {
+			e.warn(fmt.Sprintf("kazari: unknown theme %q in per-block override, keeping page colors for dark mode", darkName))
+		}
+	}
+
+	entry := overrideEntry{style: theme.BlockOverrideStyle(e.cfg, light, dark)}
+	if entry.style == "" {
+		return overrideEntry{}
+	}
+	if e.cfg.MinContrast > 0 {
+		if light.EditorBG != "" {
+			entry.lightBGs = computeMarkerBGs(light.EditorBG)
+		}
+		if dark.EditorBG != "" {
+			entry.darkBGs = computeMarkerBGs(dark.EditorBG)
+		}
+	}
+	return entry
 }
 
 func computeMarkerBGs(editorBG string) *config.MarkerEffectiveBGs {

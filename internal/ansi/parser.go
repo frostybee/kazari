@@ -155,6 +155,8 @@ func applyParams(params string, st *state) {
 			st.bg = ""
 		case code >= 90 && code <= 97:
 			st.fg = standardColors[code-82]
+		case code >= 100 && code <= 107:
+			st.bg = standardColors[code-92]
 		}
 	}
 }

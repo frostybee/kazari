@@ -79,6 +79,8 @@ var exampleDescriptions = map[string]string{
 	"word-wrap-hanging":     "Adds a fixed hanging indent to wrapped continuations so new logical lines are easy to spot.",
 	"line-markers":          "Distinguishes highlighted, inserted, and deleted lines with clear full-line treatments.",
 	"labeled-range":         "Attaches explanatory labels to marked line ranges so each change can carry context.",
+	"labeled-range-no-ln":   "Labeled ranges without line numbers place the badge flush at the left edge of the block.",
+	"labeled-range-numbers": "Short numeric labels act as compact reference badges on the first line of each range.",
 	"focus-lines":           "Keeps selected lines prominent while dimming the surrounding code for emphasis.",
 	"inline-markers":        "Highlights matching text inside a line without losing the underlying syntax colors.",
 	"inline-markers-single": "Uses single-quoted marker expressions when the highlighted text or meta string needs simpler escaping.",
@@ -98,6 +100,7 @@ var exampleDescriptions = map[string]string{
 	"ansi":                  "Converts ANSI SGR escape sequences into styled terminal colors and text treatments.",
 	"code-group-sync":       "Synchronizes matching tabs across separate code groups that share the same key.",
 	"theme-override":        "Selects an alternate theme for one block without changing the rest of the page.",
+	"theme-override-dual":   "Gives one block its own light and dark themes, switched by the page's dark mode toggle. Inverted here on purpose: dracula in light mode, github-light in dark mode.",
 	"theme-customizer":      "Adjusts resolved theme colors through a callback before Kazari generates the CSS variables.",
 	"theme-adjustments":     "Applies an OKLCH tint to generated theme colors while preserving their visual relationships.",
 	"scoped-css":            "Emits theme variables beneath a custom selector so Kazari styles stay inside a chosen container.",
@@ -388,6 +391,12 @@ const ref = useRef(null);`
 			metaGoExample(b, engine, "labeled-range", "Labeled Range", "Labeled range", labelCode,
 				`jsx title="labeled-line-markers.jsx" showLineNumbers {"1. Provide the value prop here:":4-6} del={"2. Remove the disabled and active states:":7-10} ins={"3. Add this to render the children inside the button:":11-16}`,
 				`html, err := engine.RenderWithMeta(code, meta)`),
+			metaGoExample(b, engine, "labeled-range-no-ln", "Labeled Range (no line numbers)", "No line numbers", labelCode,
+				`jsx title="labeled-line-markers.jsx" {"1. Provide the value prop here:":4-6} del={"2. Remove the disabled and active states:":7-10} ins={"3. Add this to render the children inside the button:":11-16}`,
+				`html, err := engine.RenderWithMeta(code, meta)`),
+			metaGoExample(b, engine, "labeled-range-numbers", "Labeled Range (numbered)", "Numbered labels", labelCode,
+				`jsx title="labeled-line-markers.jsx" {"1":5-6} del={"2":8-9} ins={"3":12-16}`,
+				`html, err := engine.RenderWithMeta(code, meta)`),
 			metaGoExample(b, engine, "focus-lines", "Focus Lines", "Focus lines", focusCode,
 				`go title="process.go" showLineNumbers focus={3-5}`,
 				`html, err := engine.RenderWithMeta(code, `+"`"+`go title="process.go" showLineNumbers focus={3-5}`+"`"+`)`),
@@ -647,6 +656,7 @@ html, err := engine.Render(code, kazari.Options{
 	themeCode := "func main() {\n\tfmt.Println(\"Same code, different theme\")\n}"
 	themeDefaultHTML := b.renderMeta(engine, themeCode, `go title="default theme" showLineNumbers`)
 	themeDraculaHTML := b.renderMeta(engine, themeCode, `go title="theme=dracula" showLineNumbers theme="dracula"`)
+	themeDualHTML := b.renderMeta(engine, themeCode, `go title="theme=dracula,github-light" showLineNumbers theme="dracula,github-light"`)
 	customizerEngine := b.engine(
 		kazari.WithThemeCSSRoot(".kazari-customizer"),
 		kazari.WithThemeCustomizer(func(name string, colors kazari.ThemeInfo) kazari.ThemeInfo {
@@ -680,6 +690,16 @@ html, err := engine.Render(code, kazari.Options{
 					recipe("Meta", "go title=\"default theme\" showLineNumbers\ngo title=\"theme=dracula\" showLineNumbers theme=\"dracula\""),
 					recipe("Go", `defaultHTML, err := engine.RenderWithMeta(code, `+"`"+`go title="default theme" showLineNumbers`+"`"+`)
 draculaHTML, err := engine.RenderWithMeta(code, `+"`"+`go title="theme=dracula" showLineNumbers theme="dracula"`+"`"+`)`),
+				},
+			},
+			{
+				ID:       "theme-override-dual",
+				Title:    "Per-Block Theme Override (dual: dracula + github-light)",
+				NavTitle: "Dual override",
+				HTML:     themeDualHTML,
+				Recipes: []Recipe{
+					recipe("Meta", `go title="theme=dracula,github-light" showLineNumbers theme="dracula,github-light"`),
+					recipe("Go", `html, err := engine.RenderWithMeta(code, `+"`"+`go showLineNumbers theme="dracula,github-light"`+"`"+`)`),
 				},
 			},
 			{
@@ -774,6 +794,7 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 
 	css := strings.Join([]string{
 		collapseEngine.CSS(),
+		dotsEngine.ThemeCSS(),
 		customizerEngine.ThemeCSS(),
 		tintedEngine.ThemeCSS(),
 		scopedEngine.ThemeCSS(),

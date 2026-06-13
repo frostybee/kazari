@@ -9,7 +9,6 @@ func TestDefaultConfig(t *testing.T) {
 		checks := map[string]struct{ got, want bool }{
 			"CopyButton":               {cfg.CopyButton, true},
 			"FullscreenButton":         {cfg.FullscreenButton, true},
-			"LineNumbers":              {cfg.LineNumbers, false},
 			"FrameDetection":           {cfg.FrameDetection, true},
 			"FileNameExtraction":       {cfg.FileNameExtraction, true},
 			"LanguageBadge":            {cfg.LanguageBadge, true},

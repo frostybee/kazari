@@ -219,3 +219,123 @@ func TestTokenSwitchingCSS_BothMode(t *testing.T) {
 		t.Error("should contain .dark selector rule")
 	}
 }
+
+// --- Per-block theme override ---
+
+func TestBlockOverrideStyle_DualTheme(t *testing.T) {
+	cfg := testConfig()
+	style := BlockOverrideStyle(cfg, darkColors, lightColors)
+
+	if !strings.Contains(style, "--kz-ovl-editor-bg:#1e1e1e") {
+		t.Error("should emit light slot editor bg from the override theme")
+	}
+	if !strings.Contains(style, "--kz-ovl-editor-fg:#d4d4d4") {
+		t.Error("should emit light slot editor fg")
+	}
+	if !strings.Contains(style, "--kz-ovd-editor-bg:#ffffff") {
+		t.Error("should emit dark slot editor bg")
+	}
+	if !strings.Contains(style, "--kz-ovl-toolbar-bg:") {
+		t.Error("should emit toolbar vars")
+	}
+	if !strings.Contains(style, "--kz-ovl-ln-fg:") {
+		t.Error("should emit line number fg")
+	}
+	if strings.HasSuffix(style, ";") {
+		t.Error("style should not end with a trailing semicolon")
+	}
+}
+
+func TestBlockOverrideStyle_SingleThemeEngine(t *testing.T) {
+	cfg := testConfig()
+	cfg.DarkTheme = ""
+	style := BlockOverrideStyle(cfg, darkColors, ThemeColors{})
+
+	if !strings.Contains(style, "--kz-ovl-editor-bg:#1e1e1e") {
+		t.Error("should emit light slot vars")
+	}
+	if strings.Contains(style, "--kz-ovd-") {
+		t.Error("single theme engine should not emit dark slot vars")
+	}
+}
+
+func TestBlockOverrideStyle_UnusableLight(t *testing.T) {
+	cfg := testConfig()
+	if style := BlockOverrideStyle(cfg, ThemeColors{}, darkColors); style != "" {
+		t.Errorf("unusable light colors should produce empty style, got %q", style)
+	}
+}
+
+func TestBlockOverrideStyle_FeatureGates(t *testing.T) {
+	cfg := testConfig()
+	cfg.Collapsible = nil
+	cfg.ThemedScrollbars = false
+	style := BlockOverrideStyle(cfg, darkColors, lightColors)
+	if strings.Contains(style, "collapse-btn") || strings.Contains(style, "scrollbar-thumb") {
+		t.Error("gated clusters should be absent when features are off")
+	}
+
+	cfg.Collapsible = &config.CollapsibleConfig{LineThreshold: 10}
+	cfg.ThemedScrollbars = true
+	style = BlockOverrideStyle(cfg, darkColors, lightColors)
+	if !strings.Contains(style, "--kz-ovl-collapse-btn-fg:") {
+		t.Error("collapse button vars should be present when collapsible is enabled")
+	}
+	if !strings.Contains(style, "--kz-ovl-scrollbar-thumb:") {
+		t.Error("scrollbar vars should be present when themed scrollbars are enabled")
+	}
+}
+
+func TestTokenSwitchingCSS_ThemedMapping(t *testing.T) {
+	cfg := testConfig()
+	css := TokenSwitchingCSS(cfg)
+
+	if !strings.Contains(css, ".kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg);") {
+		t.Error("should contain light kz-themed mapping rule")
+	}
+	if strings.Contains(css, "--kz-collapse-gradient-end") {
+		t.Error("gradient end re declaration should be absent when collapsible is disabled")
+	}
+	if !strings.Contains(css, ".dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg));") {
+		t.Error("dark mapping should be selector scoped with ovl fallbacks")
+	}
+
+	cfg.Collapsible = &config.CollapsibleConfig{LineThreshold: 10}
+	css = TokenSwitchingCSS(cfg)
+	if !strings.Contains(css, "--kz-collapse-gradient-end: var(--kz-editor-bg);") {
+		t.Error("light mapping must re declare the collapse gradient end when collapsible is enabled")
+	}
+}
+
+func TestTokenSwitchingCSS_ThemedMapping_DarkRuleSingleLine(t *testing.T) {
+	cfg := testConfig()
+	rule := themedDarkRule(cfg)
+	if strings.Count(rule, "\n") != 1 || !strings.HasSuffix(rule, "}\n") {
+		t.Errorf("dark mapping rule must be a single line for writeScopedRules, got %q", rule)
+	}
+}
+
+func TestTokenSwitchingCSS_ThemedMapping_NoDarkTheme(t *testing.T) {
+	cfg := testConfig()
+	cfg.DarkTheme = ""
+	css := TokenSwitchingCSS(cfg)
+
+	if !strings.Contains(css, ".kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg);") {
+		t.Error("light mapping must be present for single theme engines")
+	}
+	if strings.Contains(css, "--kz-ovd-") {
+		t.Error("dark mapping should be absent when no dark theme is configured")
+	}
+}
+
+func TestTokenSwitchingCSS_ThemedMapping_MediaQueryMode(t *testing.T) {
+	cfg := testConfig()
+	cfg.DarkMode.Kind = config.DarkModeMediaQueryKind
+	css := TokenSwitchingCSS(cfg)
+
+	mediaIdx := strings.Index(css, "@media (prefers-color-scheme: dark)")
+	darkMapIdx := strings.Index(css, "var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg))")
+	if mediaIdx < 0 || darkMapIdx < 0 || darkMapIdx < mediaIdx {
+		t.Error("dark mapping should appear inside the media query block")
+	}
+}

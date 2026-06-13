@@ -48,6 +48,10 @@ func (n *NuriHighlighter) Tokenize(code, lang, themeName string) ([][]kazari.Tok
 // both themes via Nuri's multi-theme mode, halving dual-theme cost. Both
 // returned streams share token boundaries by construction.
 func (n *NuriHighlighter) TokenizeDual(code, lang, lightTheme, darkTheme string) ([][]kazari.Token, [][]kazari.Token, error) {
+	// Nuri picks its default theme by sorting the theme map keys and taking
+	// the first one. The keys "dark" and "light" are chosen deliberately so
+	// that "dark" sorts first, which makes nt.Color below carry the dark
+	// theme colors while ThemeStyles["light"] carries the light ones.
 	result, err := n.hl.CodeToTokens(n.ctx, code, ast.CodeToTokensOptions{
 		Lang: lang,
 		Themes: map[string]string{

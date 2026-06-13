@@ -149,7 +149,7 @@ func TestSummaryText(t *testing.T) {
 	}
 }
 
-func TestComputePreviewLines(t *testing.T) {
+func TestComputePreviewSegments_FurthestVisibleLine(t *testing.T) {
 	tests := []struct {
 		name         string
 		previewLines int
@@ -185,9 +185,13 @@ func TestComputePreviewLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ComputePreviewLines(tt.previewLines, tt.lineCount, tt.markers, tt.focusLines)
+			segments, _ := ComputePreviewSegments(tt.previewLines, tt.lineCount, tt.markers, tt.focusLines)
+			if len(segments) == 0 {
+				t.Fatal("expected at least one preview segment")
+			}
+			got := segments[len(segments)-1].End
 			if got != tt.want {
-				t.Errorf("ComputePreviewLines() = %d, want %d", got, tt.want)
+				t.Errorf("furthest visible line = %d, want %d", got, tt.want)
 			}
 		})
 	}

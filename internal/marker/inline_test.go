@@ -273,3 +273,88 @@ func TestProcessInlineMarkers_RegexOverlapWithLiteral(t *testing.T) {
 		t.Errorf("ins (higher priority) should win overlap, got type %d", segs[0].Marker.Type)
 	}
 }
+
+func matchesEqual(a, b []inlineMatch) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].start != b[i].start || a[i].end != b[i].end || a[i].mtype != b[i].mtype {
+			return false
+		}
+	}
+	return true
+}
+
+func TestResolveInlineOverlaps_LowerPriorityTailSurvives(t *testing.T) {
+	matches := []inlineMatch{
+		{start: 5, end: 15, mtype: config.MarkerIns, priority: int(config.MarkerIns)},
+		{start: 12, end: 20, mtype: config.MarkerMark, priority: int(config.MarkerMark)},
+	}
+	got := resolveInlineOverlaps(matches)
+	want := []inlineMatch{
+		{start: 5, end: 15, mtype: config.MarkerIns},
+		{start: 15, end: 20, mtype: config.MarkerMark},
+	}
+	if !matchesEqual(got, want) {
+		t.Errorf("resolveInlineOverlaps() = %+v, want %+v", got, want)
+	}
+}
+
+func TestResolveInlineOverlaps_LowerPriorityHeadSurvives(t *testing.T) {
+	matches := []inlineMatch{
+		{start: 0, end: 7, mtype: config.MarkerMark, priority: int(config.MarkerMark)},
+		{start: 5, end: 10, mtype: config.MarkerDel, priority: int(config.MarkerDel)},
+	}
+	got := resolveInlineOverlaps(matches)
+	want := []inlineMatch{
+		{start: 0, end: 5, mtype: config.MarkerMark},
+		{start: 5, end: 10, mtype: config.MarkerDel},
+	}
+	if !matchesEqual(got, want) {
+		t.Errorf("resolveInlineOverlaps() = %+v, want %+v", got, want)
+	}
+}
+
+func TestResolveInlineOverlaps_MiddleFragmentSurvives(t *testing.T) {
+	matches := []inlineMatch{
+		{start: 0, end: 5, mtype: config.MarkerIns, priority: int(config.MarkerIns)},
+		{start: 10, end: 15, mtype: config.MarkerIns, priority: int(config.MarkerIns)},
+		{start: 3, end: 12, mtype: config.MarkerMark, priority: int(config.MarkerMark)},
+	}
+	got := resolveInlineOverlaps(matches)
+	want := []inlineMatch{
+		{start: 0, end: 5, mtype: config.MarkerIns},
+		{start: 5, end: 10, mtype: config.MarkerMark},
+		{start: 10, end: 15, mtype: config.MarkerIns},
+	}
+	if !matchesEqual(got, want) {
+		t.Errorf("resolveInlineOverlaps() = %+v, want %+v", got, want)
+	}
+}
+
+func TestProcessInlineMarkers_OverlapKeepsNonOverlappingTail(t *testing.T) {
+	tokens := []config.MergedToken{tok("abcdefgh")}
+	markers := []config.InlineMarker{
+		{Type: config.MarkerIns, Text: "cde"},
+		{Type: config.MarkerMark, Text: "defg"},
+	}
+	result := ProcessInlineMarkers(tokens, markers)
+
+	segs := result[0].Segments
+	if len(segs) != 4 {
+		t.Fatalf("expected 4 segments, got %d: %+v", len(segs), segs)
+	}
+	if segs[0].Content != "ab" || segs[0].Marker != nil {
+		t.Errorf("segment 0: expected plain 'ab', got %+v", segs[0])
+	}
+	if segs[1].Content != "cde" || segs[1].Marker == nil || segs[1].Marker.Type != config.MarkerIns {
+		t.Errorf("segment 1: expected ins 'cde', got %+v", segs[1])
+	}
+	if segs[2].Content != "fg" || segs[2].Marker == nil || segs[2].Marker.Type != config.MarkerMark {
+		t.Errorf("segment 2: expected mark 'fg', got %+v", segs[2])
+	}
+	if segs[3].Content != "h" || segs[3].Marker != nil {
+		t.Errorf("segment 3: expected plain 'h', got %+v", segs[3])
+	}
+}
