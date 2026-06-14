@@ -383,7 +383,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--kz-toolbar-padding, 0.375rem 1rem);
+  padding: var(--kz-toolbar-padding, 0.25rem 1rem);
   background: var(--kz-toolbar-bg, rgba(39, 39, 42, 0.6));
   border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
 }
@@ -432,7 +432,7 @@
 .kazari-code .kz-terminal-header {
   display: flex;
   align-items: center;
-  padding: var(--kz-toolbar-padding, 0.625rem 1rem);
+  padding: var(--kz-toolbar-padding, 0.5rem 1rem);
   background: var(--kz-terminal-titlebar-bg, var(--kz-toolbar-bg));
   border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
   position: relative;
@@ -512,8 +512,33 @@
   border-color: var(--kz-copy-success-border, rgba(34, 197, 94, 0.8));
 }
 .kazari-code .kz-copy-icon {
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.kazari-code:not(:has(.frame)) .kz-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.2s ease, color 0.2s ease;
+  z-index: 1;
+}
+.kazari-code:not(:has(.frame)):hover .kz-copy-btn,
+.kazari-code:not(:has(.frame)) .kz-copy-btn:focus-visible {
+  opacity: 1;
+}
+.kazari-code:not(:has(.frame)) .kz-copy-btn.copied {
+  opacity: 1;
+}
+@media (hover: none) {
+  .kazari-code:not(:has(.frame)) .kz-copy-btn {
+    opacity: 1;
+  }
+}
+@media print {
+  .kazari-code:not(:has(.frame)) .kz-copy-btn {
+    display: none;
+  }
 }
 .kazari-code .kz-fs-btn {
   display: flex;
@@ -532,13 +557,13 @@
   color: var(--kz-copy-fg-hover, #ffffff);
 }
 .kazari-code .kz-fs-icon {
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 .kazari-code .kz-fs-exit-icon {
   display: none;
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 .kazari-code .kz-font-controls {
   display: none;
@@ -663,8 +688,8 @@
 }
 .kazari-code .kz-wrap-icon,
 .kazari-code .kz-wrap-off-icon {
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 .kazari-code .kz-wrap-off-icon {
   display: none;

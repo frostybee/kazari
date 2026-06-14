@@ -250,6 +250,10 @@ func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 	if resolved.CollapseThreshold {
 		renderCollapseBar(sb, resolved, cfg)
 	}
+
+	if cfg.CopyButton {
+		renderCopyButton(sb, resolved.RawCode, cfg)
+	}
 }
 
 type lineContext struct {

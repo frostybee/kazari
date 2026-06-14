@@ -137,6 +137,34 @@ func TestRenderBlock_FrameNone(t *testing.T) {
 	}
 }
 
+func TestRenderBlock_FrameNone_CopyButton(t *testing.T) {
+	cfg := defaultCfg()
+	r := resolved()
+	r.Frame = config.FrameNone
+	r.RawCode = "hello"
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, "kz-copy-btn") {
+		t.Error("frame none should have copy button when cfg.CopyButton is true")
+	}
+}
+
+func TestRenderBlock_FrameNone_NoCopyButton_WhenDisabled(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.CopyButton = false
+	r := resolved()
+	r.Frame = config.FrameNone
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if strings.Contains(out, "kz-copy-btn") {
+		t.Error("frame none should not have copy button when cfg.CopyButton is false")
+	}
+}
+
 // --- Line numbers ---
 
 func TestRenderBlock_LineNumbers(t *testing.T) {
