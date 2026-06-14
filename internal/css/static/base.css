@@ -18,7 +18,7 @@
   border-radius: 0;
 }
 .kazari-code .frame.is-terminal pre {
-  background: var(--kz-terminal-bg, var(--kz-editor-bg));
+  background: var(--kz-terminal-bg);
 }
 .kazari-code pre code {
   display: block;

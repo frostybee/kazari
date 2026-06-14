@@ -10,7 +10,7 @@
 .kazari-code .kz-lang + .kz-file-icon {
   margin-left: 0.625rem;
   padding-left: 0.625rem;
-  border-left: 1px solid var(--kz-separator-color, rgba(161, 161, 170, 0.3));
+  border-left: 1px solid var(--kz-separator-color);
 }
 .kazari-code .kz-file-icon + .kz-title {
   margin-left: 0.25rem;

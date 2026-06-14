@@ -10,13 +10,13 @@
   justify-content: flex-end;
   align-items: flex-start;
   box-sizing: content-box;
-  min-width: var(--kz-ln-width, 2ch);
-  padding-inline: var(--kz-ln-padding-inline, 2ch);
+  min-width: var(--kz-ln-width);
+  padding-inline: var(--kz-ln-padding-inline);
   font-variant-numeric: tabular-nums;
   color: var(--kz-ln-fg);
-  opacity: var(--kz-ln-opacity, 0.4);
+  opacity: var(--kz-ln-opacity);
 }
 .kazari-code .highlight .gutter .ln {
   color: var(--kz-ln-highlight-fg);
-  opacity: var(--kz-ln-highlight-opacity, 0.8);
+  opacity: var(--kz-ln-highlight-opacity);
 }

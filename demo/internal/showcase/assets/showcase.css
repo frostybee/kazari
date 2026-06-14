@@ -69,24 +69,26 @@ summary {
 }
 
 .site-nav-links a {
-  padding: .4rem .75rem;
-  border-radius: .4rem;
+  padding: .4rem .75rem .55rem;
+  border-radius: .25rem .25rem 0 0;
   color: #5b6470;
   text-decoration: none;
   font-size: .88rem;
   font-weight: 500;
   transition: background .15s, color .15s;
+  border-bottom: 2px solid transparent;
 }
 
 .site-nav-links a:hover {
-  background: #f0f1ff;
-  color: #303bc4;
+  background: #f5f6f7;
+  color: #1a1a2e;
 }
 
 .site-nav-links a.active {
-  background: #e8eafc;
-  color: #303bc4;
-  font-weight: 650;
+  background: transparent;
+  color: #1a1a2e;
+  font-weight: 600;
+  border-bottom: 2px solid #4a55c5;
 }
 
 .site-theme-toggle {
@@ -236,12 +238,18 @@ summary {
   color: #555f6c;
   font-size: .85rem;
   text-decoration: none;
+  transition: background .15s, color .15s;
+}
+
+.backend-switcher a:hover {
+  background: #f5f6f7;
+  color: #1a1a2e;
 }
 
 .backend-switcher span {
-  background: #e8eafc;
-  color: #303bc4;
-  font-weight: 700;
+  background: #eef0f3;
+  color: #1a1a2e;
+  font-weight: 600;
 }
 
 .theme-toggle,
@@ -764,13 +772,14 @@ summary {
 }
 
 .dark .site-nav-links a:hover {
-  background: var(--dk-surface-hover);
-  color: var(--dk-accent-text);
+  background: #1e2035;
+  color: #d9dcff;
 }
 
 .dark .site-nav-links a.active {
-  background: var(--dk-surface-active);
-  color: var(--dk-accent-bright);
+  background: transparent;
+  color: #f0f1ff;
+  border-bottom-color: #7c85e0;
 }
 
 
@@ -815,7 +824,8 @@ summary {
 
 .dark .backend-switcher span {
   background: var(--dk-surface-active);
-  color: var(--dk-accent-text);
+  color: #f0f1ff;
+  font-weight: 600;
 }
 
 .dark .backend-switcher a,

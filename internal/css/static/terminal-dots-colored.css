@@ -8,6 +8,6 @@
   height: 0.7rem;
   border-radius: 50%;
 }
-.kazari-code .kz-terminal-dots span:nth-child(1) { background: var(--kz-terminal-dot-red, #ff5f57); }
-.kazari-code .kz-terminal-dots span:nth-child(2) { background: var(--kz-terminal-dot-yellow, #febc2e); }
-.kazari-code .kz-terminal-dots span:nth-child(3) { background: var(--kz-terminal-dot-green, #28c840); }
+.kazari-code .kz-terminal-dots span:nth-child(1) { background: var(--kz-terminal-dot-red); }
+.kazari-code .kz-terminal-dots span:nth-child(2) { background: var(--kz-terminal-dot-yellow); }
+.kazari-code .kz-terminal-dots span:nth-child(3) { background: var(--kz-terminal-dot-green); }

@@ -1,9 +1,9 @@
 .kazari-code .kz-terminal-header {
   display: flex;
   align-items: center;
-  padding: var(--kz-toolbar-padding, 0.5rem 1rem);
-  background: var(--kz-terminal-titlebar-bg, var(--kz-toolbar-bg));
-  border-bottom: 1px solid var(--kz-toolbar-border, rgba(63, 63, 70, 0.4));
+  padding: var(--kz-terminal-header-padding);
+  background: var(--kz-terminal-titlebar-bg);
+  border-bottom: 1px solid var(--kz-toolbar-border);
   position: relative;
 }
 .kazari-code .kz-terminal-header .kz-title {

@@ -77,6 +77,27 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-inline-del-border", "rgba(248,81,73,0.5)"},
 		// Focus defaults
 		{"--kz-focus-dimmed-opacity", "0.35"},
+		// Toolbar defaults
+		{"--kz-toolbar-padding", "0.25rem 1rem"},
+		{"--kz-terminal-header-padding", "0.5rem 1rem"},
+		{"--kz-lang-font-size", "0.8rem"},
+		{"--kz-lang-font-weight", "500"},
+		{"--kz-separator-color", "rgba(161, 161, 170, 0.3)"},
+		// Button defaults
+		{"--kz-copy-radius", "0.375rem"},
+		{"--kz-copy-success-bg", "rgba(34, 197, 94, 0.9)"},
+		{"--kz-copy-success-fg", "#ffffff"},
+		{"--kz-copy-success-border", "rgba(34, 197, 94, 0.8)"},
+		// Terminal defaults
+		{"--kz-terminal-bg", "var(--kz-editor-bg)"},
+		{"--kz-terminal-titlebar-bg", "var(--kz-toolbar-bg)"},
+		{"--kz-terminal-dot-red", "#ff5f57"},
+		{"--kz-terminal-dot-yellow", "#febc2e"},
+		{"--kz-terminal-dot-green", "#28c840"},
+		// Line number defaults
+		{"--kz-ln-width", "2ch"},
+		{"--kz-ln-opacity", "0.4"},
+		{"--kz-ln-highlight-opacity", "0.8"},
 	}
 
 
@@ -99,6 +120,14 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 			struct{ name, value string }{"--kz-collapse-open-bg-collapsible", "rgb(84 174 255 / 10%)"},
 			struct{ name, value string }{"--kz-collapse-open-border", "transparent"},
 			struct{ name, value string }{"--kz-collapse-open-border-width", "1px"},
+			// Closed section typography
+			struct{ name, value string }{"--kz-collapse-closed-fg", "inherit"},
+			struct{ name, value string }{"--kz-collapse-closed-font-family", "inherit"},
+			struct{ name, value string }{"--kz-collapse-closed-font-size", "inherit"},
+			struct{ name, value string }{"--kz-collapse-closed-line-height", "inherit"},
+			// Section expand/collapse icons (Octicons, MIT licensed)
+			struct{ name, value string }{"--kz-collapse-expand-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
+			struct{ name, value string }{"--kz-collapse-collapse-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
 		)
 	}
 
@@ -120,6 +149,30 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 			nv("--kz-file-icon-size", "1rem"),
 			nv("--kz-file-icon-margin", "0 0.4rem 0 0"),
 			nv("--kz-file-icon-opacity", "0.8"),
+		)
+	}
+
+	// Scrollbar defaults (conditional)
+	if cfg.ThemedScrollbars {
+		staticVars = append(staticVars,
+			nv("--kz-scrollbar-width", "5px"),
+			nv("--kz-scrollbar-height", "5px"),
+			nv("--kz-scrollbar-track", "transparent"),
+		)
+	}
+
+	// Fullscreen defaults (conditional)
+	if cfg.FullscreenButton {
+		staticVars = append(staticVars,
+			nv("--kz-fs-font-scale", "1"),
+		)
+	}
+
+	// Selection defaults (conditional)
+	if cfg.ThemedSelection {
+		staticVars = append(staticVars,
+			nv("--kz-selection-bg", "rgba(0,122,204,0.3)"),
+			nv("--kz-selection-fg", "inherit"),
 		)
 	}
 
