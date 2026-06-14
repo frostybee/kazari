@@ -584,3 +584,23 @@ document.addEventListener('click', function(e) {
   window.addEventListener('resize', scheduleScrollSpyUpdate);
   updateScrollSpy();
 })();
+
+(function() {
+  var btn = document.querySelector('.back-to-top');
+  if (!btn) return;
+  var footer = document.querySelector('.site-footer');
+  var threshold = 300;
+  var visible = false;
+  window.addEventListener('scroll', function() {
+    var pastTop = window.scrollY > threshold;
+    var atFooter = footer && (window.innerHeight + window.scrollY >= footer.offsetTop);
+    var show = pastTop && !atFooter;
+    if (show !== visible) {
+      visible = show;
+      btn.classList.toggle('is-visible', show);
+    }
+  }, { passive: true });
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();

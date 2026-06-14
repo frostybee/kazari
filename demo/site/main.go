@@ -61,25 +61,37 @@ func main() {
 
 	outDir := "demo/site"
 
-	generateShowcase(outDir, nuriHL)
+	generateShowcase(outDir, nuriHL, chromaHL)
 	generateNuriVsShiki(outDir, nuriHL)
 	generateNuriVsChroma(outDir, nuriHL, chromaHL)
 
 	log.Printf("All pages written to %s/", outDir)
 }
 
-func generateShowcase(outDir string, nuriHL kazari.Highlighter) {
-	config := showcase.Config{
+func generateShowcase(outDir string, nuriHL, chromaHL kazari.Highlighter) {
+	nuriConfig := showcase.Config{
 		BackendName: "Nuri",
 		HTMLFile:    "showcase.html",
 		OtherName:   "Chroma",
+		OtherHref:   "showcase-chroma.html",
+		NavLinks:    navLinksWithActive("Showcase"),
+	}
+	if err := showcase.Generate(outDir, nuriConfig, nuriHL); err != nil {
+		log.Fatalf("showcase (nuri): %v", err)
+	}
+	log.Println("Written: showcase.html, showcase.css, showcase.js")
+
+	chromaConfig := showcase.Config{
+		BackendName: "Chroma",
+		HTMLFile:    "showcase-chroma.html",
+		OtherName:   "Nuri",
 		OtherHref:   "showcase.html",
 		NavLinks:    navLinksWithActive("Showcase"),
 	}
-	if err := showcase.Generate(outDir, config, nuriHL); err != nil {
-		log.Fatalf("showcase: %v", err)
+	if err := showcase.Generate(outDir, chromaConfig, chromaHL); err != nil {
+		log.Fatalf("showcase (chroma): %v", err)
 	}
-	log.Println("Written: showcase.html, showcase.css, showcase.js")
+	log.Println("Written: showcase-chroma.html")
 }
 
 func generateNuriVsShiki(outDir string, nuriHL kazari.Highlighter) {
@@ -180,7 +192,7 @@ func navHTML(active string) string {
 		}
 	}
 	b.WriteString(`</div>`)
-	b.WriteString(`<label class="site-dark-toggle"><input type="checkbox" id="dark-toggle"> Dark mode</label>`)
+	b.WriteString(`<label class="site-theme-toggle" title="Toggle dark mode"><input type="checkbox" id="dark-toggle"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>`)
 	b.WriteString(`</div></nav>`)
 	return b.String()
 }
@@ -238,6 +250,21 @@ const shikiPageTmpl = `<!DOCTYPE html>
   <p>Left: Nuri (Go, pre-rendered at build time). Right: Shiki (JS, loaded from CDN).</p>
 </header>
 <main>%s</main>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-about">
+      <p class="site-footer-brand">Kazari <span class="site-footer-kanji">飾り</span></p>
+      <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://github.com/frostybee/kazari">GitHub</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/nuri">Nuri</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
 <script>%s</script>
 <script type="module">%s</script>
 </body>
@@ -262,6 +289,21 @@ const chromaPageTmpl = `<!DOCTYPE html>
   <p>Both sides are pre-rendered at build time. Nuri uses TextMate grammars (same as Shiki/VS Code). Chroma uses its own lexer-based tokenization.</p>
 </header>
 <main>%s</main>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-about">
+      <p class="site-footer-brand">Kazari <span class="site-footer-kanji">飾り</span></p>
+      <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://github.com/frostybee/kazari">GitHub</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/nuri">Nuri</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
 <script>%s</script>
 <script>%s</script>
 </body>

@@ -113,7 +113,7 @@ func Build(cfg Config, highlighter kazari.Highlighter) (Output, error) {
 
 	page := Page{
 		Title:        "Kazari Showcase with " + cfg.BackendName,
-		Subtitle:     "All Kazari features powered by " + cfg.BackendName + ".",
+		Subtitle:     "Code blocks highlighted by " + cfg.BackendName + ".",
 		Categories:   catalog,
 		ExampleCount: countExamples(catalog),
 		NavLinks:     cfg.NavLinks,

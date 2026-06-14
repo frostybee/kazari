@@ -19,10 +19,19 @@
       {{range .NavLinks}}<a href="{{.Href}}"{{if .Active}} class="active" aria-current="page"{{end}}>{{.Label}}</a>
       {{end}}
     </div>
-    <label class="site-dark-toggle"><input type="checkbox" id="dark-toggle"> Dark mode</label>
+    <nav class="backend-switcher" aria-label="Syntax highlighter backend">
+      {{range .Backends}}
+        {{if .Active}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.Href}}" data-backend-link>{{.Name}}</a>{{end}}
+      {{end}}
+    </nav>
+    <label class="site-theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="dark-toggle">
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+    </label>
   </div>
 </nav>
-{{end}}
+<div class="site-engine-banner">{{.Subtitle}}</div>
+{{else}}
 <header class="demo-header">
   <div class="demo-header-inner">
     <div class="demo-brand">
@@ -35,10 +44,11 @@
           {{if .Active}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.Href}}" data-backend-link>{{.Name}}</a>{{end}}
         {{end}}
       </nav>
-      {{if not .NavLinks}}<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>{{end}}
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
     </div>
   </div>
 </header>
+{{end}}
 
 <div class="demo-shell">
 <aside class="demo-sidebar">
@@ -125,13 +135,34 @@
       </details>
     </article>
     {{end}}
-    <a class="back-to-top" href="#top">Back to top</a>
   </section>
   {{end}}
 </main>
 </div>
 
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-about">
+      <p class="site-footer-brand">Kazari <span class="site-footer-kanji">飾り</span></p>
+      <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://github.com/frostybee/kazari">GitHub</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/nuri">Nuri</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+
 <div class="sr-announcement" id="showcase-announcement" role="status" aria-live="polite"></div>
+<button class="back-to-top" type="button" aria-label="Back to top" data-tooltip="Scroll to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M18 15l-6-6-6 6"/>
+  </svg>
+</button>
 <script defer src="showcase.js"></script>
 </body>
 </html>

@@ -57,17 +57,47 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
 .site-nav-links a { padding: .4rem .75rem; border-radius: .4rem; color: #5b6470; text-decoration: none; font-size: .88rem; font-weight: 500; transition: background .15s, color .15s; }
 .site-nav-links a:hover { background: #f0f1ff; color: #303bc4; }
 .site-nav-links a.active { background: #e8eafc; color: #303bc4; font-weight: 650; }
-.site-dark-toggle { margin-left: auto; font-size: .88rem; cursor: pointer; user-select: none; }
+.site-theme-toggle { margin-left: auto; cursor: pointer; user-select: none; display: flex; align-items: center; }
+.site-theme-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle-track { position: relative; display: inline-flex; align-items: center; width: 2.75rem; height: 1.5rem; border-radius: .75rem; background: #d1d5db; transition: background .2s ease; }
+.toggle-track::before,
+.toggle-track::after { content: ""; position: absolute; width: .8rem; height: .8rem; background: #6b7280; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.toggle-track::before { left: .3rem; -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cpath d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cpath d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/%3E%3C/svg%3E"); }
+.toggle-track::after { right: .3rem; -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E"); }
+.site-theme-toggle input:checked ~ .toggle-track { background: #4f46e5; }
+.site-theme-toggle input:checked ~ .toggle-track::before,
+.site-theme-toggle input:checked ~ .toggle-track::after { background: rgba(255,255,255,.7); }
+.site-theme-toggle input:checked ~ .toggle-track .toggle-thumb { transform: translateX(1.25rem); }
+.site-theme-toggle input:focus-visible ~ .toggle-track { outline: 2px solid #5965d8; outline-offset: 2px; }
+.toggle-thumb { position: absolute; left: .2rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s ease; }
 .dark .site-nav { background: rgba(12,12,23,.96); border-color: #34364b; }
 .dark .site-brand { color: #f0f1f5; }
 .dark .site-nav-links a { color: #b8bdc9; }
 .dark .site-nav-links a:hover { background: #303252; color: #d9dcff; }
 .dark .site-nav-links a.active { background: #3c3f67; color: #f0f1ff; }
-.dark .site-dark-toggle { color: #e0e0e0; }
+.site-footer { margin-top: 4rem; border-top: 1px solid #e0e3e8; background: #f8f9fb; }
+.site-footer-inner { max-width: 1400px; margin: 0 auto; padding: 2rem clamp(1rem,3vw,2.5rem); display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
+.site-footer-brand { font-size: 1.05rem; font-weight: 700; margin: 0 0 .35rem; }
+.site-footer-kanji { font-weight: 400; color: #888; margin-left: .15em; }
+.site-footer-about { max-width: 540px; }
+.site-footer-about p { margin: 0; font-size: .85rem; color: #5b6470; line-height: 1.55; }
+.site-footer-about a { color: #4a55c5; text-decoration: none; }
+.site-footer-about a:hover { text-decoration: underline; }
+.site-footer-links { display: flex; align-items: center; gap: .75rem; font-size: .82rem; }
+.site-footer-links a { color: #5b6470; text-decoration: none; }
+.site-footer-links a:hover { color: #4a55c5; }
+.site-footer-sep { width: 3px; height: 3px; border-radius: 50%; background: #ccc; }
+.dark .site-footer { border-color: #34364b; background: #0e0e1a; }
+.dark .site-footer-kanji { color: #666; }
+.dark .site-footer-about p { color: #9aa0ad; }
+.dark .site-footer-about a { color: #aeb5ff; }
+.dark .site-footer-links a { color: #9aa0ad; }
+.dark .site-footer-links a:hover { color: #aeb5ff; }
+.dark .site-footer-sep { background: #444; }
 </style>
 </head>
 <body>
-<nav class="site-nav"><div class="site-nav-inner"><a class="site-brand" href="showcase.html">Kazari</a><div class="site-nav-links"><a href="showcase.html">Showcase</a><a href="nuri-vs-shiki.html" class="active" aria-current="page">Nuri vs Shiki</a><a href="nuri-vs-chroma.html">Nuri vs Chroma</a></div><label class="site-dark-toggle"><input type="checkbox" id="dark-toggle"> Dark mode</label></div></nav>
+<nav class="site-nav"><div class="site-nav-inner"><a class="site-brand" href="showcase.html">Kazari</a><div class="site-nav-links"><a href="showcase.html">Showcase</a><a href="nuri-vs-shiki.html" class="active" aria-current="page">Nuri vs Shiki</a><a href="nuri-vs-chroma.html">Nuri vs Chroma</a></div><label class="site-theme-toggle" title="Toggle dark mode"><input type="checkbox" id="dark-toggle"><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div></nav>
 <header class="cmp-header">
   <span id="shiki-status" class="cmp-status">Loading Shiki from CDN...</span>
   <p>Left: Nuri (Go, pre-rendered at build time). Right: Shiki (JS, loaded from CDN).</p>
@@ -299,6 +329,21 @@ class UserController extends Controller
 </body>
 </html></script>
 </section></main>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-about">
+      <p class="site-footer-brand">Kazari <span class="site-footer-kanji">飾り</span></p>
+      <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://github.com/frostybee/kazari">GitHub</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/nuri">Nuri</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
 <script>document.addEventListener("click",function(e){var t,s,n=e.target.closest(".kazari-code .kz-copy-btn");if(!n)return;if(t=n.getAttribute("data-code"),!t)return;t=t.replace(/\x7f/g,`
 `),s=n.querySelector("svg");function o(){n.classList.add("copied"),s&&(s.innerHTML='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'),setTimeout(function(){n.classList.remove("copied"),s&&(s.innerHTML='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>')},2e3)}navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t).then(o).catch(function(){fallbackCopy(t),o()}):(fallbackCopy(t),o())});function fallbackCopy(e){var t=document.createElement("textarea");t.value=e,t.style.position="fixed",t.style.opacity="0",document.body.appendChild(t),t.select(),document.execCommand("copy"),t.remove()}(function(){var s="kz-fs-font-scale",o=.1,i=.6,a=5,t=1;function n(e){if(e){var n=parseFloat(e.style.getPropertyValue("--kz-fs-font-scale"));if(n)return n}try{return parseFloat(localStorage.getItem(s))||t}catch{return t}}function e(e,t){t=Math.max(i,Math.min(a,Math.round(t*100)/100)),e.style.setProperty("--kz-fs-font-scale",t);try{localStorage.setItem(s,t)}catch{}}document.addEventListener("click",function(e){var t,n=e.target.closest(".kazari-code .kz-fs-btn");if(!n)return;if(t=n.closest(".kazari-code"),!t)return;document.fullscreenElement===t?document.exitFullscreen():t.requestFullscreen?t.requestFullscreen():t.webkitRequestFullscreen&&t.webkitRequestFullscreen()}),document.addEventListener("click",function(t){var s,i=t.target.closest(".kazari-code .kz-font-inc");if(!i)return;s=i.closest(".kazari-code"),s&&e(s,n(s)+o)}),document.addEventListener("click",function(t){var s,i=t.target.closest(".kazari-code .kz-font-dec");if(!i)return;if(t.detail>1)return;s=i.closest(".kazari-code"),s&&e(s,n(s)-o)}),document.addEventListener("dblclick",function(n){var s,o=n.target.closest(".kazari-code .kz-font-dec");if(!o)return;s=o.closest(".kazari-code"),s&&e(s,t)}),document.addEventListener("fullscreenchange",function(){var s,o,i,t=document.fullscreenElement;if(t&&t.classList.contains("kazari-code"))e(t,n(t)),o=t.querySelector(".kz-fs-btn"),o&&o.setAttribute("aria-expanded","true");else for(i=document.querySelectorAll('.kz-fs-btn[aria-expanded="true"]'),s=0;s<i.length;s++)i[s].setAttribute("aria-expanded","false")})})(),document.addEventListener("click",function(e){var n,s,o,i,t=e.target.closest(".kazari-code .kz-wrap-btn");if(!t)return;if(n=t.closest(".kazari-code"),!n)return;if(s=n.querySelector("pre"),!s)return;o=s.classList.toggle("wrap"),t.setAttribute("aria-pressed",o),i=o?t.getAttribute("data-disable"):t.getAttribute("data-enable"),t.setAttribute("title",i)})</script>
 <script type="module">var toggle = document.getElementById("dark-toggle");
