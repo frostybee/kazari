@@ -145,11 +145,11 @@ func validateFileConfig(fc *FileConfig) error {
 	}
 
 	if fc.TabWidth != nil {
-		v.Field("tabWidth").Value(*fc.TabWidth).IntMin(1)
+		v.Field("tabWidth").Value(*fc.TabWidth).OmitNil().IntMin(1)
 	}
 
 	if fc.MinContrast != nil {
-		v.Field("minContrast").Value(*fc.MinContrast).FloatMin(0)
+		v.Field("minContrast").Value(*fc.MinContrast).OmitNil().FloatMin(0)
 	}
 
 	if fc.TerminalDotStyle != nil {

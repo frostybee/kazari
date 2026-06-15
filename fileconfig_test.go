@@ -766,3 +766,146 @@ func TestWithConfigDir_Priority(t *testing.T) {
 		t.Errorf("TabWidth = %d, want 4 (.yaml should win over .json)", engine.cfg.TabWidth)
 	}
 }
+
+// --- A. Validation rules with no test coverage ---
+
+func TestValidation_ZeroPreviewLines(t *testing.T) {
+	pl := 0
+	fc := &FileConfig{Collapsible: &CollapsibleFileConfig{PreviewLines: &pl}}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("zero previewLines should fail validation")
+	}
+}
+
+func TestValidation_InvalidCollapsibleStyle(t *testing.T) {
+	s := "invalid"
+	fc := &FileConfig{Collapsible: &CollapsibleFileConfig{Style: &s}}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("invalid collapsible style should fail validation")
+	}
+}
+
+func TestValidation_InvalidLanguageDefaultsFrame(t *testing.T) {
+	f := "invalid"
+	fc := &FileConfig{
+		LanguageDefaults: map[string]BlockDefaultsFileConfig{
+			"go": {Frame: &f},
+		},
+	}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("invalid languageDefaults frame should fail validation")
+	}
+}
+
+// --- B. Validation rules with partial coverage ---
+
+func TestValidation_MissingSelectorForBothKind(t *testing.T) {
+	fc := &FileConfig{DarkMode: &DarkModeFileConfig{Kind: "both"}}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("missing selector for kind=both should fail validation")
+	}
+}
+
+func TestValidation_ZeroTabWidth(t *testing.T) {
+	tw := 0
+	fc := &FileConfig{TabWidth: &tw}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("zero tabWidth should fail validation")
+	}
+}
+
+func TestValidation_InvalidDarkModeKind(t *testing.T) {
+	fc := &FileConfig{DarkMode: &DarkModeFileConfig{Kind: "invalid", Selector: ".dark"}}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("invalid darkMode.kind should fail validation")
+	}
+}
+
+// --- C. Boundary valid values ---
+
+func TestValidation_BoundaryValidValues(t *testing.T) {
+	tw := 1
+	mc := 0.0
+	lt := 1
+	pl := 1
+	fc := &FileConfig{
+		TabWidth:    &tw,
+		MinContrast: &mc,
+		Collapsible: &CollapsibleFileConfig{
+			LineThreshold: &lt,
+			PreviewLines:  &pl,
+		},
+	}
+	if err := validateFileConfig(fc); err != nil {
+		t.Errorf("minimum valid values should pass: %v", err)
+	}
+}
+
+// --- D. ParseConfig error paths ---
+
+func TestParseConfig_MalformedYAML(t *testing.T) {
+	if _, err := ParseConfig([]byte("tabWidth: [bad"), "yaml"); err == nil {
+		t.Error("malformed YAML should error")
+	}
+}
+
+func TestParseConfig_MalformedJSON(t *testing.T) {
+	if _, err := ParseConfig([]byte("{bad json}"), "json"); err == nil {
+		t.Error("malformed JSON should error")
+	}
+}
+
+func TestParseConfig_WrongTypeInYAML(t *testing.T) {
+	if _, err := ParseConfig([]byte("tabWidth: abc"), "yaml"); err == nil {
+		t.Error("wrong type for tabWidth should error")
+	}
+}
+
+// --- E. Style override error paths ---
+
+func TestParseStyleOverrides_ArrayNonStringElements(t *testing.T) {
+	raw := map[string]any{"shadow": []any{42, "red"}}
+	if _, err := parseStyleOverrides(raw); err == nil {
+		t.Error("array with non-string elements should error")
+	}
+}
+
+func TestParseStyleOverrides_MapNonStringValue(t *testing.T) {
+	raw := map[string]any{
+		"editor-bg": map[string]any{"light": 42},
+	}
+	if _, err := parseStyleOverrides(raw); err == nil {
+		t.Error("map with non-string value should error")
+	}
+}
+
+// --- F. LoadConfig edge cases ---
+
+func TestLoadConfig_YMLExtension(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "kazari.config.yml")
+	if err := os.WriteFile(path, []byte("tabWidth: 4\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	opts, err := LoadConfig(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, opts...)
+
+	if engine.cfg.TabWidth != 4 {
+		t.Errorf("TabWidth = %d, want 4", engine.cfg.TabWidth)
+	}
+}
+
+func TestLoadConfig_NonExistentFile(t *testing.T) {
+	if _, err := LoadConfig("/nonexistent/path/kazari.config.yaml"); err == nil {
+		t.Error("non-existent file should error")
+	}
+}
