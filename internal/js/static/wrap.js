@@ -9,4 +9,5 @@ document.addEventListener('click', function(e) {
   btn.setAttribute('aria-pressed', wrapped);
   var label = wrapped ? btn.getAttribute('data-disable') : btn.getAttribute('data-enable');
   btn.setAttribute('title', label);
+  btn.setAttribute('aria-label', label);
 });

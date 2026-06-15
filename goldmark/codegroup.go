@@ -140,7 +140,7 @@ func (r *codeGroupRenderer) renderCodeGroup(w util.BufWriter, source []byte, nod
 	}
 
 	// Tab bar.
-	w.WriteString(`<div class="kz-group-tabs" role="tablist">`)
+	w.WriteString(`<div class="kz-group-tabs" role="tablist" aria-label="Code variants">`)
 	for i, label := range labels {
 		selected := "false"
 		tabindex := "-1"

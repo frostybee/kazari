@@ -71,6 +71,7 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 		{"--kz-inline-del-bg", "rgba(248,81,73,0.2)"},
 		{"--kz-inline-del-border", "rgba(248,81,73,0.5)"},
 		{"--kz-focus-dimmed-opacity", "0.35"},
+		{"--kz-focus-ring", "rgb(59,130,246)"},
 		{"--kz-toolbar-padding", "0.25rem 1rem"},
 		{"--kz-terminal-header-padding", "0.5rem 1rem"},
 		{"--kz-lang-font-size", "0.8rem"},

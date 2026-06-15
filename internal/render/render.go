@@ -22,21 +22,21 @@ const (
 	fontStyleStrikethrough = 8
 )
 
-const copySVG = `<svg class="kz-copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`
+const copySVG = `<svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`
 
-const fullscreenSVG = `<svg class="kz-fs-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>`
+const fullscreenSVG = `<svg class="kz-fs-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>`
 
-const fullscreenExitSVG = `<svg class="kz-fs-exit-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg>`
+const fullscreenExitSVG = `<svg class="kz-fs-exit-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg>`
 
-const chevronSVG = `<svg class="kz-collapse-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`
+const chevronSVG = `<svg class="kz-collapse-toggle-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`
 
-const fontIncreaseSVG = `<svg class="kz-font-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg>`
+const fontIncreaseSVG = `<svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg>`
 
-const fontDecreaseSVG = `<svg class="kz-font-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg>`
+const fontDecreaseSVG = `<svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg>`
 
-const wrapSVG = `<svg class="kz-wrap-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg>`
+const wrapSVG = `<svg class="kz-wrap-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg>`
 
-const wrapOffSVG = `<svg class="kz-wrap-off-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg>`
+const wrapOffSVG = `<svg class="kz-wrap-off-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg>`
 
 // RenderBlock produces the full HTML for a code block.
 func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config) string {
@@ -105,7 +105,7 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 		sb.WriteString("<div class=\"kz-terminal-header kz-dots-minimal\">")
 	} else {
 		sb.WriteString("<div class=\"kz-terminal-header\">")
-		sb.WriteString("<span class=\"kz-terminal-dots\"><span></span><span></span><span></span></span>")
+		sb.WriteString("<span class=\"kz-terminal-dots\" aria-hidden=\"true\"><span></span><span></span><span></span></span>")
 	}
 	if resolved.Title != "" {
 		sb.WriteString(fmt.Sprintf("<span class=\"kz-title\">%s</span>", html.EscapeString(resolved.Title)))
@@ -189,13 +189,15 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 	encoded := encodeForDataCode(rawCode)
 	sb.WriteString(fmt.Sprintf(
-		"<button class=\"kz-copy-btn\" title=\"%s\" data-copied=\"%s\" data-code=\"%s\">",
+		"<button class=\"kz-copy-btn\" aria-label=\"%s\" title=\"%s\" data-copied=\"%s\" data-code=\"%s\">",
+		html.EscapeString(cfg.UIStrings.CopyLabel),
 		html.EscapeString(cfg.UIStrings.CopyTitle),
 		html.EscapeString(cfg.UIStrings.CopySuccess),
 		html.EscapeString(encoded),
 	))
 	sb.WriteString(copySVG)
 	sb.WriteString("</button>")
+	sb.WriteString(`<span class="kz-sr-announce" aria-live="polite"></span>`)
 }
 
 func renderWrapButton(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
@@ -206,8 +208,9 @@ func renderWrapButton(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *
 		title = cfg.UIStrings.WrapDisableLabel
 	}
 	sb.WriteString(fmt.Sprintf(
-		"<button class=\"kz-wrap-btn\" aria-pressed=\"%s\" title=\"%s\" data-enable=\"%s\" data-disable=\"%s\">",
+		"<button class=\"kz-wrap-btn\" aria-pressed=\"%s\" aria-label=\"%s\" title=\"%s\" data-enable=\"%s\" data-disable=\"%s\">",
 		pressed,
+		html.EscapeString(title),
 		html.EscapeString(title),
 		html.EscapeString(cfg.UIStrings.WrapEnableLabel),
 		html.EscapeString(cfg.UIStrings.WrapDisableLabel),
@@ -727,8 +730,8 @@ func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr c
 	}
 
 	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s>", indentStyle))
-	sb.WriteString("<span class=\"expand\"></span>")
-	sb.WriteString("<span class=\"collapse\"></span>")
+	sb.WriteString("<span class=\"expand\" aria-hidden=\"true\"></span>")
+	sb.WriteString("<span class=\"collapse\" aria-hidden=\"true\"></span>")
 	sb.WriteString(fmt.Sprintf("<span class=\"text\">%s</span>", collapsible.SummaryText(cr.LineCount, cfg.UIStrings)))
 	sb.WriteString("</div>")
 	sb.WriteString("</div>")
@@ -771,7 +774,7 @@ func renderGapIndicator(sb *strings.Builder, resolved *config.ResolvedBlock) {
 	if resolved.LineNumbers {
 		sb.WriteString("<div class=\"gutter\"><div class=\"ln\"></div></div>")
 	}
-	sb.WriteString("<div class=\"code\"><span class=\"kz-gap-indicator\">⋮</span></div>")
+	sb.WriteString("<div class=\"code\"><span class=\"kz-gap-indicator\" aria-hidden=\"true\">⋮</span><span class=\"sr-only\">Lines hidden</span></div>")
 	sb.WriteString("</div>")
 }
 

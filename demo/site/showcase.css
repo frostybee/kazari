@@ -48,6 +48,7 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
+  --kz-focus-ring: rgb(59,130,246);
   --kz-toolbar-padding: 0.25rem 1rem;
   --kz-terminal-header-padding: 0.5rem 1rem;
   --kz-lang-font-size: 0.8rem;
@@ -205,6 +206,19 @@
 }
 .kazari-code pre.wrap .kz-line .code .indent {
   white-space: pre;
+}
+.kazari-code button:focus-visible {
+  outline: 2px solid var(--kz-focus-ring, currentColor);
+  outline-offset: 2px;
+}
+.kazari-code [role="tab"]:focus-visible {
+  outline: 2px solid var(--kz-focus-ring, currentColor);
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kazari-code, .kazari-code *, .kazari-code *::before, .kazari-code *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
 .kazari-code .gutter {
   grid-area: gutter;
@@ -1131,6 +1145,7 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
+  --kz-focus-ring: rgb(59,130,246);
   --kz-toolbar-padding: 0.25rem 1rem;
   --kz-terminal-header-padding: 0.5rem 1rem;
   --kz-lang-font-size: 0.8rem;
@@ -1282,6 +1297,7 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
+  --kz-focus-ring: rgb(59,130,246);
   --kz-toolbar-padding: 0.25rem 1rem;
   --kz-terminal-header-padding: 0.5rem 1rem;
   --kz-lang-font-size: 0.8rem;
@@ -1429,6 +1445,7 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
+  --kz-focus-ring: rgb(59,130,246);
   --kz-toolbar-padding: 0.25rem 1rem;
   --kz-terminal-header-padding: 0.5rem 1rem;
   --kz-lang-font-size: 0.8rem;
@@ -1576,6 +1593,7 @@
   --kz-inline-del-bg: rgba(248,81,73,0.2);
   --kz-inline-del-border: rgba(248,81,73,0.5);
   --kz-focus-dimmed-opacity: 0.35;
+  --kz-focus-ring: rgb(59,130,246);
   --kz-toolbar-padding: 0.25rem 1rem;
   --kz-terminal-header-padding: 0.5rem 1rem;
   --kz-lang-font-size: 0.8rem;
