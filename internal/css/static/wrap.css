@@ -1,4 +1,4 @@
-.kazari-code .kz-wrap-btn {
+.kazari-block .kz-wrap-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,25 +10,25 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.kazari-code .kz-wrap-btn:hover {
+.kazari-block .kz-wrap-btn:hover {
   background: var(--kz-copy-bg-hover);
   color: var(--kz-copy-fg-hover);
 }
-.kazari-code .kz-wrap-btn[aria-pressed="true"] {
+.kazari-block .kz-wrap-btn[aria-pressed="true"] {
   background: var(--kz-copy-bg-hover);
   color: var(--kz-copy-fg-hover);
 }
-.kazari-code .kz-wrap-icon,
-.kazari-code .kz-wrap-off-icon {
+.kazari-block .kz-wrap-icon,
+.kazari-block .kz-wrap-off-icon {
   width: 1.25rem;
   height: 1.25rem;
 }
-.kazari-code .kz-wrap-off-icon {
+.kazari-block .kz-wrap-off-icon {
   display: none;
 }
-.kazari-code .kz-wrap-btn[aria-pressed="true"] .kz-wrap-icon {
+.kazari-block .kz-wrap-btn[aria-pressed="true"] .kz-wrap-icon {
   display: none;
 }
-.kazari-code .kz-wrap-btn[aria-pressed="true"] .kz-wrap-off-icon {
+.kazari-block .kz-wrap-btn[aria-pressed="true"] .kz-wrap-off-icon {
   display: inline;
 }

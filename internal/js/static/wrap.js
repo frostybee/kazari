@@ -1,7 +1,7 @@
 document.addEventListener('click', function(e) {
-  var btn = e.target.closest('.kazari-code .kz-wrap-btn');
+  var btn = e.target.closest('.kazari-block .kz-wrap-btn');
   if (!btn) return;
-  var block = btn.closest('.kazari-code');
+  var block = btn.closest('.kazari-block');
   if (!block) return;
   var pre = block.querySelector('pre');
   if (!pre) return;

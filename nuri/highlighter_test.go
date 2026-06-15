@@ -214,8 +214,8 @@ func TestIntegration_RenderWithEngine(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(html, "kazari-code") {
-		t.Error("expected kazari-code wrapper")
+	if !strings.Contains(html, "kazari-block") {
+		t.Error("expected kazari-block wrapper")
 	}
 	if !strings.Contains(html, "--sl:") {
 		t.Error("expected --sl CSS variable")

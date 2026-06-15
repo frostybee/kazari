@@ -1,22 +1,24 @@
-.kazari-code .frame {
+.kazari-block .frame {
   position: relative;
   border-radius: var(--kz-radius);
   box-shadow: var(--kz-shadow);
   border: var(--kz-border);
 }
-.kazari-code .frame > :first-child {
+.kazari-block .frame > :first-child {
   border-radius: var(--kz-radius) var(--kz-radius) 0 0;
 }
-.kazari-code .frame > :last-child {
+.kazari-block .frame > :last-child {
   border-radius: 0 0 var(--kz-radius) var(--kz-radius);
+}
+.kazari-block .frame > :last-child:not(pre) {
   overflow: hidden;
 }
 /* Themed blocks need their own backdrop: the translucent toolbar colors
    composite over the frame, which otherwise shows the page background. */
-.kazari-code.kz-themed .frame {
+.kazari-block.kz-themed .frame {
   background: var(--kz-editor-bg);
 }
-.kazari-code .sr-only {
+.kazari-block .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;

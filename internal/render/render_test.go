@@ -175,7 +175,7 @@ func TestRenderBlock_LineNumbers(t *testing.T) {
 
 	out := RenderBlock(lines, r, cfg)
 
-	if !strings.Contains(out, `class="gutter"`) {
+	if !strings.Contains(out, `class="kz-gutter"`) {
 		t.Error("expected gutter div")
 	}
 	if !strings.Contains(out, `aria-hidden="true"`) {
@@ -611,7 +611,7 @@ func TestRenderBlock_ThemeOverrideWrapper(t *testing.T) {
 
 	out := RenderBlock(lines, r, cfg)
 
-	if !strings.Contains(out, `class="kazari-code kz-themed"`) {
+	if !strings.Contains(out, `class="kazari-block kz-themed"`) {
 		t.Error("wrapper should carry the kz-themed class")
 	}
 	if !strings.Contains(out, `style="--kz-ovl-editor-bg:#282a36;--kz-ovl-editor-fg:#f8f8f2"`) {
@@ -630,7 +630,7 @@ func TestRenderBlock_ThemeOverrideWrapper_ComposesWithDataLinesAndCollapse(t *te
 
 	out := RenderBlock(lines, r, cfg)
 
-	if !strings.Contains(out, `class="kazari-code kz-themed kz-collapsed"`) {
+	if !strings.Contains(out, `class="kazari-block kz-themed kz-collapsed"`) {
 		t.Errorf("wrapper classes should compose, got output start %q", out[:120])
 	}
 	if !strings.Contains(out, `data-lines="1"`) {
@@ -651,7 +651,7 @@ func TestRenderBlock_NoThemeOverride_NoThemedClass(t *testing.T) {
 	if strings.Contains(out, "kz-themed") {
 		t.Error("wrapper should not carry kz-themed without an override")
 	}
-	if strings.Contains(out, `<div class="kazari-code" style=`) {
+	if strings.Contains(out, `<div class="kazari-block" style=`) {
 		t.Error("wrapper should not carry a style attribute without an override")
 	}
 }

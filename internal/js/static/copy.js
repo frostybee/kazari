@@ -1,5 +1,5 @@
 document.addEventListener('click', function(e) {
-  var btn = e.target.closest('.kazari-code .kz-copy-btn');
+  var btn = e.target.closest('.kazari-block .kz-copy-btn');
   if (!btn) return;
   var code = btn.getAttribute('data-code');
   if (!code) return;

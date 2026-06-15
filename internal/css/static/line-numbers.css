@@ -1,11 +1,11 @@
-.kazari-code .gutter {
+.kazari-block .kz-gutter {
   grid-area: gutter;
   border-right: var(--kz-gutter-border-width) solid var(--kz-gutter-border-color);
   -webkit-user-select: none;
   user-select: none;
   pointer-events: none;
 }
-.kazari-code .gutter .ln {
+.kazari-block .kz-gutter .kz-ln {
   display: inline-flex;
   justify-content: flex-end;
   align-items: flex-start;
@@ -16,7 +16,7 @@
   color: var(--kz-ln-fg);
   opacity: var(--kz-ln-opacity);
 }
-.kazari-code .highlight .gutter .ln {
+.kazari-block .highlight .kz-gutter .kz-ln {
   color: var(--kz-ln-highlight-fg);
   opacity: var(--kz-ln-highlight-opacity);
 }

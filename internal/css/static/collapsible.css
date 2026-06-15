@@ -1,10 +1,10 @@
 /* --- Threshold-based collapse --- */
 
-.kazari-code .kz-collapse-content {
+.kazari-block .kz-collapse-content {
     position: relative;
 }
 
-.kazari-code .kz-collapse-gradient {
+.kazari-block .kz-collapse-gradient {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -20,7 +20,7 @@
     z-index: 1;
 }
 
-.kazari-code .kz-collapse-bar {
+.kazari-block .kz-collapse-bar {
     display: flex;
     justify-content: center;
     padding: 0.5rem 0;
@@ -29,7 +29,7 @@
     z-index: 2;
 }
 
-.kazari-code .kz-collapse-btn {
+.kazari-block .kz-collapse-btn {
     display: inline-flex;
     align-items: center;
     padding: 0.375rem 1rem;
@@ -43,14 +43,14 @@
     transition: background 200ms ease, border-color 200ms ease;
 }
 
-.kazari-code .kz-collapse-btn:hover {
+.kazari-block .kz-collapse-btn:hover {
     background: var(--kz-collapse-btn-hover-bg);
     border-color: var(--kz-collapse-btn-border-hover);
 }
 
 /* --- Toolbar collapse toggle --- */
 
-.kazari-code .kz-collapse-toggle {
+.kazari-block .kz-collapse-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -63,53 +63,53 @@
     transition: all 0.2s ease;
 }
 
-.kazari-code .kz-collapse-toggle:hover {
+.kazari-block .kz-collapse-toggle:hover {
     background: var(--kz-copy-bg-hover);
     color: var(--kz-copy-fg-hover);
 }
 
-.kazari-code .kz-collapse-toggle-icon {
+.kazari-block .kz-collapse-toggle-icon {
     width: 1rem;
     height: 1rem;
     transition: transform 0.2s ease;
 }
 
-.kazari-code:not(.kz-collapsed) .kz-collapse-toggle-icon {
+.kazari-block:not(.kz-collapsed) .kz-collapse-toggle-icon {
     transform: rotate(180deg);
 }
 
-.kazari-code .frame {
+.kazari-block .frame {
     position: relative;
 }
 
 
-.kazari-code.kz-collapsed .kz-hidden {
+.kazari-block.kz-collapsed .kz-hidden {
     display: none;
 }
 
-.kazari-code:not(.kz-collapsed) .kz-hidden {
+.kazari-block:not(.kz-collapsed) .kz-hidden {
     display: grid;
 }
 
-.kazari-code:not(.kz-collapsed) .kz-collapse-gradient {
+.kazari-block:not(.kz-collapsed) .kz-collapse-gradient {
     opacity: 0;
     pointer-events: none;
 }
 
-.kazari-code:not(.kz-collapsed) .kz-gap {
+.kazari-block:not(.kz-collapsed) .kz-gap {
     display: none;
 }
 
 /* --- Range-based collapse sections --- */
 
-.kazari-code .kz-section {
+.kazari-block .kz-section {
     position: relative;
     border: none;
     margin: 0;
     padding: 0;
 }
 
-.kazari-code .kz-section summary {
+.kazari-block .kz-section summary {
     position: relative;
     display: block;
     cursor: pointer;
@@ -129,26 +129,26 @@
     line-height: var(--kz-collapse-closed-line-height);
 }
 
-.kazari-code .kz-section summary::marker {
+.kazari-block .kz-section summary::marker {
     display: inline-block;
     content: "";
     width: 16px;
     height: 16px;
 }
 
-.kazari-code .kz-section summary::-webkit-details-marker {
+.kazari-block .kz-section summary::-webkit-details-marker {
     display: none;
 }
 
-.kazari-code .kz-section summary .code {
+.kazari-block .kz-section summary .kz-code {
     padding-block: var(--kz-collapse-closed-padding);
     padding-left: var(--kz-indent, 0ch);
     text-indent: 0;
 }
 
 /* Expand & collapse icons (Octicons, MIT licensed) */
-.kazari-code .kz-section .expand,
-.kazari-code .kz-section .collapse {
+.kazari-block .kz-section .expand,
+.kazari-block .kz-section .collapse {
     position: relative;
     display: inline-block;
     width: 16px;
@@ -157,8 +157,8 @@
     opacity: 0.75;
 }
 
-.kazari-code .kz-section .expand::after,
-.kazari-code .kz-section .collapse::after {
+.kazari-block .kz-section .expand::after,
+.kazari-block .kz-section .collapse::after {
     content: '';
     position: absolute;
     pointer-events: none;
@@ -169,29 +169,29 @@
     line-height: 0;
 }
 
-.kazari-code .kz-section .expand::after {
+.kazari-block .kz-section .expand::after {
     -webkit-mask-image: var(--kz-collapse-expand-icon);
     mask-image: var(--kz-collapse-expand-icon);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
 
-.kazari-code .kz-section .collapse {
+.kazari-block .kz-section .collapse {
     display: none;
 }
 
-.kazari-code .kz-section .collapse::after {
+.kazari-block .kz-section .collapse::after {
     -webkit-mask-image: var(--kz-collapse-collapse-icon);
     mask-image: var(--kz-collapse-collapse-icon);
 }
 
-.kazari-code .kz-section .text {
+.kazari-block .kz-section .text {
     margin-left: 1em;
 }
 
 /* Common open section styles */
-.kazari-code .kz-section[open],
-.kazari-code .kz-section details[open] + .content-lines {
+.kazari-block .kz-section[open],
+.kazari-block .kz-section details[open] + .content-lines {
     --cs-border-color: var(--kz-collapse-open-border);
     --cs-border-width: var(--kz-collapse-open-border-width);
     box-shadow: inset 0 calc(-1 * var(--cs-border-width)) var(--cs-border-color),
@@ -200,51 +200,51 @@
 
 /* --- GitHub style (details is outer element) --- */
 
-.kazari-code details.kz-section[open] > summary {
+.kazari-block details.kz-section[open] > summary {
     display: none;
 }
 
-.kazari-code details.kz-section[open] {
+.kazari-block details.kz-section[open] {
     background-color: var(--kz-collapse-open-bg);
 }
 
 /* --- Collapsible-start / collapsible-end styles (re-collapsible) --- */
 
-.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) {
+.kazari-block .kz-section:is(.collapsible-start, .collapsible-end) {
     display: flex;
     flex-direction: column;
 }
 
-.kazari-code .kz-section.collapsible-end {
+.kazari-block .kz-section.collapsible-end {
     flex-direction: column-reverse;
 }
 
-.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) .content-lines {
+.kazari-block .kz-section:is(.collapsible-start, .collapsible-end) .content-lines {
     display: none;
 }
 
-.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] .collapse {
+.kazari-block .kz-section:is(.collapsible-start, .collapsible-end) details[open] .collapse {
     display: inline-block;
 }
 
-.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] .expand,
-.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] .text {
+.kazari-block .kz-section:is(.collapsible-start, .collapsible-end) details[open] .expand,
+.kazari-block .kz-section:is(.collapsible-start, .collapsible-end) details[open] .text {
     display: none;
 }
 
-.kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details[open] + .content-lines {
+.kazari-block .kz-section:is(.collapsible-start, .collapsible-end) details[open] + .content-lines {
     display: block;
     background-color: var(--kz-collapse-open-bg-collapsible);
 }
 
 /* --- Gap indicators --- */
 
-.kazari-code .kz-gap {
+.kazari-block .kz-gap {
     background: var(--kz-collapse-closed-bg);
     border-block: 1px dashed var(--kz-collapse-closed-border);
 }
 
-.kazari-code .kz-gap .code {
+.kazari-block .kz-gap .kz-code {
     text-align: center;
     padding-block: 0;
     line-height: 1.2;
@@ -252,7 +252,7 @@
     user-select: none;
 }
 
-.kazari-code .kz-gap .kz-gap-indicator {
+.kazari-block .kz-gap .kz-gap-indicator {
     color: var(--kz-editor-fg);
     opacity: 0.45;
     font-size: 1.2em;
@@ -261,20 +261,20 @@
 /* --- Print --- */
 
 @media print {
-    .kazari-code .kz-collapse-gradient,
-    .kazari-code .kz-collapse-btn {
+    .kazari-block .kz-collapse-gradient,
+    .kazari-block .kz-collapse-btn {
         display: none !important;
     }
-    .kazari-code.kz-collapsed .kz-hidden {
+    .kazari-block.kz-collapsed .kz-hidden {
         display: grid !important;
     }
-    .kazari-code .kz-gap {
+    .kazari-block .kz-gap {
         display: none !important;
     }
-    .kazari-code .kz-section:is(.collapsible-start, .collapsible-end) details {
+    .kazari-block .kz-section:is(.collapsible-start, .collapsible-end) details {
         display: none !important;
     }
-    .kazari-code .kz-section:is(.collapsible-start, .collapsible-end) .content-lines {
+    .kazari-block .kz-section:is(.collapsible-start, .collapsible-end) .content-lines {
         display: block !important;
     }
 }

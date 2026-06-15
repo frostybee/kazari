@@ -1,36 +1,36 @@
 /* Line marker backgrounds */
-.kazari-code .kz-line.highlight.mark {
+.kazari-block .kz-line.highlight.mark {
   background: var(--kz-mark-bg);
 }
-.kazari-code .kz-line.highlight.ins {
+.kazari-block .kz-line.highlight.ins {
   background: var(--kz-ins-bg);
 }
-.kazari-code .kz-line.highlight.del {
+.kazari-block .kz-line.highlight.del {
   background: var(--kz-del-bg);
 }
 
 /* Left accent bar via inset box-shadow (no layout shift) */
-.kazari-code .kz-line.highlight {
+.kazari-block .kz-line.highlight {
   box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-mark-border);
 }
-.kazari-code .kz-line.highlight.ins {
+.kazari-block .kz-line.highlight.ins {
   box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-ins-border);
 }
-.kazari-code .kz-line.highlight.del {
+.kazari-block .kz-line.highlight.del {
   box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-del-border);
 }
 
 /* Line number opacity bump on highlighted lines */
-.kazari-code .kz-line.highlight .ln {
+.kazari-block .kz-line.highlight .kz-ln {
   opacity: 0.6;
 }
 
-/* Diff indicators via ::before on .code */
-.kazari-code .kz-line.ins .code,
-.kazari-code .kz-line.del .code {
+/* Diff indicators via ::before on .kz-code */
+.kazari-block .kz-line.ins .kz-code,
+.kazari-block .kz-line.del .kz-code {
   position: relative;
 }
-.kazari-code .kz-line.ins .code::before {
+.kazari-block .kz-line.ins .kz-code::before {
   content: var(--kz-ins-indicator);
   color: var(--kz-ins-indicator-color);
   position: absolute;
@@ -39,7 +39,7 @@
   white-space: pre;
   pointer-events: none;
 }
-.kazari-code .kz-line.del .code::before {
+.kazari-block .kz-line.del .kz-code::before {
   content: var(--kz-del-indicator);
   color: var(--kz-del-indicator-color);
   position: absolute;
@@ -50,23 +50,23 @@
 }
 
 /* Labeled range line backgrounds (stronger than single-line markers) */
-.kazari-code .kz-line.highlight.mark.tm-label {
+.kazari-block .kz-line.highlight.mark.tm-label {
   background: var(--kz-label-mark-bg);
 }
-.kazari-code .kz-line.highlight.ins.tm-label {
+.kazari-block .kz-line.highlight.ins.tm-label {
   background: var(--kz-label-ins-bg);
 }
-.kazari-code .kz-line.highlight.del.tm-label {
+.kazari-block .kz-line.highlight.del.tm-label {
   background: var(--kz-label-del-bg);
 }
 
 /* Labeled ranges — badge at the left edge of the code area.
-   data-label on .code div, read via attr().
+   data-label on .kz-code div, read via attr().
    On ins/del lines, this overrides the diff indicator ::before. */
-.kazari-code .kz-line.tm-label .code {
+.kazari-block .kz-line.tm-label .kz-code {
   position: relative;
 }
-.kazari-code .kz-line.tm-label .code::before {
+.kazari-block .kz-line.tm-label .kz-code::before {
   content: attr(data-label);
   display: block;
   position: absolute;
@@ -80,12 +80,12 @@
   white-space: nowrap;
   pointer-events: none;
 }
-.kazari-code .kz-line.mark.tm-label .code::before {
+.kazari-block .kz-line.mark.tm-label .kz-code::before {
   background: var(--kz-mark-border);
 }
-.kazari-code .kz-line.ins.tm-label .code::before {
+.kazari-block .kz-line.ins.tm-label .kz-code::before {
   background: var(--kz-ins-border);
 }
-.kazari-code .kz-line.del.tm-label .code::before {
+.kazari-block .kz-line.del.tm-label .kz-code::before {
   background: var(--kz-del-border);
 }

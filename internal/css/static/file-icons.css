@@ -1,4 +1,4 @@
-.kazari-code .kz-file-icon {
+.kazari-block .kz-file-icon {
   display: inline-block;
   width: var(--kz-file-icon-size);
   height: var(--kz-file-icon-size);
@@ -7,11 +7,11 @@
   vertical-align: middle;
   flex-shrink: 0;
 }
-.kazari-code .kz-lang + .kz-file-icon {
+.kazari-block .kz-lang + .kz-file-icon {
   margin-left: 0.625rem;
   padding-left: 0.625rem;
   border-left: 1px solid var(--kz-separator-color);
 }
-.kazari-code .kz-file-icon + .kz-title {
+.kazari-block .kz-file-icon + .kz-title {
   margin-left: 0.25rem;
 }

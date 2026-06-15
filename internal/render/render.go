@@ -43,7 +43,7 @@ func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.
 	var sb strings.Builder
 	dualTheme := hasDualTheme(lines)
 
-	wrapperClass := "kazari-code"
+	wrapperClass := "kazari-block"
 	if resolved.ThemeOverrideStyle != "" {
 		wrapperClass += " kz-themed"
 	}
@@ -448,9 +448,9 @@ func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineCont
 
 	sb.WriteString(fmt.Sprintf("<div class=\"%s\">", classes))
 	if lctx.resolved.LineNumbers {
-		sb.WriteString(fmt.Sprintf("<div class=\"gutter\"><div class=\"ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
+		sb.WriteString(fmt.Sprintf("<div class=\"kz-gutter\"><div class=\"kz-ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
 	}
-	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s%s>", labelAttr, indentAttr))
+	sb.WriteString(fmt.Sprintf("<div class=\"kz-code\"%s%s>", labelAttr, indentAttr))
 	if indentWS != "" {
 		sb.WriteString(fmt.Sprintf("<span class=\"indent\">%s</span>", indentWS))
 	}
@@ -746,7 +746,7 @@ func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr c
 	sb.WriteString("<summary>")
 	sb.WriteString("<div class=\"kz-line\">")
 	if resolved.LineNumbers {
-		sb.WriteString("<div class=\"gutter\"><div class=\"ln\"></div></div>")
+		sb.WriteString("<div class=\"kz-gutter\"><div class=\"kz-ln\"></div></div>")
 	}
 
 	indentStyle := ""
@@ -754,7 +754,7 @@ func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr c
 		indentStyle = fmt.Sprintf(" style=\"--kz-indent:%dch\"", cr.MinIndent)
 	}
 
-	sb.WriteString(fmt.Sprintf("<div class=\"code\"%s>", indentStyle))
+	sb.WriteString(fmt.Sprintf("<div class=\"kz-code\"%s>", indentStyle))
 	sb.WriteString("<span class=\"expand\" aria-hidden=\"true\"></span>")
 	sb.WriteString("<span class=\"collapse\" aria-hidden=\"true\"></span>")
 	sb.WriteString(fmt.Sprintf("<span class=\"text\">%s</span>", collapsible.SummaryText(cr.LineCount, cfg.UIStrings)))
@@ -797,9 +797,9 @@ func renderCollapseRangeClose(sb *strings.Builder, cr config.CollapseRange) {
 func renderGapIndicator(sb *strings.Builder, resolved *config.ResolvedBlock) {
 	sb.WriteString("<div class=\"kz-line kz-gap\">")
 	if resolved.LineNumbers {
-		sb.WriteString("<div class=\"gutter\"><div class=\"ln\"></div></div>")
+		sb.WriteString("<div class=\"kz-gutter\"><div class=\"kz-ln\"></div></div>")
 	}
-	sb.WriteString("<div class=\"code\"><span class=\"kz-gap-indicator\" aria-hidden=\"true\">⋮</span><span class=\"sr-only\">Lines hidden</span></div>")
+	sb.WriteString("<div class=\"kz-code\"><span class=\"kz-gap-indicator\" aria-hidden=\"true\">⋮</span><span class=\"sr-only\">Lines hidden</span></div>")
 	sb.WriteString("</div>")
 }
 
@@ -827,9 +827,9 @@ func renderHiddenLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *li
 
 	sb.WriteString(fmt.Sprintf("<div class=\"%s\">", classes))
 	if lctx.resolved.LineNumbers {
-		sb.WriteString(fmt.Sprintf("<div class=\"gutter\"><div class=\"ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
+		sb.WriteString(fmt.Sprintf("<div class=\"kz-gutter\"><div class=\"kz-ln\" aria-hidden=\"true\">%d</div></div>", lineNum))
 	}
-	sb.WriteString("<div class=\"code\">")
+	sb.WriteString("<div class=\"kz-code\">")
 	for _, tok := range line.Tokens {
 		if tok.Content == "" {
 			continue

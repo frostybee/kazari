@@ -271,14 +271,14 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 func TokenSwitchingCSS(cfg *config.Config) string {
 	var sb strings.Builder
 
-	sb.WriteString(".kazari-code .kz-line span[style^=\"--\"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n")
+	sb.WriteString(".kazari-block .kz-line span[style^=\"--\"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n")
 	sb.WriteString(themedLightRule(cfg))
 
 	if cfg.DarkTheme == "" {
 		return sb.String()
 	}
 
-	darkRules := ".kazari-code .kz-line span[style^=\"--\"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n" +
+	darkRules := ".kazari-block .kz-line span[style^=\"--\"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n" +
 		themedDarkRule(cfg)
 
 	switch cfg.DarkMode.Kind {
@@ -478,7 +478,7 @@ func writeOverridePrefixed(sb *strings.Builder, prefix string, vars []struct{ na
 // the page color instead of the override.
 func themedLightRule(cfg *config.Config) string {
 	var sb strings.Builder
-	sb.WriteString(".kazari-code.kz-themed { ")
+	sb.WriteString(".kazari-block.kz-themed { ")
 	for _, name := range overridableVarNames(cfg) {
 		suffix := strings.TrimPrefix(name, "--kz-")
 		sb.WriteString(fmt.Sprintf("%s: var(--kz-ovl-%s); ", name, suffix))
@@ -496,7 +496,7 @@ func themedLightRule(cfg *config.Config) string {
 // overrides never leave a variable guaranteed invalid.
 func themedDarkRule(cfg *config.Config) string {
 	var sb strings.Builder
-	sb.WriteString(".kazari-code.kz-themed { ")
+	sb.WriteString(".kazari-block.kz-themed { ")
 	for _, name := range overridableVarNames(cfg) {
 		suffix := strings.TrimPrefix(name, "--kz-")
 		sb.WriteString(fmt.Sprintf("%s: var(--kz-ovd-%s, var(--kz-ovl-%s)); ", name, suffix, suffix))

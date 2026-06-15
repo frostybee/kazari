@@ -23,7 +23,7 @@ func TestGenerate_BaseCSS(t *testing.T) {
 	light, dark := colors()
 	out := Generate(cfg, light, dark)
 
-	for _, sel := range []string{".kazari-code", ".kz-line"} {
+	for _, sel := range []string{".kazari-block", ".kz-line"} {
 		if !strings.Contains(out, sel) {
 			t.Errorf("expected base selector %q in output", sel)
 		}
@@ -35,8 +35,8 @@ func TestGenerate_LineNumbersCSS(t *testing.T) {
 	light, dark := colors()
 	out := Generate(cfg, light, dark)
 
-	if !strings.Contains(out, ".ln") {
-		t.Error("expected line number CSS (.ln) in output")
+	if !strings.Contains(out, ".kz-ln") {
+		t.Error("expected line number CSS (.kz-ln) in output")
 	}
 }
 

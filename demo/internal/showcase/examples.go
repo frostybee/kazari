@@ -1011,8 +1011,8 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		customizerEngine.ThemeCSS(),
 		tintedEngine.ThemeCSS(),
 		scopedEngine.ThemeCSS(),
-		`.kazari-code .kz-lang-icon { display:inline-block; width:var(--kz-lang-icon-size,1.25rem); height:var(--kz-lang-icon-size,1.25rem); margin:var(--kz-lang-icon-margin,0); opacity:var(--kz-lang-icon-opacity,0.8); vertical-align:middle; flex-shrink:0; }`,
-		`.kazari-code .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
+		`.kazari-block .kz-lang-icon { display:inline-block; width:var(--kz-lang-icon-size,1.25rem); height:var(--kz-lang-icon-size,1.25rem); margin:var(--kz-lang-icon-margin,0); opacity:var(--kz-lang-icon-opacity,0.8); vertical-align:middle; flex-shrink:0; }`,
+		`.kazari-block .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
 	}, "\n")
 
 	categories := []Category{frames, layout, markers, collapsible, formats, ansi, themes, localization}

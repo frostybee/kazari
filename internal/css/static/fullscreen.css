@@ -1,4 +1,4 @@
-.kazari-code .kz-fs-btn {
+.kazari-block .kz-fs-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,26 +10,26 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.kazari-code .kz-fs-btn:hover {
+.kazari-block .kz-fs-btn:hover {
   background: var(--kz-copy-bg-hover);
   color: var(--kz-copy-fg-hover);
 }
-.kazari-code .kz-fs-icon {
+.kazari-block .kz-fs-icon {
   width: 1.25rem;
   height: 1.25rem;
 }
-.kazari-code .kz-fs-exit-icon {
+.kazari-block .kz-fs-exit-icon {
   display: none;
   width: 1.25rem;
   height: 1.25rem;
 }
-.kazari-code .kz-font-controls {
+.kazari-block .kz-font-controls {
   display: none;
   align-items: center;
   gap: 0.25rem;
 }
-.kazari-code .kz-font-inc,
-.kazari-code .kz-font-dec {
+.kazari-block .kz-font-inc,
+.kazari-block .kz-font-dec {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,37 +41,37 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.kazari-code .kz-font-inc:hover,
-.kazari-code .kz-font-dec:hover {
+.kazari-block .kz-font-inc:hover,
+.kazari-block .kz-font-dec:hover {
   background: var(--kz-copy-bg-hover);
   color: var(--kz-copy-fg-hover);
 }
-.kazari-code .kz-font-icon {
+.kazari-block .kz-font-icon {
   width: 1.25rem;
   height: 1.25rem;
 }
-.kazari-code:fullscreen .kz-font-controls,
-.kazari-code:-webkit-full-screen .kz-font-controls {
+.kazari-block:fullscreen .kz-font-controls,
+.kazari-block:-webkit-full-screen .kz-font-controls {
   display: flex;
 }
-.kazari-code:fullscreen .kz-fs-icon,
-.kazari-code:-webkit-full-screen .kz-fs-icon {
+.kazari-block:fullscreen .kz-fs-icon,
+.kazari-block:-webkit-full-screen .kz-fs-icon {
   display: none;
 }
-.kazari-code:fullscreen .kz-fs-exit-icon,
-.kazari-code:-webkit-full-screen .kz-fs-exit-icon {
+.kazari-block:fullscreen .kz-fs-exit-icon,
+.kazari-block:-webkit-full-screen .kz-fs-exit-icon {
   display: inline;
 }
-.kazari-code:fullscreen,
-.kazari-code:-webkit-full-screen {
+.kazari-block:fullscreen,
+.kazari-block:-webkit-full-screen {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   background: var(--kz-editor-bg);
   padding: 2rem;
 }
-.kazari-code:fullscreen .frame,
-.kazari-code:-webkit-full-screen .frame {
+.kazari-block:fullscreen .frame,
+.kazari-block:-webkit-full-screen .frame {
   width: 100%;
   max-width: none;
   border-radius: var(--kz-radius);
@@ -79,47 +79,47 @@
   overflow: auto;
   font-size: calc(1em * var(--kz-fs-font-scale));
 }
-.kazari-code:fullscreen pre,
-.kazari-code:-webkit-full-screen pre {
+.kazari-block:fullscreen pre,
+.kazari-block:-webkit-full-screen pre {
   font-size: calc(var(--kz-font-size) * var(--kz-fs-font-scale));
 }
-.kazari-code:fullscreen .kz-lang,
-.kazari-code:-webkit-full-screen .kz-lang {
+.kazari-block:fullscreen .kz-lang,
+.kazari-block:-webkit-full-screen .kz-lang {
   font-size: calc(var(--kz-lang-font-size) * var(--kz-fs-font-scale));
 }
-.kazari-code:fullscreen .kz-title,
-.kazari-code:-webkit-full-screen .kz-title {
+.kazari-block:fullscreen .kz-title,
+.kazari-block:-webkit-full-screen .kz-title {
   font-size: calc(0.875rem * var(--kz-fs-font-scale));
 }
 @media (max-width: 768px) {
-  .kazari-code:fullscreen,
-  .kazari-code:-webkit-full-screen {
+  .kazari-block:fullscreen,
+  .kazari-block:-webkit-full-screen {
     padding: 0.75rem;
   }
-  .kazari-code .kz-font-inc,
-  .kazari-code .kz-font-dec {
+  .kazari-block .kz-font-inc,
+  .kazari-block .kz-font-dec {
     padding: 0.5rem;
   }
-  .kazari-code .kz-font-icon {
+  .kazari-block .kz-font-icon {
     width: 1.5rem;
     height: 1.5rem;
   }
-  .kazari-code .kz-fs-btn {
+  .kazari-block .kz-fs-btn {
     padding: 0.5rem;
   }
-  .kazari-code .kz-fs-icon,
-  .kazari-code .kz-fs-exit-icon {
+  .kazari-block .kz-fs-icon,
+  .kazari-block .kz-fs-exit-icon {
     width: 1.25rem;
     height: 1.25rem;
   }
 }
 @media (hover: none) and (pointer: coarse) {
-  .kazari-code .kz-fs-btn:hover {
+  .kazari-block .kz-fs-btn:hover {
     background: transparent;
     transform: none;
   }
-  .kazari-code .kz-font-inc:hover,
-  .kazari-code .kz-font-dec:hover {
+  .kazari-block .kz-font-inc:hover,
+  .kazari-block .kz-font-dec:hover {
     background: transparent;
     transform: none;
   }

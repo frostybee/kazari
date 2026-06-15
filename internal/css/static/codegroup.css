@@ -1,19 +1,19 @@
 /* Code group container */
-.kazari-code.kz-group {
+.kazari-block.kz-group {
   border: var(--kz-group-border-width) solid var(--kz-group-border);
   border-radius: var(--kz-group-radius);
   overflow: hidden;
 }
 
 /* Tab bar */
-.kazari-code .kz-group-tabs {
+.kazari-block .kz-group-tabs {
   display: flex;
   border-bottom: 1px solid var(--kz-group-border);
   background: var(--kz-editor-bg);
   overflow-x: auto;
 }
 
-.kazari-code .kz-group-tabs button[role="tab"] {
+.kazari-block .kz-group-tabs button[role="tab"] {
   padding: var(--kz-group-tab-padding);
   background: var(--kz-group-tab-bg);
   color: var(--kz-group-tab-fg);
@@ -28,29 +28,29 @@
   transition: color var(--kz-transition), background var(--kz-transition), border-color var(--kz-transition);
 }
 
-.kazari-code .kz-group-tabs button[role="tab"]:hover {
+.kazari-block .kz-group-tabs button[role="tab"]:hover {
   background: var(--kz-group-tab-active-bg);
 }
 
-.kazari-code .kz-group-tabs button[role="tab"][aria-selected="true"] {
+.kazari-block .kz-group-tabs button[role="tab"][aria-selected="true"] {
   background: var(--kz-group-tab-active-bg);
   color: var(--kz-group-tab-active-fg);
   border-bottom-color: var(--kz-group-tab-active-border);
 }
 
 /* Panels */
-.kazari-code .kz-group-panels [role="tabpanel"][hidden] {
+.kazari-block .kz-group-panels [role="tabpanel"][hidden] {
   display: none;
 }
 
-/* Neutralize inner kazari-code wrapper inside group panels */
-.kazari-code .kz-group-panels .kazari-code {
+/* Neutralize inner kazari-block wrapper inside group panels */
+.kazari-block .kz-group-panels .kazari-block {
   border-radius: 0;
   box-shadow: none;
 }
 
 /* Remove figure border-radius and shadow inside group */
-.kazari-code .kz-group-panels .frame {
+.kazari-block .kz-group-panels .frame {
   border-radius: 0;
   box-shadow: none;
 }

@@ -1,7 +1,7 @@
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.kazari-code .kz-collapse-btn, .kazari-code .kz-collapse-toggle');
+    var btn = e.target.closest('.kazari-block .kz-collapse-btn, .kazari-block .kz-collapse-toggle');
     if (!btn) return;
-    var block = btn.closest('.kazari-code');
+    var block = btn.closest('.kazari-block');
     if (!block) return;
     var bottomBtn = block.querySelector('.kz-collapse-btn');
     var toggleBtn = block.querySelector('.kz-collapse-toggle');

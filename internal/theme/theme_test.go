@@ -189,7 +189,7 @@ func TestTokenSwitchingCSS_SelectorMode(t *testing.T) {
 	cfg := testConfig()
 	css := TokenSwitchingCSS(cfg)
 
-	if !strings.Contains(css, ".dark .kazari-code") {
+	if !strings.Contains(css, ".dark .kazari-block") {
 		t.Error("should contain .dark selector rule")
 	}
 	if !strings.Contains(css, "var(--sd, inherit)") {
@@ -215,7 +215,7 @@ func TestTokenSwitchingCSS_BothMode(t *testing.T) {
 	if !strings.Contains(css, "@media (prefers-color-scheme: dark)") {
 		t.Error("should contain media query")
 	}
-	if !strings.Contains(css, ".dark .kazari-code") {
+	if !strings.Contains(css, ".dark .kazari-block") {
 		t.Error("should contain .dark selector rule")
 	}
 }
@@ -290,13 +290,13 @@ func TestTokenSwitchingCSS_ThemedMapping(t *testing.T) {
 	cfg := testConfig()
 	css := TokenSwitchingCSS(cfg)
 
-	if !strings.Contains(css, ".kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg);") {
+	if !strings.Contains(css, ".kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg);") {
 		t.Error("should contain light kz-themed mapping rule")
 	}
 	if strings.Contains(css, "--kz-collapse-gradient-end") {
 		t.Error("gradient end re declaration should be absent when collapsible is disabled")
 	}
-	if !strings.Contains(css, ".dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg));") {
+	if !strings.Contains(css, ".dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg));") {
 		t.Error("dark mapping should be selector scoped with ovl fallbacks")
 	}
 
@@ -320,7 +320,7 @@ func TestTokenSwitchingCSS_ThemedMapping_NoDarkTheme(t *testing.T) {
 	cfg.DarkTheme = ""
 	css := TokenSwitchingCSS(cfg)
 
-	if !strings.Contains(css, ".kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg);") {
+	if !strings.Contains(css, ".kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg);") {
 		t.Error("light mapping must be present for single theme engines")
 	}
 	if strings.Contains(css, "--kz-ovd-") {

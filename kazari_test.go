@@ -103,8 +103,8 @@ func TestRender_DualTheme(t *testing.T) {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	if !strings.Contains(html, `class="kazari-code"`) {
-		t.Error("missing kazari-code wrapper")
+	if !strings.Contains(html, `class="kazari-block"`) {
+		t.Error("missing kazari-block wrapper")
 	}
 	if !strings.Contains(html, "--sl:#cf222e") {
 		t.Error("missing light color")
@@ -754,10 +754,10 @@ func TestRender_NoLineNumbers_Default(t *testing.T) {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	if strings.Contains(html, "gutter") {
-		t.Error("gutter should not be present when line numbers disabled")
+	if strings.Contains(html, "kz-gutter") {
+		t.Error("kz-gutter should not be present when line numbers disabled")
 	}
-	if strings.Contains(html, `class="ln"`) {
+	if strings.Contains(html, `class="kz-ln"`) {
 		t.Error("ln should not be present when line numbers disabled")
 	}
 }
@@ -778,7 +778,7 @@ func TestRender_LineNumbers_Enabled(t *testing.T) {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	if !strings.Contains(html, `<div class="gutter">`) {
+	if !strings.Contains(html, `<div class="kz-gutter">`) {
 		t.Error("missing gutter div")
 	}
 	if !strings.Contains(html, `aria-hidden="true">1</div>`) {
@@ -891,7 +891,7 @@ func TestRender_LineNumbers_TerminalFrame(t *testing.T) {
 	if !strings.Contains(html, "is-terminal") {
 		t.Error("should render terminal frame")
 	}
-	if !strings.Contains(html, `<div class="gutter">`) {
+	if !strings.Contains(html, `<div class="kz-gutter">`) {
 		t.Error("gutter should render inside terminal frame")
 	}
 }
@@ -911,7 +911,7 @@ func TestRenderWithMeta_LineNumbers(t *testing.T) {
 		t.Fatalf("RenderWithMeta() error: %v", err)
 	}
 
-	if !strings.Contains(html, `<div class="gutter">`) {
+	if !strings.Contains(html, `<div class="kz-gutter">`) {
 		t.Error("missing gutter from meta showLineNumbers")
 	}
 	if !strings.Contains(html, `aria-hidden="true">10</div>`) {
@@ -1744,7 +1744,7 @@ func TestRenderWithMeta_Collapsible_RangeWithLineNumbers(t *testing.T) {
 	}
 
 	// Summary should have empty gutter for alignment
-	if !strings.Contains(html, `<div class="gutter"><div class="ln"></div></div>`) {
+	if !strings.Contains(html, `<div class="kz-gutter"><div class="kz-ln"></div></div>`) {
 		t.Error("missing empty gutter placeholder in summary line")
 	}
 }
@@ -2316,8 +2316,8 @@ func TestMermaid_NoFrameMarkup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if strings.Contains(html, "kazari-code") {
-		t.Error("mermaid block should not contain kazari-code wrapper")
+	if strings.Contains(html, "kazari-block") {
+		t.Error("mermaid block should not contain kazari-block wrapper")
 	}
 	if strings.Contains(html, "kz-copy-btn") {
 		t.Error("mermaid block should not contain copy button")
@@ -2340,8 +2340,8 @@ func TestMermaid_DisabledRendersNormally(t *testing.T) {
 	if strings.Contains(html, `<pre class="mermaid">`) {
 		t.Error("with mermaid disabled, should not render raw mermaid block")
 	}
-	if !strings.Contains(html, "kazari-code") {
-		t.Error("with mermaid disabled, should render normally with kazari-code wrapper")
+	if !strings.Contains(html, "kazari-block") {
+		t.Error("with mermaid disabled, should render normally with kazari-block wrapper")
 	}
 }
 
@@ -2408,7 +2408,7 @@ func TestThemeOverride_MetaParsed(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RenderWithMeta() error: %v", err)
 	}
-	if !strings.Contains(html, "kazari-code") {
+	if !strings.Contains(html, "kazari-block") {
 		t.Error("should render normally with theme override")
 	}
 }
@@ -2639,7 +2639,7 @@ func TestRender_ANSI_WithLineNumbers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, `class="ln"`) {
+	if !strings.Contains(html, `class="kz-ln"`) {
 		t.Error("ANSI blocks should support line numbers")
 	}
 }
@@ -3317,7 +3317,7 @@ func TestRender_Wrap_WithLineNumbers(t *testing.T) {
 	if !strings.Contains(html, `<pre class="wrap"`) {
 		t.Error("wrap class should coexist with line numbers")
 	}
-	if !strings.Contains(html, `class="gutter"`) {
+	if !strings.Contains(html, `class="kz-gutter"`) {
 		t.Error("line number gutter should render in wrap mode")
 	}
 	if !strings.Contains(html, `style="--kz-indent:2ch"`) {
@@ -3329,7 +3329,7 @@ func TestCSS_WrapStyles(t *testing.T) {
 	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
 	engine := New(WithHighlighter(hl), WithMinify(false))
 	css := engine.CSS()
-	if !strings.Contains(css, "pre.wrap .kz-line .code") {
+	if !strings.Contains(css, "pre.wrap .kz-line .kz-code") {
 		t.Error("CSS should contain wrap rules")
 	}
 	if !strings.Contains(css, "text-indent: calc(var(--kz-indent, 0ch) * -1)") {
@@ -3358,7 +3358,7 @@ func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
 		hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
 		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
 			WithDarkMode(SelectorMode(".dark")), WithMinify(false))
-		if !strings.Contains(engine.CSS(), ".dark .kazari-code .kz-line "+darkRule) {
+		if !strings.Contains(engine.CSS(), ".dark .kazari-block .kz-line "+darkRule) {
 			t.Error("selector mode should scope dark token rule under .dark")
 		}
 	})
@@ -3368,7 +3368,7 @@ func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
 		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
 			WithDarkMode(MediaQueryMode()), WithMinify(false))
 		css := engine.CSS()
-		if !strings.Contains(css, ".kazari-code .kz-line "+darkRule) {
+		if !strings.Contains(css, ".kazari-block .kz-line "+darkRule) {
 			t.Error("media mode should emit dark token rule")
 		}
 	})
@@ -3378,7 +3378,7 @@ func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
 		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
 			WithDarkMode(BothMode(".dark")), WithMinify(false))
 		css := engine.CSS()
-		if !strings.Contains(css, ".dark .kazari-code .kz-line "+darkRule) {
+		if !strings.Contains(css, ".dark .kazari-block .kz-line "+darkRule) {
 			t.Error("both mode should scope dark token rule under .dark")
 		}
 		if strings.Count(css, darkRule) < 2 {

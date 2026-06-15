@@ -1,7 +1,7 @@
-.kazari-code .kz-terminal-header.kz-dots-minimal {
+.kazari-block .kz-terminal-header.kz-dots-minimal {
   min-height: 2rem;
 }
-.kazari-code .kz-terminal-header.kz-dots-minimal::before {
+.kazari-block .kz-terminal-header.kz-dots-minimal::before {
   content: '';
   position: absolute;
   top: 50%;

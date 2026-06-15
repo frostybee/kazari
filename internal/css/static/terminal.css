@@ -1,4 +1,4 @@
-.kazari-code .kz-terminal-header {
+.kazari-block .kz-terminal-header {
   display: flex;
   align-items: center;
   padding: var(--kz-terminal-header-padding);
@@ -6,7 +6,7 @@
   border-bottom: 1px solid var(--kz-toolbar-border);
   position: relative;
 }
-.kazari-code .kz-terminal-header .kz-title {
+.kazari-block .kz-terminal-header .kz-title {
   position: absolute;
   left: 0;
   right: 0;
@@ -16,7 +16,7 @@
   color: var(--kz-editor-fg);
   pointer-events: none;
 }
-.kazari-code .kz-terminal-actions {
+.kazari-block .kz-terminal-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;

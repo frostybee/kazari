@@ -1,7 +1,7 @@
-.kazari-code [data-tooltip] {
+.kazari-block [data-tooltip] {
   position: relative;
 }
-.kazari-code [data-tooltip]::after {
+.kazari-block [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + var(--kz-tooltip-offset));
@@ -21,27 +21,27 @@
   visibility: hidden;
   z-index: 10;
 }
-.kazari-code [data-tooltip]:hover::after,
-.kazari-code [data-tooltip]:focus-visible::after {
+.kazari-block [data-tooltip]:hover::after,
+.kazari-block [data-tooltip]:focus-visible::after {
   visibility: visible;
 }
-.kazari-code [data-tooltip]:active::after {
+.kazari-block [data-tooltip]:active::after {
   visibility: hidden;
 }
-.kazari-code .kz-copy-btn.copied::after {
+.kazari-block .kz-copy-btn.copied::after {
   visibility: hidden;
 }
-.kazari-code:fullscreen [data-tooltip]::after,
-.kazari-code:-webkit-full-screen [data-tooltip]::after {
+.kazari-block:fullscreen [data-tooltip]::after,
+.kazari-block:-webkit-full-screen [data-tooltip]::after {
   z-index: 100;
 }
 @media (hover: none) {
-  .kazari-code [data-tooltip]::after {
+  .kazari-block [data-tooltip]::after {
     display: none;
   }
 }
 @media print {
-  .kazari-code [data-tooltip]::after {
+  .kazari-block [data-tooltip]::after {
     display: none;
   }
 }

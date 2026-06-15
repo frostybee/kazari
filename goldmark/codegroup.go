@@ -134,9 +134,9 @@ func (r *codeGroupRenderer) renderCodeGroup(w util.BufWriter, source []byte, nod
 
 	cgNode := node.(*CodeGroupNode)
 	if cgNode.SyncKey != "" {
-		w.WriteString(fmt.Sprintf(`<div class="kazari-code kz-group" data-sync="%s">`, html.EscapeString(cgNode.SyncKey)))
+		w.WriteString(fmt.Sprintf(`<div class="kazari-block kz-group" data-sync="%s">`, html.EscapeString(cgNode.SyncKey)))
 	} else {
-		w.WriteString(`<div class="kazari-code kz-group">`)
+		w.WriteString(`<div class="kazari-block kz-group">`)
 	}
 
 	// Tab bar.

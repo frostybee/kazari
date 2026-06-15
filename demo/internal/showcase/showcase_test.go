@@ -118,7 +118,7 @@ func TestBuildUsesExternalAssetsAndBackendLinks(t *testing.T) {
 		t.Error("HTML loads showcase.js as a module, which breaks direct file:// use")
 	}
 
-	for _, expected := range []string{".kazari-code", ".showcase-filters", ".recipe-disclosure", ".nav-category.is-active", ".dark .clear-filters", ".clear-filters:focus-visible"} {
+	for _, expected := range []string{".kazari-block", ".showcase-filters", ".recipe-disclosure", ".nav-category.is-active", ".dark .clear-filters", ".clear-filters:focus-visible"} {
 		if !strings.Contains(output.CSS, expected) {
 			t.Errorf("CSS missing %q", expected)
 		}

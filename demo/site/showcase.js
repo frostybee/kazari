@@ -1,5 +1,5 @@
 document.addEventListener('click', function(e) {
-  var btn = e.target.closest('.kazari-code .kz-copy-btn');
+  var btn = e.target.closest('.kazari-block .kz-copy-btn');
   if (!btn) return;
   var code = btn.getAttribute('data-code');
   if (!code) return;
@@ -64,9 +64,9 @@ function fallbackCopy(text) {
   }
 
   document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.kazari-code .kz-fs-btn');
+    var btn = e.target.closest('.kazari-block .kz-fs-btn');
     if (!btn) return;
-    var block = btn.closest('.kazari-code');
+    var block = btn.closest('.kazari-block');
     if (!block) return;
     if (document.fullscreenElement === block) {
       document.exitFullscreen();
@@ -78,31 +78,31 @@ function fallbackCopy(text) {
   });
 
   document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.kazari-code .kz-font-inc');
+    var btn = e.target.closest('.kazari-block .kz-font-inc');
     if (!btn) return;
-    var block = btn.closest('.kazari-code');
+    var block = btn.closest('.kazari-block');
     if (block) setScale(block, getScale(block) + STEP);
   });
 
   document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.kazari-code .kz-font-dec');
+    var btn = e.target.closest('.kazari-block .kz-font-dec');
     if (!btn) return;
     // The second click of a double click is handled by the dblclick reset.
     if (e.detail > 1) return;
-    var block = btn.closest('.kazari-code');
+    var block = btn.closest('.kazari-block');
     if (block) setScale(block, getScale(block) - STEP);
   });
 
   document.addEventListener('dblclick', function(e) {
-    var btn = e.target.closest('.kazari-code .kz-font-dec');
+    var btn = e.target.closest('.kazari-block .kz-font-dec');
     if (!btn) return;
-    var block = btn.closest('.kazari-code');
+    var block = btn.closest('.kazari-block');
     if (block) setScale(block, DEFAULT);
   });
 
   document.addEventListener('fullscreenchange', function() {
     var el = document.fullscreenElement;
-    if (el && el.classList.contains('kazari-code')) {
+    if (el && el.classList.contains('kazari-block')) {
       setScale(el, getScale(el));
       var btn = el.querySelector('.kz-fs-btn');
       if (btn) btn.setAttribute('aria-expanded', 'true');
@@ -115,9 +115,9 @@ function fallbackCopy(text) {
   });
 })();
 document.addEventListener('click', function(e) {
-  var btn = e.target.closest('.kazari-code .kz-wrap-btn');
+  var btn = e.target.closest('.kazari-block .kz-wrap-btn');
   if (!btn) return;
-  var block = btn.closest('.kazari-code');
+  var block = btn.closest('.kazari-block');
   if (!block) return;
   var pre = block.querySelector('pre');
   if (!pre) return;
@@ -128,9 +128,9 @@ document.addEventListener('click', function(e) {
   btn.setAttribute('aria-label', label);
 });
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.kazari-code .kz-collapse-btn, .kazari-code .kz-collapse-toggle');
+    var btn = e.target.closest('.kazari-block .kz-collapse-btn, .kazari-block .kz-collapse-toggle');
     if (!btn) return;
-    var block = btn.closest('.kazari-code');
+    var block = btn.closest('.kazari-block');
     if (!block) return;
     var bottomBtn = block.querySelector('.kz-collapse-btn');
     var toggleBtn = block.querySelector('.kz-collapse-toggle');
