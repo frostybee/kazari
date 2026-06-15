@@ -909,3 +909,51 @@ func TestLoadConfig_NonExistentFile(t *testing.T) {
 		t.Error("non-existent file should error")
 	}
 }
+
+// --- G. hangingIndent validation ---
+
+func TestValidation_NegativeHangingIndent(t *testing.T) {
+	hi := -1
+	fc := &FileConfig{Defaults: &BlockDefaultsFileConfig{HangingIndent: &hi}}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("negative hangingIndent should fail validation")
+	}
+}
+
+func TestValidation_ZeroHangingIndent(t *testing.T) {
+	hi := 0
+	fc := &FileConfig{Defaults: &BlockDefaultsFileConfig{HangingIndent: &hi}}
+	if err := validateFileConfig(fc); err != nil {
+		t.Errorf("zero hangingIndent should pass: %v", err)
+	}
+}
+
+func TestValidation_NegativeLanguageDefaultsHangingIndent(t *testing.T) {
+	hi := -1
+	fc := &FileConfig{
+		LanguageDefaults: map[string]BlockDefaultsFileConfig{
+			"go": {HangingIndent: &hi},
+		},
+	}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("negative languageDefaults hangingIndent should fail validation")
+	}
+}
+
+// --- H. minContrast upper bound ---
+
+func TestValidation_MinContrastAboveMax(t *testing.T) {
+	mc := 22.0
+	fc := &FileConfig{MinContrast: &mc}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("minContrast above 21 should fail validation")
+	}
+}
+
+func TestValidation_MinContrastAtMax(t *testing.T) {
+	mc := 21.0
+	fc := &FileConfig{MinContrast: &mc}
+	if err := validateFileConfig(fc); err != nil {
+		t.Errorf("minContrast=21 should pass: %v", err)
+	}
+}

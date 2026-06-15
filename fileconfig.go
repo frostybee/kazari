@@ -149,20 +149,28 @@ func validateFileConfig(fc *FileConfig) error {
 	}
 
 	if fc.MinContrast != nil {
-		v.Field("minContrast").Value(*fc.MinContrast).OmitNil().FloatMin(0)
+		v.Field("minContrast").Value(*fc.MinContrast).OmitNil().FloatRange(0, 21)
 	}
 
 	if fc.TerminalDotStyle != nil {
 		v.Field("terminalDotStyle").Value(*fc.TerminalDotStyle).OneOf("colored", "minimal")
 	}
 
-	if fc.Defaults != nil && fc.Defaults.Frame != nil {
-		v.Field("defaults.frame").Value(*fc.Defaults.Frame).OneOf("auto", "code", "terminal", "none")
+	if fc.Defaults != nil {
+		if fc.Defaults.Frame != nil {
+			v.Field("defaults.frame").Value(*fc.Defaults.Frame).OneOf("auto", "code", "terminal", "none")
+		}
+		if fc.Defaults.HangingIndent != nil {
+			v.Field("defaults.hangingIndent").Value(*fc.Defaults.HangingIndent).OmitNil().IntMin(0)
+		}
 	}
 
 	for key, ld := range fc.LanguageDefaults {
 		if ld.Frame != nil {
 			v.Field(fmt.Sprintf("languageDefaults.%s.frame", key)).Value(*ld.Frame).OneOf("auto", "code", "terminal", "none")
+		}
+		if ld.HangingIndent != nil {
+			v.Field(fmt.Sprintf("languageDefaults.%s.hangingIndent", key)).Value(*ld.HangingIndent).OmitNil().IntMin(0)
 		}
 	}
 
