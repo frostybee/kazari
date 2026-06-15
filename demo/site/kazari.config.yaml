@@ -1,0 +1,74 @@
+# kazari.config.yaml
+# All fields are optional. Omitted fields use engine defaults.
+
+themes:
+  light: "github-light"
+  dark: "github-dark"
+
+darkMode:
+  kind: "selector"
+  selector: ".dark"
+
+# Feature toggles
+copyButton: true
+fullscreenButton: true
+wrapButton: true
+lineNumbers: true
+frameDetection: true
+fileNameExtraction: true
+languageBadge: true
+themedScrollbars: true
+themedSelection: false
+styleReset: true
+minify: true
+fileIcons: true
+
+# Engine settings
+tabWidth: 2
+minContrast: 5.5
+cascadeLayer: "kazari"
+themeCSSRoot: ":root"
+terminalDotStyle: "colored"
+locale: "en-US"
+
+# CSS variable overrides (shorthand keys auto-prefixed with --kz-)
+# Values can be a string (both themes) or [dark, light] array
+styleOverrides:
+  radius: "0.3rem"  
+  font-size: "1rem"
+  font-family: "'Fira Code', monospace"
+  shadow: ["none", "0 2px 8px rgba(0,0,0,0.1)"]
+  code-padding-block: "1.5rem"
+  editor-bg: ["#182c34", "#151515"]    
+
+# Block defaults (applied to all code blocks)
+defaults:
+  wrap: false
+  preserveIndent: true
+  lineNumbers: false
+  frame: "auto"
+
+# Per-language overrides (comma-separated keys supported)
+languageDefaults:
+  "bash,sh,zsh":
+    wrap: true
+    frame: "terminal"
+  "python":
+    lineNumbers: true
+
+# Collapsible configuration
+collapsible:
+  lineThreshold: 20
+  previewLines: 5
+  defaultCollapsed: true
+  style: "github"
+
+# Language aliases
+languageAliases:
+  javascript: "js"
+  typescript: "ts"
+
+# UI string overrides
+uiStrings:
+  "copy.label": "Copy"
+  "copy.success": "Copied!"

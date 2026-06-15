@@ -1,6 +1,10 @@
 package kazari
 
-import "github.com/frostybee/kazari/internal/config"
+import (
+	"strings"
+
+	"github.com/frostybee/kazari/internal/config"
+)
 
 func WithCopyButton(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.CopyButton = enabled }
@@ -86,4 +90,37 @@ func WithFileIcons(enabled bool) Option {
 
 func WithFileIconResolver(f func(ext string) string) Option {
 	return func(b *engineBuilder) { b.cfg.FileIconResolver = f }
+}
+
+func normalizeVarName(name string) string {
+	if strings.HasPrefix(name, "--") {
+		return name
+	}
+	return "--kz-" + name
+}
+
+func WithStyleOverrides(overrides map[string]string) Option {
+	return func(b *engineBuilder) {
+		if b.cfg.StyleOverrides == nil {
+			b.cfg.StyleOverrides = make(map[string]config.StyleValue)
+		}
+		for k, v := range overrides {
+			b.cfg.StyleOverrides[normalizeVarName(k)] = config.StyleValue{Value: v}
+		}
+	}
+}
+
+func WithThemedStyleOverrides(overrides map[string]StyleValue) Option {
+	return func(b *engineBuilder) {
+		if b.cfg.StyleOverrides == nil {
+			b.cfg.StyleOverrides = make(map[string]config.StyleValue)
+		}
+		for k, v := range overrides {
+			b.cfg.StyleOverrides[normalizeVarName(k)] = config.StyleValue{
+				Value: v.Value,
+				Dark:  v.Dark,
+				Light: v.Light,
+			}
+		}
+	}
 }

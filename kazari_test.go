@@ -69,6 +69,7 @@ func newTestEngine(hl *mockHighlighter, opts ...Option) *Engine {
 		WithHighlighter(hl),
 		WithThemes("light-theme", ""),
 		WithMinify(false),
+		WithMinSyntaxHighlightingColorContrast(0),
 	}
 	return New(append(base, opts...)...)
 }
@@ -96,7 +97,7 @@ func TestRender_DualTheme(t *testing.T) {
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
 
-	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false))
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false), WithMinSyntaxHighlightingColorContrast(0))
 	html, err := engine.Render("func main", Options{Lang: "go"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
@@ -126,7 +127,7 @@ func TestRender_DualThemeCapability(t *testing.T) {
 		},
 	}
 
-	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false))
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false), WithMinSyntaxHighlightingColorContrast(0))
 	html, err := engine.Render("func main", Options{Lang: "go"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
@@ -1380,9 +1381,56 @@ func TestRender_ContrastAdjustment_UnmarkedLine(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// On unmarked lines, the original color should be preserved.
-	if !strings.Contains(html, "--sl:#f0e8b0") {
-		t.Error("token color should NOT be adjusted on unmarked line")
+	if strings.Contains(html, "--sl:#f0e8b0") {
+		t.Error("token color should be adjusted on unmarked line, but original low-contrast color was kept")
+	}
+	if !strings.Contains(html, "--sl:") {
+		t.Error("expected --sl: color to be present after adjustment")
+	}
+}
+
+func TestRender_ContrastAdjustment_UnmarkedLine_DualTheme(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "test", Color: "#f0e8b0"}},
+		},
+		darkTokens: [][]Token{
+			{{Content: "test", Color: "#3a3520"}},
+		},
+		themeInfo:      ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo:  ThemeInfo{FG: "#c9d1d9", BG: "#0d1117"},
+		lightThemeName: "light",
+	}
+	engine := newTestEngine(hl,
+		WithMinSyntaxHighlightingColorContrast(4.5),
+		WithThemes("light", "dark"),
+	)
+	html, err := engine.RenderWithMeta("test", `go`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(html, "--sl:#f0e8b0") {
+		t.Error("light color should be adjusted on unmarked line")
+	}
+	if strings.Contains(html, "--sd:#3a3520") {
+		t.Error("dark color should be adjusted on unmarked line")
+	}
+}
+
+func TestRender_ContrastAdjustment_UnmarkedLine_AlreadyMeetsContrast(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "test", Color: "#000000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(4.5))
+	html, err := engine.RenderWithMeta("test", `go`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, "--sl:#000000") {
+		t.Error("high-contrast token should not be changed")
 	}
 }
 
@@ -2560,6 +2608,7 @@ func TestRender_ANSI_DualColorsSame(t *testing.T) {
 		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
 		WithThemes("light-theme", "dark-theme"),
 		WithMinify(false),
+		WithMinSyntaxHighlightingColorContrast(0),
 	)
 	html, err := engine.Render("\x1b[31mred\x1b[0m", Options{Lang: "ansi"})
 	if err != nil {
@@ -3781,7 +3830,7 @@ func TestThemeOverride_UnknownThemeWarnsAndSkips(t *testing.T) {
 func TestThemeOverride_MarkerContrastUsesOverrideBG(t *testing.T) {
 	hl := overrideMock()
 	hl.lightTokens = [][]Token{{{Content: "x", Color: "#777777"}}}
-	engine := newTestEngine(hl)
+	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(5.5))
 
 	extractSL := func(html string) string {
 		idx := strings.Index(html, "--sl:")
@@ -3826,4 +3875,179 @@ func TestThemeOverride_ConcurrentRenders(t *testing.T) {
 		}(metas[i%len(metas)])
 	}
 	wg.Wait()
+}
+
+// --- normalizeVarName ---
+
+func TestNormalizeVarName(t *testing.T) {
+	tests := map[string]struct{ input, want string }{
+		"bare name":       {"radius", "--kz-radius"},
+		"already prefixed": {"--kz-shadow", "--kz-shadow"},
+		"custom prefix":   {"--custom-var", "--custom-var"},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got := normalizeVarName(tc.input); got != tc.want {
+				t.Errorf("normalizeVarName(%q) = %q, want %q", tc.input, got, tc.want)
+			}
+		})
+	}
+}
+
+// --- WithStyleOverrides merge ---
+
+func TestWithStyleOverrides_Merge(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithStyleOverrides(map[string]string{
+			"radius": "0.5rem",
+			"shadow": "none",
+		}),
+		WithStyleOverrides(map[string]string{
+			"shadow":    "0 1px 4px rgba(0,0,0,0.1)",
+			"font-size": "1rem",
+		}),
+	)
+	css := engine.CSS()
+
+	if !strings.Contains(css, "--kz-radius: 0.5rem") {
+		t.Error("first call's unique key should be preserved")
+	}
+	if !strings.Contains(css, "--kz-shadow: 0 1px 4px rgba(0,0,0,0.1)") {
+		t.Error("later call should win for duplicate key")
+	}
+	if strings.Contains(css, "--kz-shadow: none") {
+		t.Error("earlier value for duplicate key should be overwritten")
+	}
+	if !strings.Contains(css, "--kz-font-size: 1rem") {
+		t.Error("second call's unique key should be present")
+	}
+}
+
+// --- WithThemedStyleOverrides ---
+
+func TestWithThemedStyleOverrides(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+		darkThemeInfo: ThemeInfo{FG: "#d4d4d4", BG: "#1e1e1e"},
+	}
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", "dark-theme"),
+		WithMinify(false),
+		WithThemedStyleOverrides(map[string]StyleValue{
+			"shadow": {Dark: "none", Light: "0 2px 8px rgba(0,0,0,0.1)"},
+		}),
+	)
+	css := engine.CSS()
+
+	if !strings.Contains(css, "--kz-shadow: 0 2px 8px rgba(0,0,0,0.1)") {
+		t.Error("light value should appear in CSS")
+	}
+	if !strings.Contains(css, "--kz-shadow: none") {
+		t.Error("dark value should appear in CSS")
+	}
+}
+
+// --- Deep merge composition ---
+
+func TestWithLanguageDefaults_Merge(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+
+	engine := newTestEngine(hl,
+		WithLanguageDefaults(map[string]BlockDefaults{
+			"go":     {LineNumbers: true},
+			"python": {Wrap: true},
+		}),
+		WithLanguageDefaults(map[string]BlockDefaults{
+			"python": {LineNumbers: true, Wrap: false},
+			"rust":   {LineNumbers: true},
+		}),
+	)
+
+	cfg := engine.cfg
+
+	if _, ok := cfg.LanguageDefaults["go"]; !ok {
+		t.Error("first call's unique key 'go' should be preserved")
+	}
+	if _, ok := cfg.LanguageDefaults["rust"]; !ok {
+		t.Error("second call's unique key 'rust' should be present")
+	}
+	py := cfg.LanguageDefaults["python"]
+	if !py.LineNumbers {
+		t.Error("later call should win: python.LineNumbers should be true")
+	}
+	if py.Wrap {
+		t.Error("later call should win: python.Wrap should be false")
+	}
+}
+
+func TestWithLanguageAliases_Merge(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+
+	engine := newTestEngine(hl,
+		WithLanguageAliases(map[string]string{
+			"js": "javascript",
+			"ts": "typescript",
+		}),
+		WithLanguageAliases(map[string]string{
+			"ts": "tsx",
+			"py": "python",
+		}),
+	)
+
+	cfg := engine.cfg
+
+	if cfg.LanguageAliases["js"] != "javascript" {
+		t.Error("first call's unique key 'js' should be preserved")
+	}
+	if cfg.LanguageAliases["py"] != "python" {
+		t.Error("second call's unique key 'py' should be present")
+	}
+	if cfg.LanguageAliases["ts"] != "tsx" {
+		t.Error("later call should win for duplicate key 'ts'")
+	}
+}
+
+func TestWithUIStrings_Merge(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+
+	engine := newTestEngine(hl,
+		WithUIStrings(map[string]string{
+			"copy.label":   "Copy",
+			"copy.success": "Copied!",
+		}),
+		WithUIStrings(map[string]string{
+			"copy.success":    "Done!",
+			"expand.label":    "Expand",
+		}),
+	)
+
+	cfg := engine.cfg
+
+	if cfg.UIStringOverrides["copy.label"] != "Copy" {
+		t.Error("first call's unique key should be preserved")
+	}
+	if cfg.UIStringOverrides["expand.label"] != "Expand" {
+		t.Error("second call's unique key should be present")
+	}
+	if cfg.UIStringOverrides["copy.success"] != "Done!" {
+		t.Error("later call should win for duplicate key")
+	}
 }

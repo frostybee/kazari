@@ -552,22 +552,39 @@ func buildTokenStyle(tok MergedToken, lctx *lineContext, markerType *config.Mark
 	lightColor := tok.LightColor
 	darkColor := tok.DarkColor
 
-	if markerType != nil && lctx.cfg.MinContrast > 0 {
-		// Per-block theme overrides carry their own marker backgrounds so
-		// contrast is computed against the override canvas, not the page's.
-		lightBGs := lctx.cfg.LightMarkerBGs
-		if lctx.resolved.LightMarkerBGs != nil {
-			lightBGs = lctx.resolved.LightMarkerBGs
-		}
-		darkBGs := lctx.cfg.DarkMarkerBGs
-		if lctx.resolved.DarkMarkerBGs != nil {
-			darkBGs = lctx.resolved.DarkMarkerBGs
-		}
-		if lightColor != "" && lightBGs != nil {
-			lightColor = adjustContrast(lightColor, lightBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
-		}
-		if darkColor != "" && darkBGs != nil {
-			darkColor = adjustContrast(darkColor, darkBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+	if lctx.cfg.MinContrast > 0 {
+		if markerType != nil {
+			// Per-block theme overrides carry their own marker backgrounds so
+			// contrast is computed against the override canvas, not the page's.
+			lightBGs := lctx.cfg.LightMarkerBGs
+			if lctx.resolved.LightMarkerBGs != nil {
+				lightBGs = lctx.resolved.LightMarkerBGs
+			}
+			darkBGs := lctx.cfg.DarkMarkerBGs
+			if lctx.resolved.DarkMarkerBGs != nil {
+				darkBGs = lctx.resolved.DarkMarkerBGs
+			}
+			if lightColor != "" && lightBGs != nil {
+				lightColor = adjustContrast(lightColor, lightBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+			}
+			if darkColor != "" && darkBGs != nil {
+				darkColor = adjustContrast(darkColor, darkBGs.BG(*markerType), lctx.cfg.MinContrast, lctx.contrastCache)
+			}
+		} else {
+			lightBG := lctx.cfg.LightEditorBG
+			if lctx.resolved.LightEditorBG != "" {
+				lightBG = lctx.resolved.LightEditorBG
+			}
+			darkBG := lctx.cfg.DarkEditorBG
+			if lctx.resolved.DarkEditorBG != "" {
+				darkBG = lctx.resolved.DarkEditorBG
+			}
+			if lightColor != "" && lightBG != "" {
+				lightColor = adjustContrast(lightColor, lightBG, lctx.cfg.MinContrast, lctx.contrastCache)
+			}
+			if darkColor != "" && darkBG != "" {
+				darkColor = adjustContrast(darkColor, darkBG, lctx.cfg.MinContrast, lctx.contrastCache)
+			}
 		}
 	}
 

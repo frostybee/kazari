@@ -3,11 +3,17 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
 .dark body { background: #0d1117; color: #c9d1d9; }
 
 .cmp-header {
-  max-width: 1400px; margin: 0 auto; padding: 1.5rem clamp(1rem,3vw,2.5rem) .5rem;
-  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  max-width: 1400px; margin: 0 auto; padding: 1.5rem clamp(1rem,3vw,2.5rem) 1.5rem;
+  display: flex; flex-direction: column; gap: .6rem;
 }
-.cmp-header p { margin: 0; color: #57606a; font-size: .9rem; flex: 1 1 100%; }
+.cmp-page-title { margin: 0 0 .25rem; font-size: 1.4rem; font-weight: 700; color: #1a1a2e; }
+.dark .cmp-page-title { color: #f0f1f5; }
+.cmp-header p { margin: 0; color: #57606a; font-size: 1rem; line-height: 1.6; }
+.cmp-header a { color: #4a55c5; text-decoration: underline; text-underline-offset: 2px; }
+.cmp-header a:hover { color: #3640a0; }
 .dark .cmp-header p { color: #8b949e; }
+.dark .cmp-header a { color: #8b9cf7; }
+.dark .cmp-header a:hover { color: #a8b5ff; }
 .cmp-status { font-size: .85rem; color: #57606a; }
 .cmp-status.ready { color: #1a7f37; }
 .cmp-status.error { color: #cf222e; }

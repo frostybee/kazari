@@ -12,17 +12,20 @@ import (
 )
 
 type catalogBuilder struct {
-	highlighter kazari.Highlighter
-	err         error
+	highlighter   kazari.Highlighter
+	kazariOptions []kazari.Option
+	err           error
 }
 
 func (b *catalogBuilder) engine(options ...kazari.Option) *kazari.Engine {
-	base := []kazari.Option{
+	all := make([]kazari.Option, 0, len(b.kazariOptions)+2+len(options))
+	all = append(all, b.kazariOptions...)
+	all = append(all,
 		kazari.WithHighlighter(b.highlighter),
-		kazari.WithThemes("github-light", "github-dark"),
 		kazari.WithMinify(false),
-	}
-	return kazari.New(append(base, options...)...)
+	)
+	all = append(all, options...)
+	return kazari.New(all...)
 }
 
 func (b *catalogBuilder) render(engine *kazari.Engine, code string, options kazari.Options) template.HTML {
@@ -116,8 +119,8 @@ func joinHTML(parts ...template.HTML) template.HTML {
 	return template.HTML(output.String())
 }
 
-func buildCatalog(highlighter kazari.Highlighter) ([]Category, string, string, error) {
-	b := &catalogBuilder{highlighter: highlighter}
+func buildCatalog(highlighter kazari.Highlighter, kazariOptions []kazari.Option) ([]Category, string, string, error) {
+	b := &catalogBuilder{highlighter: highlighter, kazariOptions: kazariOptions}
 	engine := b.engine()
 
 	goCode := `package main

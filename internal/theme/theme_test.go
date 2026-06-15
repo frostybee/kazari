@@ -339,3 +339,196 @@ func TestTokenSwitchingCSS_ThemedMapping_MediaQueryMode(t *testing.T) {
 		t.Error("dark mapping should appear inside the media query block")
 	}
 }
+
+// --- Style overrides ---
+
+func TestGenerateVars_StyleOverrides_Universal(t *testing.T) {
+	cfg := testConfig()
+	cfg.StyleOverrides = map[string]config.StyleValue{
+		"--kz-radius": {Value: "1rem"},
+	}
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	rootIdx := strings.Index(css, ":root {")
+	darkIdx := strings.Index(css, ":root.dark {")
+	rootBlock := css[rootIdx:darkIdx]
+	darkBlock := css[darkIdx:]
+
+	if !strings.Contains(rootBlock, "  --kz-radius: 1rem;\n") {
+		t.Error("universal override should appear in :root block")
+	}
+	if strings.Contains(darkBlock, "--kz-radius") {
+		t.Error("universal override should not appear in dark block")
+	}
+}
+
+func TestGenerateVars_StyleOverrides_Themed(t *testing.T) {
+	cfg := testConfig()
+	cfg.StyleOverrides = map[string]config.StyleValue{
+		"--kz-shadow": {Dark: "none", Light: "0 2px 8px rgba(0,0,0,0.1)"},
+	}
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	rootIdx := strings.Index(css, ":root {")
+	darkIdx := strings.Index(css, ":root.dark {")
+	rootBlock := css[rootIdx:darkIdx]
+	darkBlock := css[darkIdx:]
+
+	if !strings.Contains(rootBlock, "  --kz-shadow: 0 2px 8px rgba(0,0,0,0.1);\n") {
+		t.Error("themed override should emit light value in :root block")
+	}
+	if !strings.Contains(darkBlock, "  --kz-shadow: none;\n") {
+		t.Error("themed override should emit dark value in dark block")
+	}
+}
+
+func TestGenerateVars_StyleOverrides_Empty(t *testing.T) {
+	cfg := testConfig()
+	cssWithout := GenerateVars(cfg, lightColors, darkColors)
+
+	cfg.StyleOverrides = map[string]config.StyleValue{}
+	cssWith := GenerateVars(cfg, lightColors, darkColors)
+
+	if cssWithout != cssWith {
+		t.Error("empty style overrides should produce identical CSS")
+	}
+}
+
+func TestGenerateVars_StyleOverrides_MediaQuery(t *testing.T) {
+	cfg := testConfig()
+	cfg.DarkMode.Kind = config.DarkModeMediaQueryKind
+	cfg.StyleOverrides = map[string]config.StyleValue{
+		"--kz-radius": {Value: "0.5rem"},
+		"--kz-shadow": {Dark: "none", Light: "0 1px 4px rgba(0,0,0,0.1)"},
+	}
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	rootIdx := strings.Index(css, ":root {")
+	mediaIdx := strings.Index(css, "@media (prefers-color-scheme: dark)")
+	rootBlock := css[rootIdx:mediaIdx]
+	darkBlock := css[mediaIdx:]
+
+	if !strings.Contains(rootBlock, "  --kz-radius: 0.5rem;\n") {
+		t.Error("universal override should appear in :root block")
+	}
+	if !strings.Contains(rootBlock, "  --kz-shadow: 0 1px 4px rgba(0,0,0,0.1);\n") {
+		t.Error("themed light value should appear in :root block")
+	}
+	if strings.Contains(darkBlock, "--kz-radius") {
+		t.Error("universal override should not appear in dark media query block")
+	}
+	if !strings.Contains(darkBlock, "  --kz-shadow: none;\n") {
+		t.Error("themed dark value should appear in media query block")
+	}
+}
+
+func TestGenerateVars_StyleOverrides_BothMode(t *testing.T) {
+	cfg := testConfig()
+	cfg.DarkMode.Kind = config.DarkModeBothKind
+	cfg.StyleOverrides = map[string]config.StyleValue{
+		"--kz-shadow": {Dark: "none", Light: "0 2px 8px rgba(0,0,0,0.1)"},
+	}
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	mediaIdx := strings.Index(css, "@media (prefers-color-scheme: dark)")
+	selectorIdx := strings.LastIndex(css, ":root.dark {")
+	mediaBlock := css[mediaIdx:selectorIdx]
+	selectorBlock := css[selectorIdx:]
+
+	if !strings.Contains(mediaBlock, "  --kz-shadow: none;\n") {
+		t.Error("dark override should appear in media query block")
+	}
+	if !strings.Contains(selectorBlock, "  --kz-shadow: none;\n") {
+		t.Error("dark override should appear in selector block")
+	}
+}
+
+func TestGenerateVars_StyleOverrides_DeterministicOrder(t *testing.T) {
+	cfg := testConfig()
+	cfg.StyleOverrides = map[string]config.StyleValue{
+		"--kz-z-radius": {Value: "1rem"},
+		"--kz-a-font":   {Value: "monospace"},
+		"--kz-m-shadow": {Value: "none"},
+	}
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	aIdx := strings.Index(css, "--kz-a-font")
+	mIdx := strings.Index(css, "--kz-m-shadow")
+	zIdx := strings.Index(css, "--kz-z-radius")
+
+	if aIdx < 0 || mIdx < 0 || zIdx < 0 {
+		t.Fatal("all overrides should be present in CSS")
+	}
+	if !(aIdx < mIdx && mIdx < zIdx) {
+		t.Error("overrides should be emitted in alphabetical key order")
+	}
+}
+
+func TestGenerateVars_StyleOverrides_CustomRoot(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeCSSRoot = ".my-app"
+	cfg.StyleOverrides = map[string]config.StyleValue{
+		"--kz-radius": {Value: "0.5rem"},
+	}
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, ".my-app {") {
+		t.Error("should use custom root selector")
+	}
+	if !strings.Contains(css, "  --kz-radius: 0.5rem;\n") {
+		t.Error("override should appear in custom root block")
+	}
+}
+
+// --- Differential theme emission ---
+
+func TestGenerateVars_DifferentialEmission_IdenticalVarsOmitted(t *testing.T) {
+	cfg := testConfig()
+	same := ThemeColors{EditorBG: "#ffffff", EditorFG: "#24292f"}
+	css := GenerateVars(cfg, same, same)
+
+	darkIdx := strings.Index(css, ":root.dark {")
+	if darkIdx < 0 {
+		t.Fatal("should contain dark block")
+	}
+	darkBlock := css[darkIdx:]
+
+	if strings.Contains(darkBlock, "--kz-editor-bg") {
+		t.Error("identical editor-bg should be omitted from dark block")
+	}
+	if strings.Contains(darkBlock, "--kz-editor-fg") {
+		t.Error("identical editor-fg should be omitted from dark block")
+	}
+}
+
+func TestGenerateVars_DifferentialEmission_DifferingVarsEmitted(t *testing.T) {
+	cfg := testConfig()
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	darkIdx := strings.Index(css, ":root.dark {")
+	if darkIdx < 0 {
+		t.Fatal("should contain dark block")
+	}
+	darkBlock := css[darkIdx:]
+
+	if !strings.Contains(darkBlock, "--kz-editor-bg") {
+		t.Error("differing editor-bg should be emitted in dark block")
+	}
+	if !strings.Contains(darkBlock, "--kz-editor-fg") {
+		t.Error("differing editor-fg should be emitted in dark block")
+	}
+}
+
+func TestGenerateVars_DifferentialEmission_IdenticalThemes(t *testing.T) {
+	cfg := testConfig()
+	same := ThemeColors{EditorBG: "#ffffff", EditorFG: "#24292f"}
+	css := GenerateVars(cfg, same, same)
+
+	darkIdx := strings.Index(css, ":root.dark {")
+	closingIdx := strings.Index(css[darkIdx:], "}")
+	darkBlock := css[darkIdx : darkIdx+closingIdx]
+
+	if strings.Contains(darkBlock, "--kz-") {
+		t.Error("identical themes should produce no vars in dark block")
+	}
+}

@@ -67,9 +67,11 @@ func WithDefaults(d BlockDefaults) Option {
 
 func WithLanguageDefaults(m map[string]BlockDefaults) Option {
 	return func(b *engineBuilder) {
-		internal := make(map[string]config.BlockDefaults, len(m))
+		if b.cfg.LanguageDefaults == nil {
+			b.cfg.LanguageDefaults = make(map[string]config.BlockDefaults)
+		}
 		for key, d := range m {
-			internal[key] = config.BlockDefaults{
+			b.cfg.LanguageDefaults[key] = config.BlockDefaults{
 				Wrap:           d.Wrap,
 				PreserveIndent: d.PreserveIndent,
 				HangingIndent:  d.HangingIndent,
@@ -77,7 +79,6 @@ func WithLanguageDefaults(m map[string]BlockDefaults) Option {
 				Frame:          int(d.Frame),
 			}
 		}
-		b.cfg.LanguageDefaults = internal
 	}
 }
 
@@ -90,7 +91,14 @@ func WithCascadeLayer(name string) Option {
 }
 
 func WithLanguageAliases(m map[string]string) Option {
-	return func(b *engineBuilder) { b.cfg.LanguageAliases = m }
+	return func(b *engineBuilder) {
+		if b.cfg.LanguageAliases == nil {
+			b.cfg.LanguageAliases = make(map[string]string)
+		}
+		for k, v := range m {
+			b.cfg.LanguageAliases[k] = v
+		}
+	}
 }
 
 func WithThemeCSSRoot(selector string) Option {
@@ -112,7 +120,14 @@ func WithLocale(loc string) Option {
 }
 
 func WithUIStrings(overrides map[string]string) Option {
-	return func(b *engineBuilder) { b.cfg.UIStringOverrides = overrides }
+	return func(b *engineBuilder) {
+		if b.cfg.UIStringOverrides == nil {
+			b.cfg.UIStringOverrides = make(map[string]string)
+		}
+		for k, v := range overrides {
+			b.cfg.UIStringOverrides[k] = v
+		}
+	}
 }
 
 // WithWarningHandler sets the function that receives non-fatal warnings,

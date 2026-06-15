@@ -2,6 +2,7 @@ package theme
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/frostybee/kazari/internal/color"
@@ -20,11 +21,8 @@ type ThemeColors struct {
 
 // GenerateVars produces CSS variable declarations for both themes,
 // wrapped according to the dark mode strategy.
-func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
-	var sb strings.Builder
-
-	// Static defaults (not theme-dependent).
-	staticVars := []struct{ name, value string }{
+func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
+	vars := []struct{ name, value string }{
 		{"--kz-radius", "0.5rem"},
 		{"--kz-shadow", "0 2px 8px rgba(0,0,0,0.15)"},
 		{"--kz-border", "1px solid transparent"},
@@ -43,7 +41,6 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-title-padding", "0.5rem 1rem"},
 		{"--kz-ln-padding-inline", "2ch"},
 		{"--kz-gutter-border-width", "1px"},
-		// Line marker defaults
 		{"--kz-mark-bg", "rgba(255,200,0,0.12)"},
 		{"--kz-mark-border", "rgba(255,200,0,0.5)"},
 		{"--kz-mark-border-width", "3px"},
@@ -57,7 +54,6 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-diff-indicator-margin", "0.3rem"},
 		{"--kz-ins-indicator-color", "rgba(46,160,67,0.8)"},
 		{"--kz-del-indicator-color", "rgba(248,81,73,0.8)"},
-		// Label defaults
 		{"--kz-label-mark-bg", "rgba(255,200,0,0.35)"},
 		{"--kz-label-ins-bg", "rgba(46,160,67,0.35)"},
 		{"--kz-label-del-bg", "rgba(248,81,73,0.35)"},
@@ -65,7 +61,6 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-label-padding", "0.1rem 0.3rem"},
 		{"--kz-label-font-size", "0.75rem"},
 		{"--kz-label-radius", "0.2rem"},
-		// Inline marker defaults
 		{"--kz-inline-mark-bg", "rgba(255,200,0,0.2)"},
 		{"--kz-inline-mark-border", "rgba(255,200,0,0.5)"},
 		{"--kz-inline-mark-radius", "0.2rem"},
@@ -75,43 +70,34 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		{"--kz-inline-ins-border", "rgba(46,160,67,0.5)"},
 		{"--kz-inline-del-bg", "rgba(248,81,73,0.2)"},
 		{"--kz-inline-del-border", "rgba(248,81,73,0.5)"},
-		// Focus defaults
 		{"--kz-focus-dimmed-opacity", "0.35"},
-		// Toolbar defaults
 		{"--kz-toolbar-padding", "0.25rem 1rem"},
 		{"--kz-terminal-header-padding", "0.5rem 1rem"},
 		{"--kz-lang-font-size", "0.8rem"},
 		{"--kz-lang-font-weight", "500"},
 		{"--kz-separator-color", "rgba(161, 161, 170, 0.3)"},
-		// Button defaults
 		{"--kz-copy-radius", "0.375rem"},
 		{"--kz-copy-success-bg", "rgba(34, 197, 94, 0.9)"},
 		{"--kz-copy-success-fg", "#ffffff"},
 		{"--kz-copy-success-border", "rgba(34, 197, 94, 0.8)"},
-		// Terminal defaults
 		{"--kz-terminal-bg", "var(--kz-editor-bg)"},
 		{"--kz-terminal-titlebar-bg", "var(--kz-toolbar-bg)"},
 		{"--kz-terminal-dot-red", "#ff5f57"},
 		{"--kz-terminal-dot-yellow", "#febc2e"},
 		{"--kz-terminal-dot-green", "#28c840"},
-		// Line number defaults
 		{"--kz-ln-width", "2ch"},
 		{"--kz-ln-opacity", "0.4"},
 		{"--kz-ln-highlight-opacity", "0.8"},
 	}
 
-
-	// Collapsible defaults (conditional)
 	if cfg.Collapsible != nil {
-		staticVars = append(staticVars,
-			// Threshold button
+		vars = append(vars,
 			struct{ name, value string }{"--kz-collapse-btn-bg", "rgba(255,255,255,0.08)"},
 			struct{ name, value string }{"--kz-collapse-btn-fg", "rgba(255,255,255,0.7)"},
 			struct{ name, value string }{"--kz-collapse-btn-hover-bg", "rgba(255,255,255,0.15)"},
 			struct{ name, value string }{"--kz-collapse-gradient-start", "transparent"},
 			struct{ name, value string }{"--kz-collapse-gradient-end", "var(--kz-editor-bg)"},
 			struct{ name, value string }{"--kz-collapse-transition", "300ms ease"},
-			// Range section (EC-matching defaults)
 			struct{ name, value string }{"--kz-collapse-closed-bg", "rgb(84 174 255 / 20%)"},
 			struct{ name, value string }{"--kz-collapse-closed-border", "rgb(84 174 255 / 50%)"},
 			struct{ name, value string }{"--kz-collapse-closed-border-width", "0"},
@@ -120,20 +106,17 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 			struct{ name, value string }{"--kz-collapse-open-bg-collapsible", "rgb(84 174 255 / 10%)"},
 			struct{ name, value string }{"--kz-collapse-open-border", "transparent"},
 			struct{ name, value string }{"--kz-collapse-open-border-width", "1px"},
-			// Closed section typography
 			struct{ name, value string }{"--kz-collapse-closed-fg", "inherit"},
 			struct{ name, value string }{"--kz-collapse-closed-font-family", "inherit"},
 			struct{ name, value string }{"--kz-collapse-closed-font-size", "inherit"},
 			struct{ name, value string }{"--kz-collapse-closed-line-height", "inherit"},
-			// Section expand/collapse icons (Octicons, MIT licensed)
 			struct{ name, value string }{"--kz-collapse-expand-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
 			struct{ name, value string }{"--kz-collapse-collapse-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
 		)
 	}
 
-	// Code group defaults (conditional)
 	if cfg.CodeGroups {
-		staticVars = append(staticVars,
+		vars = append(vars,
 			nv("--kz-group-tab-bg", "transparent"),
 			nv("--kz-group-tab-fg", "inherit"),
 			nv("--kz-group-tab-active-border", "#007acc"),
@@ -143,53 +126,83 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		)
 	}
 
-	// File icon defaults (conditional)
 	if cfg.FileIcons {
-		staticVars = append(staticVars,
+		vars = append(vars,
 			nv("--kz-file-icon-size", "1rem"),
 			nv("--kz-file-icon-margin", "0 0.4rem 0 0"),
 			nv("--kz-file-icon-opacity", "0.8"),
 		)
 	}
 
-	// Scrollbar defaults (conditional)
 	if cfg.ThemedScrollbars {
-		staticVars = append(staticVars,
+		vars = append(vars,
 			nv("--kz-scrollbar-width", "5px"),
 			nv("--kz-scrollbar-height", "5px"),
 			nv("--kz-scrollbar-track", "transparent"),
 		)
 	}
 
-	// Fullscreen defaults (conditional)
 	if cfg.FullscreenButton {
-		staticVars = append(staticVars,
+		vars = append(vars,
 			nv("--kz-fs-font-scale", "1"),
 		)
 	}
 
-	// Selection defaults (conditional)
 	if cfg.ThemedSelection {
-		staticVars = append(staticVars,
+		vars = append(vars,
 			nv("--kz-selection-bg", "rgba(0,122,204,0.3)"),
 			nv("--kz-selection-fg", "inherit"),
 		)
 	}
 
-	// Minimal terminal dots (conditional)
 	if cfg.TerminalDotStyle == config.DotsMinimal {
 		dotsSVG := "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'>" +
 			"<circle cx='8' cy='8' r='8'/><circle cx='30' cy='8' r='8'/><circle cx='52' cy='8' r='8'/></svg>"
-		staticVars = append(staticVars,
+		vars = append(vars,
 			nv("--kz-terminal-dots-opacity", "0.15"),
 			nv("--kz-terminal-icon", fmt.Sprintf("url(\"%s\")", svgutil.InlineSVGURL(dotsSVG))),
 		)
 	}
 
+	return vars
+}
+
+// KnownVarNames returns the deduplicated list of all CSS variable names
+// that Kazari can emit for the given config. Used for style override validation.
+func KnownVarNames(cfg *config.Config) []string {
+	seen := make(map[string]struct{})
+	for _, v := range buildStaticVars(cfg) {
+		seen[v.name] = struct{}{}
+	}
+	for _, name := range overridableVarNames(cfg) {
+		seen[name] = struct{}{}
+	}
+	names := make([]string, 0, len(seen))
+	for name := range seen {
+		names = append(names, name)
+	}
+	return names
+}
+
+func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
+	var sb strings.Builder
+
+	staticVars := buildStaticVars(cfg)
+
 	// Light theme variables.
 	lightVars := buildThemeVars(light, cfg)
-	// Dark theme variables.
+	// Dark theme variables (only those that differ from light).
 	darkVars := buildThemeVars(dark, cfg)
+	lightMap := make(map[string]string, len(lightVars))
+	for _, v := range lightVars {
+		lightMap[v.name] = v.value
+	}
+	var darkDiffVars []struct{ name, value string }
+	for _, v := range darkVars {
+		if lightMap[v.name] != v.value {
+			darkDiffVars = append(darkDiffVars, v)
+		}
+	}
 
 	root := cfg.ThemeCSSRoot
 	if root == "" {
@@ -201,30 +214,37 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 		sb.WriteString(fmt.Sprintf("%s {\n", root))
 		writeVars(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, false)
 		sb.WriteString("}\n")
 		sb.WriteString(fmt.Sprintf("%s%s {\n", root, cfg.DarkMode.Selector))
-		writeVarLines(&sb, darkVars)
+		writeVarLines(&sb, darkDiffVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, true)
 		sb.WriteString("}\n")
 
 	case config.DarkModeMediaQueryKind:
 		sb.WriteString(fmt.Sprintf("%s {\n", root))
 		writeVars(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, false)
 		sb.WriteString("}\n")
 		sb.WriteString(fmt.Sprintf("@media (prefers-color-scheme: dark) {\n%s {\n", root))
-		writeVarLines(&sb, darkVars)
+		writeVarLines(&sb, darkDiffVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, true)
 		sb.WriteString("}\n}\n")
 
 	case config.DarkModeBothKind:
 		sb.WriteString(fmt.Sprintf("%s {\n", root))
 		writeVars(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, false)
 		sb.WriteString("}\n")
 		sb.WriteString(fmt.Sprintf("@media (prefers-color-scheme: dark) {\n%s {\n", root))
-		writeVarLines(&sb, darkVars)
+		writeVarLines(&sb, darkDiffVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, true)
 		sb.WriteString("}\n}\n")
 		sb.WriteString(fmt.Sprintf("%s%s {\n", root, cfg.DarkMode.Selector))
-		writeVarLines(&sb, darkVars)
+		writeVarLines(&sb, darkDiffVars)
+		writeStyleOverrides(&sb, cfg.StyleOverrides, true)
 		sb.WriteString("}\n")
 	}
 
@@ -484,6 +504,39 @@ func writeVarLines(sb *strings.Builder, vars []struct{ name, value string }) {
 	for _, v := range vars {
 		if v.value != "" {
 			sb.WriteString(fmt.Sprintf("  %s: %s;\n", v.name, v.value))
+		}
+	}
+}
+
+func writeStyleOverrides(sb *strings.Builder, overrides map[string]config.StyleValue, isDark bool) {
+	if len(overrides) == 0 {
+		return
+	}
+	keys := make([]string, 0, len(overrides))
+	for k := range overrides {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		sv := overrides[k]
+		if isDark {
+			if !sv.IsThemed() {
+				continue
+			}
+			if v := sv.DarkValue(); v != "" {
+				sb.WriteString(fmt.Sprintf("  %s: %s;\n", k, v))
+			}
+		} else {
+			var v string
+			if sv.IsThemed() {
+				v = sv.LightValue()
+			} else {
+				v = sv.Value
+			}
+			if v != "" {
+				sb.WriteString(fmt.Sprintf("  %s: %s;\n", k, v))
+			}
 		}
 	}
 }

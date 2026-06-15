@@ -118,6 +118,12 @@
   --kz-group-tab-active-bg: rgba(255,255,255,0.8);
   --kz-group-tab-active-fg: #24292f;
   --kz-group-border: rgba(0,0,0,0.1);
+  --kz-code-padding-block: 1.5rem;
+  --kz-editor-bg: #151515;
+  --kz-font-family: 'Fira Code', monospace;
+  --kz-font-size: 1rem;
+  --kz-radius: 0.3rem;
+  --kz-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 :root.dark {
   --kz-editor-bg: #0d1117;
@@ -141,6 +147,8 @@
   --kz-group-tab-active-bg: rgba(255,255,255,0.1);
   --kz-group-tab-active-fg: #e6edf3;
   --kz-group-border: rgba(255,255,255,0.1);
+  --kz-editor-bg: #182c34;
+  --kz-shadow: none;
 }
 .kazari-code .kz-line span[style] { color: var(--sl); }
 .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); --kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); --kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); --kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); --kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-collapse-gradient-end: var(--kz-editor-bg); }
@@ -1140,6 +1148,26 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.4;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-collapse-btn-bg: rgba(255,255,255,0.08);
+  --kz-collapse-btn-fg: rgba(255,255,255,0.7);
+  --kz-collapse-btn-hover-bg: rgba(255,255,255,0.15);
+  --kz-collapse-gradient-start: transparent;
+  --kz-collapse-gradient-end: var(--kz-editor-bg);
+  --kz-collapse-transition: 300ms ease;
+  --kz-collapse-closed-bg: rgb(84 174 255 / 20%);
+  --kz-collapse-closed-border: rgb(84 174 255 / 50%);
+  --kz-collapse-closed-border-width: 0;
+  --kz-collapse-closed-padding: 4px;
+  --kz-collapse-open-bg: transparent;
+  --kz-collapse-open-bg-collapsible: rgb(84 174 255 / 10%);
+  --kz-collapse-open-border: transparent;
+  --kz-collapse-open-border-width: 1px;
+  --kz-collapse-closed-fg: inherit;
+  --kz-collapse-closed-font-family: inherit;
+  --kz-collapse-closed-font-size: inherit;
+  --kz-collapse-closed-line-height: inherit;
+  --kz-collapse-expand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
+  --kz-collapse-collapse-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1159,9 +1187,20 @@
   --kz-copy-fg: #4b5563;
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
+  --kz-collapse-btn-fg: #4b5563;
+  --kz-collapse-btn-bg: rgba(0, 0, 0, 0.04);
+  --kz-collapse-btn-hover-bg: rgba(0, 0, 0, 0.08);
+  --kz-collapse-btn-border: rgba(0, 0, 0, 0.15);
+  --kz-collapse-btn-border-hover: rgba(0, 0, 0, 0.3);
   --kz-scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --kz-scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
   --kz-terminal-dots-fg: #24292f;
+  --kz-code-padding-block: 1.5rem;
+  --kz-editor-bg: #151515;
+  --kz-font-family: 'Fira Code', monospace;
+  --kz-font-size: 1rem;
+  --kz-radius: 0.3rem;
+  --kz-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 :root.dark {
   --kz-editor-bg: #0d1117;
@@ -1175,15 +1214,22 @@
   --kz-copy-fg: #d4d4d8;
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
+  --kz-collapse-btn-fg: #d4d4d8;
+  --kz-collapse-btn-bg: rgba(255, 255, 255, 0.1);
+  --kz-collapse-btn-hover-bg: rgba(255, 255, 255, 0.18);
+  --kz-collapse-btn-border: rgba(255, 255, 255, 0.2);
+  --kz-collapse-btn-border-hover: rgba(255, 255, 255, 0.35);
   --kz-scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
   --kz-terminal-dots-fg: #e6edf3;
+  --kz-editor-bg: #182c34;
+  --kz-shadow: none;
 }
 .kazari-code .kz-line span[style] { color: var(--sl); }
-.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-terminal-dots-fg: var(--kz-ovl-terminal-dots-fg); }
+.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); --kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); --kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); --kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); --kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-terminal-dots-fg: var(--kz-ovl-terminal-dots-fg); --kz-collapse-gradient-end: var(--kz-editor-bg); }
 .dark .kazari-code .kz-line span[style] { color: var(--sd); }
 .dark .kazari-code .kz-line span[style*="--sdbg"] { background-color: var(--sdbg); }
-.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); --kz-terminal-dots-fg: var(--kz-ovd-terminal-dots-fg, var(--kz-ovl-terminal-dots-fg)); }
+.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-collapse-btn-fg: var(--kz-ovd-collapse-btn-fg, var(--kz-ovl-collapse-btn-fg)); --kz-collapse-btn-bg: var(--kz-ovd-collapse-btn-bg, var(--kz-ovl-collapse-btn-bg)); --kz-collapse-btn-hover-bg: var(--kz-ovd-collapse-btn-hover-bg, var(--kz-ovl-collapse-btn-hover-bg)); --kz-collapse-btn-border: var(--kz-ovd-collapse-btn-border, var(--kz-ovl-collapse-btn-border)); --kz-collapse-btn-border-hover: var(--kz-ovd-collapse-btn-border-hover, var(--kz-ovl-collapse-btn-border-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); --kz-terminal-dots-fg: var(--kz-ovd-terminal-dots-fg, var(--kz-ovl-terminal-dots-fg)); }
 }
 
 @layer kazari {
@@ -1253,6 +1299,26 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.4;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-collapse-btn-bg: rgba(255,255,255,0.08);
+  --kz-collapse-btn-fg: rgba(255,255,255,0.7);
+  --kz-collapse-btn-hover-bg: rgba(255,255,255,0.15);
+  --kz-collapse-gradient-start: transparent;
+  --kz-collapse-gradient-end: var(--kz-editor-bg);
+  --kz-collapse-transition: 300ms ease;
+  --kz-collapse-closed-bg: rgb(84 174 255 / 20%);
+  --kz-collapse-closed-border: rgb(84 174 255 / 50%);
+  --kz-collapse-closed-border-width: 0;
+  --kz-collapse-closed-padding: 4px;
+  --kz-collapse-open-bg: transparent;
+  --kz-collapse-open-bg-collapsible: rgb(84 174 255 / 10%);
+  --kz-collapse-open-border: transparent;
+  --kz-collapse-open-border-width: 1px;
+  --kz-collapse-closed-fg: inherit;
+  --kz-collapse-closed-font-family: inherit;
+  --kz-collapse-closed-font-size: inherit;
+  --kz-collapse-closed-line-height: inherit;
+  --kz-collapse-expand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
+  --kz-collapse-collapse-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1270,8 +1336,19 @@
   --kz-copy-fg: #4b5563;
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
+  --kz-collapse-btn-fg: #4b5563;
+  --kz-collapse-btn-bg: rgba(0, 0, 0, 0.04);
+  --kz-collapse-btn-hover-bg: rgba(0, 0, 0, 0.08);
+  --kz-collapse-btn-border: rgba(0, 0, 0, 0.15);
+  --kz-collapse-btn-border-hover: rgba(0, 0, 0, 0.3);
   --kz-scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --kz-scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --kz-code-padding-block: 1.5rem;
+  --kz-editor-bg: #151515;
+  --kz-font-family: 'Fira Code', monospace;
+  --kz-font-size: 1rem;
+  --kz-radius: 0.3rem;
+  --kz-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .kazari-customizer.dark {
   --kz-editor-bg: #1a1b26;
@@ -1285,14 +1362,21 @@
   --kz-copy-fg: #d4d4d8;
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
+  --kz-collapse-btn-fg: #d4d4d8;
+  --kz-collapse-btn-bg: rgba(255, 255, 255, 0.1);
+  --kz-collapse-btn-hover-bg: rgba(255, 255, 255, 0.18);
+  --kz-collapse-btn-border: rgba(255, 255, 255, 0.2);
+  --kz-collapse-btn-border-hover: rgba(255, 255, 255, 0.35);
   --kz-scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  --kz-editor-bg: #182c34;
+  --kz-shadow: none;
 }
 .kazari-code .kz-line span[style] { color: var(--sl); }
-.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); --kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); --kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); --kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); --kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-collapse-gradient-end: var(--kz-editor-bg); }
 .dark .kazari-code .kz-line span[style] { color: var(--sd); }
 .dark .kazari-code .kz-line span[style*="--sdbg"] { background-color: var(--sdbg); }
-.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
+.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-collapse-btn-fg: var(--kz-ovd-collapse-btn-fg, var(--kz-ovl-collapse-btn-fg)); --kz-collapse-btn-bg: var(--kz-ovd-collapse-btn-bg, var(--kz-ovl-collapse-btn-bg)); --kz-collapse-btn-hover-bg: var(--kz-ovd-collapse-btn-hover-bg, var(--kz-ovl-collapse-btn-hover-bg)); --kz-collapse-btn-border: var(--kz-ovd-collapse-btn-border, var(--kz-ovl-collapse-btn-border)); --kz-collapse-btn-border-hover: var(--kz-ovd-collapse-btn-border-hover, var(--kz-ovl-collapse-btn-border-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 }
 
 @layer kazari {
@@ -1362,6 +1446,26 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.4;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-collapse-btn-bg: rgba(255,255,255,0.08);
+  --kz-collapse-btn-fg: rgba(255,255,255,0.7);
+  --kz-collapse-btn-hover-bg: rgba(255,255,255,0.15);
+  --kz-collapse-gradient-start: transparent;
+  --kz-collapse-gradient-end: var(--kz-editor-bg);
+  --kz-collapse-transition: 300ms ease;
+  --kz-collapse-closed-bg: rgb(84 174 255 / 20%);
+  --kz-collapse-closed-border: rgb(84 174 255 / 50%);
+  --kz-collapse-closed-border-width: 0;
+  --kz-collapse-closed-padding: 4px;
+  --kz-collapse-open-bg: transparent;
+  --kz-collapse-open-bg-collapsible: rgb(84 174 255 / 10%);
+  --kz-collapse-open-border: transparent;
+  --kz-collapse-open-border-width: 1px;
+  --kz-collapse-closed-fg: inherit;
+  --kz-collapse-closed-font-family: inherit;
+  --kz-collapse-closed-font-size: inherit;
+  --kz-collapse-closed-line-height: inherit;
+  --kz-collapse-expand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
+  --kz-collapse-collapse-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1379,8 +1483,19 @@
   --kz-copy-fg: #4b5563;
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
+  --kz-collapse-btn-fg: #4b5563;
+  --kz-collapse-btn-bg: rgba(0, 0, 0, 0.04);
+  --kz-collapse-btn-hover-bg: rgba(0, 0, 0, 0.08);
+  --kz-collapse-btn-border: rgba(0, 0, 0, 0.15);
+  --kz-collapse-btn-border-hover: rgba(0, 0, 0, 0.3);
   --kz-scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --kz-scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --kz-code-padding-block: 1.5rem;
+  --kz-editor-bg: #151515;
+  --kz-font-family: 'Fira Code', monospace;
+  --kz-font-size: 1rem;
+  --kz-radius: 0.3rem;
+  --kz-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .kazari-tinted.dark {
   --kz-editor-bg: #001515;
@@ -1394,14 +1509,21 @@
   --kz-copy-fg: #d4d4d8;
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
+  --kz-collapse-btn-fg: #d4d4d8;
+  --kz-collapse-btn-bg: rgba(255, 255, 255, 0.1);
+  --kz-collapse-btn-hover-bg: rgba(255, 255, 255, 0.18);
+  --kz-collapse-btn-border: rgba(255, 255, 255, 0.2);
+  --kz-collapse-btn-border-hover: rgba(255, 255, 255, 0.35);
   --kz-scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  --kz-editor-bg: #182c34;
+  --kz-shadow: none;
 }
 .kazari-code .kz-line span[style] { color: var(--sl); }
-.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); --kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); --kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); --kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); --kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-collapse-gradient-end: var(--kz-editor-bg); }
 .dark .kazari-code .kz-line span[style] { color: var(--sd); }
 .dark .kazari-code .kz-line span[style*="--sdbg"] { background-color: var(--sdbg); }
-.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
+.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-collapse-btn-fg: var(--kz-ovd-collapse-btn-fg, var(--kz-ovl-collapse-btn-fg)); --kz-collapse-btn-bg: var(--kz-ovd-collapse-btn-bg, var(--kz-ovl-collapse-btn-bg)); --kz-collapse-btn-hover-bg: var(--kz-ovd-collapse-btn-hover-bg, var(--kz-ovl-collapse-btn-hover-bg)); --kz-collapse-btn-border: var(--kz-ovd-collapse-btn-border, var(--kz-ovl-collapse-btn-border)); --kz-collapse-btn-border-hover: var(--kz-ovd-collapse-btn-border-hover, var(--kz-ovl-collapse-btn-border-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 }
 
 @layer kazari {
@@ -1471,6 +1593,26 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.4;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-collapse-btn-bg: rgba(255,255,255,0.08);
+  --kz-collapse-btn-fg: rgba(255,255,255,0.7);
+  --kz-collapse-btn-hover-bg: rgba(255,255,255,0.15);
+  --kz-collapse-gradient-start: transparent;
+  --kz-collapse-gradient-end: var(--kz-editor-bg);
+  --kz-collapse-transition: 300ms ease;
+  --kz-collapse-closed-bg: rgb(84 174 255 / 20%);
+  --kz-collapse-closed-border: rgb(84 174 255 / 50%);
+  --kz-collapse-closed-border-width: 0;
+  --kz-collapse-closed-padding: 4px;
+  --kz-collapse-open-bg: transparent;
+  --kz-collapse-open-bg-collapsible: rgb(84 174 255 / 10%);
+  --kz-collapse-open-border: transparent;
+  --kz-collapse-open-border-width: 1px;
+  --kz-collapse-closed-fg: inherit;
+  --kz-collapse-closed-font-family: inherit;
+  --kz-collapse-closed-font-size: inherit;
+  --kz-collapse-closed-line-height: inherit;
+  --kz-collapse-expand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
+  --kz-collapse-collapse-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E");
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1488,8 +1630,19 @@
   --kz-copy-fg: #4b5563;
   --kz-copy-fg-hover: #111827;
   --kz-copy-bg-hover: rgba(156, 163, 175, 0.2);
+  --kz-collapse-btn-fg: #4b5563;
+  --kz-collapse-btn-bg: rgba(0, 0, 0, 0.04);
+  --kz-collapse-btn-hover-bg: rgba(0, 0, 0, 0.08);
+  --kz-collapse-btn-border: rgba(0, 0, 0, 0.15);
+  --kz-collapse-btn-border-hover: rgba(0, 0, 0, 0.3);
   --kz-scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --kz-scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --kz-code-padding-block: 1.5rem;
+  --kz-editor-bg: #151515;
+  --kz-font-family: 'Fira Code', monospace;
+  --kz-font-size: 1rem;
+  --kz-radius: 0.3rem;
+  --kz-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .kazari-scoped.dark {
   --kz-editor-bg: #0d1117;
@@ -1503,14 +1656,21 @@
   --kz-copy-fg: #d4d4d8;
   --kz-copy-fg-hover: #ffffff;
   --kz-copy-bg-hover: rgba(63, 63, 70, 0.8);
+  --kz-collapse-btn-fg: #d4d4d8;
+  --kz-collapse-btn-bg: rgba(255, 255, 255, 0.1);
+  --kz-collapse-btn-hover-bg: rgba(255, 255, 255, 0.18);
+  --kz-collapse-btn-border: rgba(255, 255, 255, 0.2);
+  --kz-collapse-btn-border-hover: rgba(255, 255, 255, 0.35);
   --kz-scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  --kz-editor-bg: #182c34;
+  --kz-shadow: none;
 }
 .kazari-code .kz-line span[style] { color: var(--sl); }
-.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); --kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); --kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); --kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); --kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-collapse-gradient-end: var(--kz-editor-bg); }
 .dark .kazari-code .kz-line span[style] { color: var(--sd); }
 .dark .kazari-code .kz-line span[style*="--sdbg"] { background-color: var(--sdbg); }
-.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
+.dark .kazari-code.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-collapse-btn-fg: var(--kz-ovd-collapse-btn-fg, var(--kz-ovl-collapse-btn-fg)); --kz-collapse-btn-bg: var(--kz-ovd-collapse-btn-bg, var(--kz-ovl-collapse-btn-bg)); --kz-collapse-btn-hover-bg: var(--kz-ovd-collapse-btn-hover-bg, var(--kz-ovl-collapse-btn-hover-bg)); --kz-collapse-btn-border: var(--kz-ovd-collapse-btn-border, var(--kz-ovl-collapse-btn-border)); --kz-collapse-btn-border-hover: var(--kz-ovd-collapse-btn-border-hover, var(--kz-ovl-collapse-btn-border-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 }
 
 .kazari-code .kz-file-icon { font-size: 1rem; margin-right: .4rem; }

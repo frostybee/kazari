@@ -161,6 +161,34 @@ type PreviewSegment struct {
 	End   int // 1-based inclusive
 }
 
+// StyleValue represents a CSS variable override that can be universal or per-theme.
+type StyleValue struct {
+	Value string // used when both themes share the same value
+	Dark  string // dark theme override
+	Light string // light theme override
+}
+
+// IsThemed reports whether this value has per-theme overrides.
+func (sv StyleValue) IsThemed() bool {
+	return sv.Dark != "" || sv.Light != ""
+}
+
+// LightValue returns the value to use for the light theme.
+func (sv StyleValue) LightValue() string {
+	if sv.IsThemed() {
+		return sv.Light
+	}
+	return sv.Value
+}
+
+// DarkValue returns the value to use for the dark theme.
+func (sv StyleValue) DarkValue() string {
+	if sv.IsThemed() {
+		return sv.Dark
+	}
+	return sv.Value
+}
+
 // Config holds the fully resolved engine configuration.
 type Config struct {
 	LightTheme         string
@@ -181,6 +209,8 @@ type Config struct {
 	DarkMode           DarkModeConfig
 	TabWidth           int
 	MinContrast        float64
+	LightEditorBG      string
+	DarkEditorBG       string
 	LightMarkerBGs     *MarkerEffectiveBGs
 	DarkMarkerBGs      *MarkerEffectiveBGs
 	Minify             bool
@@ -192,6 +222,7 @@ type Config struct {
 	MermaidPassThrough         bool
 	DataLineCount              bool
 	ThemeCSSRoot               string
+	StyleOverrides             map[string]StyleValue
 	Locale                     string
 	UIStringOverrides          map[string]string
 	UIStrings                  *locale.UIStrings
@@ -274,6 +305,8 @@ type ResolvedBlock struct {
 	FocusLines    []LineRange
 	// Per-block theme override state (populated when Theme is set)
 	ThemeOverrideStyle string              // inline --kz-ovl-*/--kz-ovd-* declarations for the wrapper
+	LightEditorBG      string              // editor BG for unmarked-line contrast (override light)
+	DarkEditorBG       string              // editor BG for unmarked-line contrast (override dark)
 	LightMarkerBGs     *MarkerEffectiveBGs // marker compositing against the override light BG
 	DarkMarkerBGs      *MarkerEffectiveBGs // marker compositing against the override dark BG
 	// Collapse state (populated by collapsible.ResolveCollapse)

@@ -16,11 +16,12 @@ import (
 var sourceFiles embed.FS
 
 type Config struct {
-	BackendName string
-	HTMLFile    string
-	OtherName   string
-	OtherHref   string
-	NavLinks    []NavLink
+	BackendName    string
+	HTMLFile       string
+	OtherName      string
+	OtherHref      string
+	NavLinks       []NavLink
+	KazariOptions  []kazari.Option
 }
 
 type NavLink struct {
@@ -105,7 +106,7 @@ func Build(cfg Config, highlighter kazari.Highlighter) (Output, error) {
 		return Output{}, fmt.Errorf("showcase: nil highlighter")
 	}
 
-	catalog, generatedCSS, generatedJS, err := buildCatalog(highlighter)
+	catalog, generatedCSS, generatedJS, err := buildCatalog(highlighter, cfg.KazariOptions)
 	if err != nil {
 		return Output{}, err
 	}

@@ -192,6 +192,34 @@ type CollapsibleConfig struct {
 	CollapsedAnnouncement string // screen reader
 }
 
+// StyleValue represents a CSS variable override that can be universal or per-theme.
+type StyleValue struct {
+	Value string // used when both themes share the same value
+	Dark  string // dark theme override
+	Light string // light theme override
+}
+
+// IsThemed reports whether this value has per-theme overrides.
+func (sv StyleValue) IsThemed() bool {
+	return sv.Dark != "" || sv.Light != ""
+}
+
+// LightValue returns the value to use for the light theme.
+func (sv StyleValue) LightValue() string {
+	if sv.IsThemed() {
+		return sv.Light
+	}
+	return sv.Value
+}
+
+// DarkValue returns the value to use for the dark theme.
+func (sv StyleValue) DarkValue() string {
+	if sv.IsThemed() {
+		return sv.Dark
+	}
+	return sv.Value
+}
+
 // Assets holds CSS and JS output with content-hashed filenames.
 type Assets struct {
 	CSS AssetFile

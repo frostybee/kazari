@@ -40,9 +40,11 @@ type Engine struct {
 
 // overrideEntry caches the resolved state for one theme= override string.
 type overrideEntry struct {
-	style    string
-	lightBGs *config.MarkerEffectiveBGs
-	darkBGs  *config.MarkerEffectiveBGs
+	style        string
+	lightEditorBG string
+	darkEditorBG  string
+	lightBGs     *config.MarkerEffectiveBGs
+	darkBGs      *config.MarkerEffectiveBGs
 }
 
 // New creates a new Engine with the given options.
@@ -75,9 +77,11 @@ func New(opts ...Option) *Engine {
 
 	if e.cfg.MinContrast > 0 {
 		if e.lightColors.EditorBG != "" {
+			e.cfg.LightEditorBG = e.lightColors.EditorBG
 			e.cfg.LightMarkerBGs = computeMarkerBGs(e.lightColors.EditorBG)
 		}
 		if e.darkColors.EditorBG != "" {
+			e.cfg.DarkEditorBG = e.darkColors.EditorBG
 			e.cfg.DarkMarkerBGs = computeMarkerBGs(e.darkColors.EditorBG)
 		}
 	}
@@ -453,6 +457,8 @@ func (e *Engine) applyThemeOverride(resolved *config.ResolvedBlock) {
 	}
 
 	resolved.ThemeOverrideStyle = entry.style
+	resolved.LightEditorBG = entry.lightEditorBG
+	resolved.DarkEditorBG = entry.darkEditorBG
 	resolved.LightMarkerBGs = entry.lightBGs
 	resolved.DarkMarkerBGs = entry.darkBGs
 }
@@ -479,9 +485,11 @@ func (e *Engine) buildOverrideEntry(lightName, darkName string) overrideEntry {
 	}
 	if e.cfg.MinContrast > 0 {
 		if light.EditorBG != "" {
+			entry.lightEditorBG = light.EditorBG
 			entry.lightBGs = computeMarkerBGs(light.EditorBG)
 		}
 		if dark.EditorBG != "" {
+			entry.darkEditorBG = dark.EditorBG
 			entry.darkBGs = computeMarkerBGs(dark.EditorBG)
 		}
 	}
