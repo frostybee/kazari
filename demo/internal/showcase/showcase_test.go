@@ -57,11 +57,11 @@ func TestBuildCatalogParityAndCompleteness(t *testing.T) {
 	if !reflect.DeepEqual(nuriIDs, chromaIDs) {
 		t.Fatalf("backend catalogs differ:\nNuri: %v\nChroma: %v", nuriIDs, chromaIDs)
 	}
-	if len(nuri.Page.Categories) != 7 {
-		t.Fatalf("category count = %d, want 7", len(nuri.Page.Categories))
+	if len(nuri.Page.Categories) != 8 {
+		t.Fatalf("category count = %d, want 8", len(nuri.Page.Categories))
 	}
-	if len(nuriIDs) != 40 {
-		t.Fatalf("example count = %d, want 40", len(nuriIDs))
+	if len(nuriIDs) != 43 {
+		t.Fatalf("example count = %d, want 43", len(nuriIDs))
 	}
 
 	seen := make(map[string]bool, len(nuriIDs))

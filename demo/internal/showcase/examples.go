@@ -14,6 +14,7 @@ import (
 type catalogBuilder struct {
 	highlighter   kazari.Highlighter
 	kazariOptions []kazari.Option
+	svgProvider   SVGProvider
 	err           error
 }
 
@@ -64,6 +65,18 @@ func (b *catalogBuilder) renderMarkdown(markdown goldmark.Markdown, source strin
 	return template.HTML(output.String())
 }
 
+func (b *catalogBuilder) renderSVG(code string, opts SVGOptions) template.HTML {
+	if b.err != nil || b.svgProvider == nil {
+		return ""
+	}
+	svg, err := b.svgProvider.RenderSVG(code, opts)
+	if err != nil {
+		b.err = err
+		return ""
+	}
+	return template.HTML(`<div class="kz-svg-preview">` + svg + `</div>`)
+}
+
 func recipe(label, code string) Recipe {
 	return Recipe{Label: label, Code: code}
 }
@@ -101,6 +114,9 @@ var exampleDescriptions = map[string]string{
 	"hybrid-diff":           "Combines diff prefixes with syntax highlighting from the underlying source language.",
 	"code-group":            "Presents related language examples as an accessible tabbed group generated from Markdown.",
 	"ansi":                  "Converts ANSI SGR escape sequences into styled terminal colors and text treatments.",
+	"ansi-git-diff":         "Renders git diff output with bold headers, cyan hunk markers, and red/green background strips for deleted and inserted lines.",
+	"ansi-truecolor":        "Demonstrates 24-bit truecolor foregrounds alongside italic, bold, strikethrough, and underline text styles.",
+	"ansi-256-palette":      "Exercises all three 256-color zones: the standard palette, the 6x6x6 color cube, and the grayscale ramp.",
 	"code-group-sync":       "Synchronizes matching tabs across separate code groups that share the same key.",
 	"theme-override":        "Selects an alternate theme for one block without changing the rest of the page.",
 	"theme-override-dual":   "Gives one block its own light and dark themes, switched by the page's dark mode toggle. Inverted here on purpose: dracula in light mode, github-light in dark mode.",
@@ -109,6 +125,10 @@ var exampleDescriptions = map[string]string{
 	"scoped-css":            "Emits theme variables beneath a custom selector so Kazari styles stay inside a chosen container.",
 	"locale-french":         "Localizes built-in copy and fullscreen controls through the engine's locale setting.",
 	"file-icons":            "Resolves a custom icon from each title's file extension and places it in the frame toolbar.",
+	"svg-default":           "Renders a Go snippet to a self-contained SVG image using Nuri's CodeToSVG with default settings.",
+	"svg-custom-font":       "Increases the font size to 18px to produce a larger, more readable SVG image.",
+	"svg-no-background":     "Strips the background rectangle and corner radius for transparent SVG output suitable for embedding.",
+	"svg-dual-theme":        "Renders the same snippet with both a light and dark theme, displayed side by side.",
 }
 
 func joinHTML(parts ...template.HTML) template.HTML {
@@ -119,8 +139,8 @@ func joinHTML(parts ...template.HTML) template.HTML {
 	return template.HTML(output.String())
 }
 
-func buildCatalog(highlighter kazari.Highlighter, kazariOptions []kazari.Option) ([]Category, string, string, error) {
-	b := &catalogBuilder{highlighter: highlighter, kazariOptions: kazariOptions}
+func buildCatalog(highlighter kazari.Highlighter, kazariOptions []kazari.Option, svgProvider SVGProvider) ([]Category, string, string, error) {
+	b := &catalogBuilder{highlighter: highlighter, kazariOptions: kazariOptions, svgProvider: svgProvider}
 	engine := b.engine()
 
 	goCode := `package main
@@ -660,6 +680,33 @@ html, err := engine.Render(code, kazari.Options{
 		"\x1b[1;33mWARN\x1b[0m  Cache miss for key \x1b[36m\"user:42\"\x1b[0m\n" +
 		"\x1b[1;31mERROR\x1b[0m Connection refused: \x1b[4mdb.example.com:5432\x1b[0m\n" +
 		"\x1b[90m2024-01-15 10:30:45\x1b[0m \x1b[38;5;208mDEBUG\x1b[0m Retrying in \x1b[1m3s\x1b[0m..."
+	ansiGitDiff := "\x1b[1mdiff --git a/api/handler.go b/api/handler.go\x1b[0m\n" +
+		"\x1b[1mindex 4e9d2a1..7c3f8b2 100644\x1b[0m\n" +
+		"\x1b[1m--- a/api/handler.go\x1b[0m\n" +
+		"\x1b[1m+++ b/api/handler.go\x1b[0m\n" +
+		"\x1b[36m@@ -12,7 +12,9 @@\x1b[0m func ServeHTTP(w http.ResponseWriter, r *http.Request) {\n" +
+		"    ctx := r.Context()\n" +
+		"\x1b[31m-   log.Printf(\"request: %s %s\", r.Method, r.URL.Path)\x1b[0m\n" +
+		"\x1b[32m+   spanCtx, span := tracer.Start(ctx, \"ServeHTTP\")\x1b[0m\n" +
+		"\x1b[32m+   defer span.End()\x1b[0m\n" +
+		"\x1b[32m+   log.Printf(\"trace: %s %s\", r.Method, r.URL.Path)\x1b[0m\n" +
+		"    handler(w, r.WithContext(ctx))"
+	ansiTruecolor := "\x1b[38;2;255;100;0mWARNING\x1b[0m \x1b[38;2;200;200;200mcargo build\x1b[0m\n" +
+		"\x1b[38;2;255;200;0m  Compiling\x1b[0m tokio v1.36.0\n" +
+		"\x1b[3m\x1b[38;2;150;150;150m  deprecated: use tokio::task::spawn_local instead\x1b[0m\n" +
+		"\x1b[1;38;2;255;80;80mERROR\x1b[22m\x1b[38;2;230;230;230m[E0308]\x1b[0m mismatched types\n" +
+		"  \x1b[38;2;100;200;255mexpected\x1b[0m \x1b[1m&str\x1b[22m\n" +
+		"  \x1b[9m\x1b[38;2;180;180;180m   found\x1b[29m\x1b[0m String\n" +
+		"\x1b[4m\x1b[38;2;100;180;255mFor more information: rustc --explain E0308\x1b[0m"
+	ansi256 := "\x1b[1m/home/user/project\x1b[0m\n" +
+		"\x1b[38;5;33mdrwxr-xr-x\x1b[0m  2 user user  4096 \x1b[38;5;33msrc/\x1b[0m\n" +
+		"\x1b[38;5;33mdrwxr-xr-x\x1b[0m  2 user user  4096 \x1b[38;5;33mtests/\x1b[0m\n" +
+		"\x1b[38;5;46m-rwxr-xr-x\x1b[0m  1 user user  8192 \x1b[38;5;46mbuild.sh\x1b[0m\n" +
+		"\x1b[38;5;196m-rw-r--r--\x1b[0m  1 user user   512 \x1b[38;5;196mERROR.log\x1b[0m\n" +
+		"\x1b[38;5;220m-rw-r--r--\x1b[0m  1 user user  2048 \x1b[38;5;220mconfig.yaml\x1b[0m\n" +
+		"\x1b[38;5;244m-rw-r--r--\x1b[0m  1 user user    64 \x1b[38;5;244m.gitignore\x1b[0m\n" +
+		"\x1b[38;5;252m-rw-r--r--\x1b[0m  1 user user  1024 \x1b[38;5;252mREADME.md\x1b[0m\n" +
+		"\x1b[48;5;234m\x1b[38;5;252m Total: 7 items \x1b[0m"
 	syncMarkdown := ":::code-group sync=\"language\"\n\n```go\ngo get github.com/example/pkg\n```\n\n```python\npip install example-pkg\n```\n\n```javascript\nnpm install example-pkg\n```\n\n:::\n\n<p>Select a language above and the group below syncs automatically.</p>\n\n:::code-group sync=\"language\"\n\n```go\nimport \"github.com/example/pkg\"\n```\n\n```python\nimport example_pkg\n```\n\n```javascript\nconst pkg = require('example-pkg');\n```\n\n:::\n\n<p>This group uses a different sync key (<code>sync=\"platform\"</code>) and syncs independently.</p>\n\n:::code-group sync=\"platform\"\n\n```bash title=\"Linux\"\nsudo apt install build-essential\n```\n\n```powershell title=\"Windows\"\nwinget install Microsoft.VisualStudio.BuildTools\n```\n\n```bash title=\"macOS\"\nbrew install gcc\n```\n\n:::\n"
 
 	markdownRenderer := goldmark.New(goldmark.WithExtensions(
@@ -672,7 +719,7 @@ html, err := engine.Render(code, kazari.Options{
 	formats := Category{
 		ID:          "formats",
 		Title:       "Formats and Groups",
-		Description: "Specialized formats, regex matching, diffs, ANSI output, and tabbed groups.",
+		Description: "Specialized formats, regex matching, diffs, and tabbed groups.",
 		Examples: []Example{
 			metaGoExample(b, engine, "mermaid", "Mermaid Pass-Through (raw code for Mermaid.js)", "Mermaid", mermaidCode,
 				`mermaid`, `html, err := engine.Render(code, kazari.Options{Lang: "mermaid"})`),
@@ -696,9 +743,6 @@ html, err := engine.Render(code, kazari.Options{
 				HTML:     codeGroupHTML,
 				Recipes:  []Recipe{recipe("Markdown", codeGroupMarkdown)},
 			},
-			metaGoExample(b, engine, "ansi", "ANSI Escape Sequences (parsed SGR codes)", "ANSI", ansiCode,
-				`ansi title="server.log" showLineNumbers`,
-				`html, err := engine.RenderWithMeta(code, `+"`"+`ansi title="server.log" showLineNumbers`+"`"+`)`),
 			{
 				ID:       "code-group-sync",
 				Title:    "Code Group Tab Sync (tabs synced across groups)",
@@ -706,6 +750,26 @@ html, err := engine.Render(code, kazari.Options{
 				HTML:     syncHTML,
 				Recipes:  []Recipe{recipe("Markdown", syncMarkdown)},
 			},
+		},
+	}
+
+	ansi := Category{
+		ID:          "ansi",
+		Title:       "ANSI Terminal Output",
+		Description: "Renders ANSI SGR escape sequences into styled HTML with full color and text decoration support.",
+		Examples: []Example{
+			metaGoExample(b, engine, "ansi", "ANSI Escape Sequences (parsed SGR codes)", "SGR basics", ansiCode,
+				`ansi title="server.log" showLineNumbers`,
+				`html, err := engine.RenderWithMeta(code, `+"`"+`ansi title="server.log" showLineNumbers`+"`"+`)`),
+			metaGoExample(b, engine, "ansi-git-diff", "ANSI Git Diff (16-color foreground + background)", "Git diff", ansiGitDiff,
+				`ansi title="git diff" showLineNumbers`,
+				`html, err := engine.RenderWithMeta(code, `+"`"+`ansi title="git diff" showLineNumbers`+"`"+`)`),
+			metaGoExample(b, engine, "ansi-truecolor", "ANSI Truecolor + Styles (24-bit RGB, italic, strikethrough, underline)", "Truecolor + styles", ansiTruecolor,
+				`ansi title="cargo build" showLineNumbers`,
+				`html, err := engine.RenderWithMeta(code, `+"`"+`ansi title="cargo build" showLineNumbers`+"`"+`)`),
+			metaGoExample(b, engine, "ansi-256-palette", "ANSI 256-Color Palette (cube, grayscale, background)", "256-color palette", ansi256,
+				`ansi title="ls --color" showLineNumbers`,
+				`html, err := engine.RenderWithMeta(code, `+"`"+`ansi title="ls --color" showLineNumbers`+"`"+`)`),
 		},
 	}
 
@@ -844,6 +908,66 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 		},
 	}
 
+	svgGoCode := "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tname := \"Kazari\"\n\tfmt.Printf(\"Hello, %s!\\n\", name)\n}"
+	svgPyCode := "import json\nfrom pathlib import Path\n\ndef load_config(path: str) -> dict:\n    data = Path(path).read_text()\n    return json.loads(data)"
+	svgTsCode := "interface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nfunction greet(user: User): string {\n  return `Hello, ${user.name}!`;\n}"
+
+	var svgCategory *Category
+	if b.svgProvider != nil {
+		noBG := false
+		lightSVG := b.renderSVG(svgGoCode, SVGOptions{Lang: "go", Theme: "github-light"})
+		darkSVG := b.renderSVG(svgGoCode, SVGOptions{Lang: "go", Theme: "github-dark"})
+
+		svgCategory = &Category{
+			ID:          "svg",
+			Title:       "SVG Output",
+			Description: "Self-contained SVG images from Nuri's CodeToSVG, useful for README files, email, or static export.",
+			Examples: []Example{
+				{
+					ID:       "svg-default",
+					Title:    "SVG Default Output (github-dark)",
+					NavTitle: "Default",
+					HTML:     b.renderSVG(svgGoCode, SVGOptions{Lang: "go", Theme: "github-dark"}),
+					Recipes: []Recipe{recipe("Go", `svg, err := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
+	Lang: "go", Theme: "github-dark",
+})`)},
+				},
+				{
+					ID:       "svg-custom-font",
+					Title:    "SVG Custom Font Size (18px, dracula)",
+					NavTitle: "Custom font",
+					HTML:     b.renderSVG(svgPyCode, SVGOptions{Lang: "python", Theme: "dracula", FontSize: 18}),
+					Recipes: []Recipe{recipe("Go", `svg, err := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
+	Lang: "python", Theme: "dracula", FontSize: 18,
+})`)},
+				},
+				{
+					ID:       "svg-no-background",
+					Title:    "SVG No Background (transparent, no corner radius)",
+					NavTitle: "No background",
+					HTML:     b.renderSVG(svgTsCode, SVGOptions{Lang: "typescript", Theme: "github-light", ShowBG: &noBG, CornerRadius: 0}),
+					Recipes: []Recipe{recipe("Go", `noBG := false
+svg, err := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
+	Lang: "typescript", Theme: "github-light",
+	ShowBackground: &noBG, CornerRadius: 0,
+})`)},
+				},
+				{
+					ID:       "svg-dual-theme",
+					Title:    "SVG Light vs Dark Theme (side by side)",
+					NavTitle: "Light vs dark",
+					HTML:     template.HTML(`<div class="kz-svg-compare">`) + lightSVG + darkSVG + template.HTML(`</div>`),
+					Recipes: []Recipe{recipe("Go", `lightSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
+	Lang: "go", Theme: "github-light",
+})
+darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
+	Lang: "go", Theme: "github-dark",
+})`)},
+				},
+			},
+		}
+	}
+
 	if b.err != nil {
 		return nil, "", "", fmt.Errorf("render showcase example: %w", b.err)
 	}
@@ -856,7 +980,12 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 		scopedEngine.ThemeCSS(),
 		`.kazari-code .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
 	}, "\n")
-	return []Category{frames, layout, markers, collapsible, formats, themes, localization}, css, collapseEngine.JS(), nil
+
+	categories := []Category{frames, layout, markers, collapsible, formats, ansi, themes, localization}
+	if svgCategory != nil {
+		categories = append(categories, *svgCategory)
+	}
+	return categories, css, collapseEngine.JS(), nil
 }
 
 func metaGoExample(b *catalogBuilder, engine *kazari.Engine, id, title, navTitle, code, meta, goRecipe string) Example {

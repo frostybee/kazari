@@ -1023,3 +1023,30 @@ summary {
     transition: none;
   }
 }
+
+.kz-svg-preview {
+  overflow-x: auto;
+  padding: .5rem 0;
+}
+
+.kz-svg-preview svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.kz-svg-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.kz-svg-compare .kz-svg-preview {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .kz-svg-compare {
+    grid-template-columns: 1fr;
+  }
+}

@@ -15,6 +15,18 @@ import (
 //go:embed templates/page.html assets/showcase.css assets/showcase.js
 var sourceFiles embed.FS
 
+type SVGProvider interface {
+	RenderSVG(code string, opts SVGOptions) (string, error)
+}
+
+type SVGOptions struct {
+	Lang         string
+	Theme        string
+	FontSize     float64
+	CornerRadius float64
+	ShowBG       *bool
+}
+
 type Config struct {
 	BackendName    string
 	HTMLFile       string
@@ -22,6 +34,7 @@ type Config struct {
 	OtherHref      string
 	NavLinks       []NavLink
 	KazariOptions  []kazari.Option
+	SVGProvider    SVGProvider
 }
 
 type NavLink struct {
@@ -106,7 +119,7 @@ func Build(cfg Config, highlighter kazari.Highlighter) (Output, error) {
 		return Output{}, fmt.Errorf("showcase: nil highlighter")
 	}
 
-	catalog, generatedCSS, generatedJS, err := buildCatalog(highlighter, cfg.KazariOptions)
+	catalog, generatedCSS, generatedJS, err := buildCatalog(highlighter, cfg.KazariOptions, cfg.SVGProvider)
 	if err != nil {
 		return Output{}, err
 	}

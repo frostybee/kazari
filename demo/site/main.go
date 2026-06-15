@@ -76,7 +76,7 @@ func main() {
 
 	outDir := sourceDir()
 
-	generateShowcase(outDir, nuriHL, chromaHL)
+	generateShowcase(outDir, nuriHL, chromaHL, &nuriSVGProvider{hl: hl, ctx: ctx})
 	generateNuriVsShiki(outDir, nuriHL)
 	generateNuriVsChroma(outDir, nuriHL, chromaHL)
 	generateColorContrast(outDir, rawNuriHL, nuriHL)
@@ -84,7 +84,23 @@ func main() {
 	log.Printf("All pages written to %s/", outDir)
 }
 
-func generateShowcase(outDir string, nuriHL, chromaHL kazari.Highlighter) {
+type nuriSVGProvider struct {
+	hl  *nuri.Highlighter
+	ctx context.Context
+}
+
+func (p *nuriSVGProvider) RenderSVG(code string, opts showcase.SVGOptions) (string, error) {
+	nuriOpts := nuri.CodeToSVGOptions{
+		Lang:         opts.Lang,
+		Theme:        opts.Theme,
+		FontSize:     opts.FontSize,
+		CornerRadius: opts.CornerRadius,
+		ShowBackground: opts.ShowBG,
+	}
+	return p.hl.CodeToSVG(p.ctx, code, nuriOpts)
+}
+
+func generateShowcase(outDir string, nuriHL, chromaHL kazari.Highlighter, svgProvider showcase.SVGProvider) {
 	configOpts := []kazari.Option{kazari.WithConfigDir(sourceDir())}
 
 	nuriConfig := showcase.Config{
@@ -94,6 +110,7 @@ func generateShowcase(outDir string, nuriHL, chromaHL kazari.Highlighter) {
 		OtherHref:     "showcase-chroma.html",
 		NavLinks:      navLinksWithActive("Showcase"),
 		KazariOptions: configOpts,
+		SVGProvider:   svgProvider,
 	}
 	if err := showcase.Generate(outDir, nuriConfig, nuriHL); err != nil {
 		log.Fatalf("showcase (nuri): %v", err)
