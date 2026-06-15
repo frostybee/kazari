@@ -1,0 +1,9 @@
+.kazari-code .kz-lang-icon {
+  display: inline-block;
+  width: var(--kz-lang-icon-size);
+  height: var(--kz-lang-icon-size);
+  margin: var(--kz-lang-icon-margin);
+  opacity: var(--kz-lang-icon-opacity);
+  vertical-align: middle;
+  flex-shrink: 0;
+}

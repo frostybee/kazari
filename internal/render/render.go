@@ -146,7 +146,7 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 	// Left section: language label, then separator + title (if present)
 	sb.WriteString("<div class=\"kz-toolbar-left\">")
 	if cfg.LanguageBadge && resolved.Lang != "" {
-		sb.WriteString(fmt.Sprintf("<span class=\"kz-lang\">%s</span>", html.EscapeString(displayLang(resolved.Lang))))
+		renderLangBadge(sb, resolved.Lang, cfg)
 	}
 	if resolved.Title != "" {
 		if cfg.FileIcons {
@@ -375,6 +375,16 @@ func fileExt(title string) string {
 		return ""
 	}
 	return title[idx+1:]
+}
+
+func renderLangBadge(sb *strings.Builder, lang string, cfg *config.Config) {
+	mode := cfg.LangIconMode
+	if mode == config.LangIconOnly || mode == config.LangIconAndText {
+		sb.WriteString(fmt.Sprintf(`<span class="kz-lang-icon" data-lang="%s"></span>`, html.EscapeString(lang)))
+	}
+	if mode != config.LangIconOnly {
+		sb.WriteString(fmt.Sprintf(`<span class="kz-lang">%s</span>`, html.EscapeString(displayLang(lang))))
+	}
 }
 
 func displayLang(lang string) string {

@@ -35,6 +35,13 @@ const (
 	DotsMinimal = 1
 )
 
+// Language icon mode constants matching the public LangIconMode enum.
+const (
+	LangIconNone    = 0
+	LangIconOnly    = 1
+	LangIconAndText = 2
+)
+
 // MarkerType identifies the kind of line or inline marker.
 type MarkerType int
 
@@ -226,6 +233,7 @@ type Config struct {
 	Locale                     string
 	UIStringOverrides          map[string]string
 	UIStrings                  *locale.UIStrings
+	LangIconMode               int
 	FileIcons                  bool
 	FileIconResolver           func(string) string
 	WarningHandler             func(string)

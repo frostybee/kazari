@@ -85,6 +85,15 @@ const (
 	DotsMinimal                          // CSS-only monochrome dots via SVG mask
 )
 
+// LangIconMode controls language icon display in the toolbar badge area.
+type LangIconMode int
+
+const (
+	LangIconNone    LangIconMode = iota // text label only (default)
+	LangIconOnly                        // icon replaces text
+	LangIconAndText                     // icon shown before text label
+)
+
 // Range represents an inclusive 1-based line range.
 type Range struct {
 	Start int

@@ -58,7 +58,7 @@ type Example struct {
 	ID           string
 	Title        string
 	NavTitle     string
-	Description  string
+	Description  template.HTML
 	HTML         template.HTML
 	WrapperClass string
 	Recipes      []Recipe
@@ -177,7 +177,7 @@ func prepareCatalog(categories []Category) {
 		for exampleIndex := range category.Examples {
 			example := &category.Examples[exampleIndex]
 			if description, ok := exampleDescriptions[example.ID]; ok {
-				example.Description = description
+				example.Description = template.HTML(description)
 			}
 			if example.NavTitle == "" {
 				example.NavTitle = example.Title
@@ -187,7 +187,7 @@ func prepareCatalog(categories []Category) {
 			search.WriteByte(' ')
 			search.WriteString(example.Title)
 			search.WriteByte(' ')
-			search.WriteString(example.Description)
+			search.WriteString(string(example.Description))
 			for _, recipe := range example.Recipes {
 				search.WriteByte(' ')
 				search.WriteString(recipe.Label)

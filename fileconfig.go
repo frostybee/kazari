@@ -40,6 +40,7 @@ type FileConfig struct {
 	ThemeCSSRoot             *string                           `yaml:"themeCSSRoot" json:"themeCSSRoot"`
 	Locale                   *string                           `yaml:"locale" json:"locale"`
 	TerminalDotStyle         *string                           `yaml:"terminalDotStyle" json:"terminalDotStyle"`
+	LanguageIconMode         *string                           `yaml:"languageIconMode" json:"languageIconMode"`
 	Defaults                 *BlockDefaultsFileConfig          `yaml:"defaults" json:"defaults"`
 	LanguageDefaults         map[string]BlockDefaultsFileConfig `yaml:"languageDefaults" json:"languageDefaults"`
 	Collapsible              *CollapsibleFileConfig            `yaml:"collapsible" json:"collapsible"`
@@ -121,6 +122,19 @@ func parseTerminalDotStyleStr(s string) (TerminalDotStyle, error) {
 	}
 }
 
+func parseLangIconModeStr(s string) (LangIconMode, error) {
+	switch s {
+	case "none":
+		return LangIconNone, nil
+	case "iconOnly":
+		return LangIconOnly, nil
+	case "iconAndText":
+		return LangIconAndText, nil
+	default:
+		return 0, fmt.Errorf("kazari: invalid languageIconMode %q, must be one of: none, iconOnly, iconAndText", s)
+	}
+}
+
 func parseDarkModeConfig(fc *DarkModeFileConfig) (DarkMode, error) {
 	switch fc.Kind {
 	case "selector":
@@ -154,6 +168,10 @@ func validateFileConfig(fc *FileConfig) error {
 
 	if fc.TerminalDotStyle != nil {
 		v.Field("terminalDotStyle").Value(*fc.TerminalDotStyle).OneOf("colored", "minimal")
+	}
+
+	if fc.LanguageIconMode != nil {
+		v.Field("languageIconMode").Value(*fc.LanguageIconMode).OneOf("none", "iconOnly", "iconAndText")
 	}
 
 	if fc.Defaults != nil {
@@ -309,6 +327,14 @@ func FileConfigToOptions(fc *FileConfig) ([]Option, error) {
 			return nil, err
 		}
 		opts = append(opts, WithTerminalDotStyle(ds))
+	}
+
+	if fc.LanguageIconMode != nil {
+		mode, err := parseLangIconModeStr(*fc.LanguageIconMode)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, WithLanguageIconMode(mode))
 	}
 
 	if fc.Defaults != nil {

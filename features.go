@@ -84,6 +84,10 @@ func WithDataLineCount(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.DataLineCount = enabled }
 }
 
+func WithLanguageIconMode(mode LangIconMode) Option {
+	return func(b *engineBuilder) { b.cfg.LangIconMode = int(mode) }
+}
+
 func WithFileIcons(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.FileIcons = enabled }
 }

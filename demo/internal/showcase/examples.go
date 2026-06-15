@@ -125,6 +125,8 @@ var exampleDescriptions = map[string]string{
 	"scoped-css":            "Emits theme variables beneath a custom selector so Kazari styles stay inside a chosen container.",
 	"locale-french":         "Localizes built-in copy and fullscreen controls through the engine's locale setting.",
 	"file-icons":            "Resolves a custom icon from each title's file extension and places it in the frame toolbar.",
+	"lang-icon-only":        `Replaces the language text badge with a CSS icon slot that the consumer styles via [data-lang] selectors. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
+	"lang-icon-and-text":    `Shows a language icon before the text label, giving both a visual cue and a readable name. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
 	"svg-default":           "Renders a Go snippet to a self-contained SVG image using Nuri's CodeToSVG with default settings.",
 	"svg-custom-font":       "Increases the font size to 18px to produce a larger, more readable SVG image.",
 	"svg-no-background":     "Strips the background rectangle and corner radius for transparent SVG output suitable for embedding.",
@@ -865,6 +867,21 @@ css := engine.CSS()`)},
 
 	frenchEngine := b.engine(kazari.WithLocale("fr-FR"))
 	frenchHTML := b.render(frenchEngine, `fmt.Println("Bonjour le monde !")`, kazari.Options{Lang: "go", Title: "locale-fr.go"})
+
+	langIconOnlyEngine := b.engine(kazari.WithLanguageIconMode(kazari.LangIconOnly))
+	langIconOnlyHTML := joinHTML(
+		b.render(langIconOnlyEngine, `fmt.Println("Go")`, kazari.Options{Lang: "go"}),
+		b.render(langIconOnlyEngine, `print("Python")`, kazari.Options{Lang: "python"}),
+		b.render(langIconOnlyEngine, `console.log("JS")`, kazari.Options{Lang: "javascript"}),
+	)
+
+	langIconAndTextEngine := b.engine(kazari.WithLanguageIconMode(kazari.LangIconAndText))
+	langIconAndTextHTML := joinHTML(
+		b.render(langIconAndTextEngine, `fmt.Println("Go")`, kazari.Options{Lang: "go"}),
+		b.render(langIconAndTextEngine, `print("Python")`, kazari.Options{Lang: "python"}),
+		b.render(langIconAndTextEngine, `console.log("JS")`, kazari.Options{Lang: "javascript"}),
+	)
+
 	iconEngine := b.engine(kazari.WithFileIconResolver(func(extension string) string {
 		icons := map[string]string{"go": "🔵", "py": "🐍", "js": "🟡", "rs": "🦀", "css": "🎨"}
 		icon := "📄"
@@ -904,6 +921,22 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 	icons := map[string]string{"go": "🔵", "py": "🐍", "js": "🟡", "rs": "🦀"}
 	return fmt.Sprintf("<span class=\"kz-file-icon\">%s</span>", icons[ext])
 }))`)},
+			},
+			{
+				ID:          "lang-icon-only",
+				Title:       "Language Icons: Icon Only (LangIconOnly)",
+				NavTitle:    "Lang icon only",
+				Description: `Replaces the text badge with a CSS icon slot. The consumer styles it via [data-lang] selectors. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
+				HTML:        langIconOnlyHTML,
+				Recipes: []Recipe{recipe("Go", `engine := kazari.New(kazari.WithLanguageIconMode(kazari.LangIconOnly))`)},
+			},
+			{
+				ID:          "lang-icon-and-text",
+				Title:       "Language Icons: Icon + Text (LangIconAndText)",
+				NavTitle:    "Lang icon + text",
+				Description: `Shows a language icon before the text label for both a visual cue and a readable name. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
+				HTML:        langIconAndTextHTML,
+				Recipes: []Recipe{recipe("Go", `engine := kazari.New(kazari.WithLanguageIconMode(kazari.LangIconAndText))`)},
 			},
 		},
 	}
@@ -978,6 +1011,7 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		customizerEngine.ThemeCSS(),
 		tintedEngine.ThemeCSS(),
 		scopedEngine.ThemeCSS(),
+		`.kazari-code .kz-lang-icon { display:inline-block; width:var(--kz-lang-icon-size,1.25rem); height:var(--kz-lang-icon-size,1.25rem); margin:var(--kz-lang-icon-margin,0); opacity:var(--kz-lang-icon-opacity,0.8); vertical-align:middle; flex-shrink:0; }`,
 		`.kazari-code .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
 	}, "\n")
 

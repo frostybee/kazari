@@ -57,6 +57,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	if cfg.FileIcons {
 		sb.WriteString(readCSS("file-icons.css"))
 	}
+	if cfg.LangIconMode != config.LangIconNone {
+		sb.WriteString(readCSS("lang-icons.css"))
+	}
 	sb.WriteString(readCSS("terminal.css"))
 
 	sb.WriteString(readCSS("terminal-dots-colored.css"))

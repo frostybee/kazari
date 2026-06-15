@@ -60,8 +60,8 @@ func TestBuildCatalogParityAndCompleteness(t *testing.T) {
 	if len(nuri.Page.Categories) != 8 {
 		t.Fatalf("category count = %d, want 8", len(nuri.Page.Categories))
 	}
-	if len(nuriIDs) != 43 {
-		t.Fatalf("example count = %d, want 43", len(nuriIDs))
+	if len(nuriIDs) != 45 {
+		t.Fatalf("example count = %d, want 45", len(nuriIDs))
 	}
 
 	seen := make(map[string]bool, len(nuriIDs))
@@ -71,7 +71,7 @@ func TestBuildCatalogParityAndCompleteness(t *testing.T) {
 				t.Fatalf("duplicate example ID %q", example.ID)
 			}
 			seen[example.ID] = true
-			if strings.TrimSpace(example.Description) == "" {
+			if strings.TrimSpace(string(example.Description)) == "" {
 				t.Fatalf("example %q has no description", example.ID)
 			}
 			if len(example.Recipes) == 0 {

@@ -50,6 +50,25 @@ func TestParseCollapseStyle(t *testing.T) {
 	}
 }
 
+func TestParseLangIconMode(t *testing.T) {
+	tests := map[string]LangIconMode{
+		"none": LangIconNone, "iconOnly": LangIconOnly,
+		"iconAndText": LangIconAndText,
+	}
+	for s, want := range tests {
+		got, err := parseLangIconModeStr(s)
+		if err != nil {
+			t.Errorf("parseLangIconModeStr(%q) error: %v", s, err)
+		}
+		if got != want {
+			t.Errorf("parseLangIconModeStr(%q) = %d, want %d", s, got, want)
+		}
+	}
+	if _, err := parseLangIconModeStr("invalid"); err == nil {
+		t.Error("parseLangIconModeStr(invalid) should error")
+	}
+}
+
 func TestParseTerminalDotStyle(t *testing.T) {
 	tests := map[string]TerminalDotStyle{
 		"colored": DotsColored, "minimal": DotsMinimal,
@@ -811,6 +830,14 @@ func TestValidation_ZeroTabWidth(t *testing.T) {
 	fc := &FileConfig{TabWidth: &tw}
 	if err := validateFileConfig(fc); err == nil {
 		t.Error("zero tabWidth should fail validation")
+	}
+}
+
+func TestValidation_InvalidLangIconMode(t *testing.T) {
+	s := "invalid"
+	fc := &FileConfig{LanguageIconMode: &s}
+	if err := validateFileConfig(fc); err == nil {
+		t.Error("invalid languageIconMode should fail validation")
 	}
 }
 

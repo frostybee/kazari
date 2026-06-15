@@ -4137,3 +4137,85 @@ func TestWithUIStrings_Merge(t *testing.T) {
 		t.Error("later call should win for duplicate key")
 	}
 }
+
+// --- Language icon mode ---
+
+func TestRender_LangIcon_DefaultTextOnly(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `<span class="kz-lang">Go</span>`) {
+		t.Error("default mode should emit text badge")
+	}
+	if strings.Contains(html, "kz-lang-icon") {
+		t.Error("default mode should not emit icon slot")
+	}
+}
+
+func TestRender_LangIcon_IconOnly(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLanguageIconMode(LangIconOnly))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `data-lang="go"`) {
+		t.Error("icon-only mode should emit data-lang attribute")
+	}
+	if !strings.Contains(html, `kz-lang-icon`) {
+		t.Error("icon-only mode should emit icon slot")
+	}
+	if strings.Contains(html, `<span class="kz-lang">`) {
+		t.Error("icon-only mode should not emit text badge")
+	}
+}
+
+func TestRender_LangIcon_IconAndText(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLanguageIconMode(LangIconAndText))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(html, `kz-lang-icon`) {
+		t.Error("icon+text mode should emit icon slot")
+	}
+	if !strings.Contains(html, `<span class="kz-lang">Go</span>`) {
+		t.Error("icon+text mode should emit text badge")
+	}
+	iconIdx := strings.Index(html, "kz-lang-icon")
+	textIdx := strings.Index(html, "kz-lang\">")
+	if iconIdx > textIdx {
+		t.Error("icon should appear before text")
+	}
+}
+
+func TestRender_LangIcon_BadgeDisabledSuppressesBoth(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "x", Color: "#000"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLanguageIconMode(LangIconOnly), WithLanguageBadge(false))
+	html, err := engine.Render("x", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(html, "kz-lang-icon") {
+		t.Error("LanguageBadge=false should suppress icon")
+	}
+	if strings.Contains(html, "kz-lang") {
+		t.Error("LanguageBadge=false should suppress text")
+	}
+}

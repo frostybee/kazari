@@ -142,6 +142,14 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 		)
 	}
 
+	if cfg.LangIconMode != config.LangIconNone {
+		vars = append(vars,
+			nv("--kz-lang-icon-size", "1.25rem"),
+			nv("--kz-lang-icon-margin", "0"),
+			nv("--kz-lang-icon-opacity", "0.8"),
+		)
+	}
+
 	if cfg.ThemedScrollbars {
 		vars = append(vars,
 			nv("--kz-scrollbar-width", "5px"),
