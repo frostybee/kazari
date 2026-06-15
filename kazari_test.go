@@ -2503,6 +2503,92 @@ func TestDiff_NoLangRendersNormally(t *testing.T) {
 	}
 }
 
+// --- Options API parity tests ---
+
+func TestRender_PreserveIndent_PerBlock(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "    foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: true}))
+
+	noPreserve := false
+	html, err := engine.Render("    foo()", Options{Lang: "go", PreserveIndent: &noPreserve})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if strings.Contains(html, `class="indent"`) {
+		t.Error("PreserveIndent=false per-block should suppress indent spans")
+	}
+}
+
+func TestRender_HangingIndent_PerBlock(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{{{Content: "  foo()", Color: "#333333"}}},
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	noPreserve := false
+	wrap := true
+	hanging := 4
+	engine := newTestEngine(hl, WithDefaults(BlockDefaults{Wrap: true, PreserveIndent: false}))
+	html, err := engine.Render("  foo()", Options{
+		Lang: "go", Wrap: &wrap, PreserveIndent: &noPreserve, HangingIndent: &hanging,
+	})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `--kz-indent:4ch`) {
+		t.Errorf("HangingIndent=4 per-block should produce --kz-indent:4ch, got: %s", html)
+	}
+}
+
+func TestRender_CollapseStyle_PerBlock(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(10),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 100, PreserveIndent: true}),
+	)
+	code := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
+	style := CollapseCollapsibleStart
+	html, err := engine.Render(code, Options{
+		Lang: "go",
+		Collapse: &CollapseOptions{
+			Ranges: []Range{{Start: 2, End: 4}},
+			Style:  &style,
+		},
+	})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, `collapsible-start`) {
+		t.Error("Collapse.Style should produce collapsible-start wrapper via Render()")
+	}
+}
+
+func TestRender_DiffLang_PerBlock(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "a", Color: "#24292f"}},
+			{{Content: "b", Color: "#24292f"}},
+			{{Content: "c", Color: "#24292f"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	html, err := engine.Render("  a\n+ b\n- c", Options{Lang: "diff", DiffLang: "text"})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+	if !strings.Contains(html, "ins") {
+		t.Error("DiffLang via Render() should produce ins markers for + lines")
+	}
+	if !strings.Contains(html, "del") {
+		t.Error("DiffLang via Render() should produce del markers for - lines")
+	}
+}
+
 // --- ANSI rendering tests ---
 
 func TestRender_ANSI_BasicColor(t *testing.T) {

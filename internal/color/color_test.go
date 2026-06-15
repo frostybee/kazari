@@ -240,6 +240,31 @@ func TestEnsureContrastOnBackground_LightOnLight(t *testing.T) {
 	}
 }
 
+func TestEnsureContrastOnBackground_MediumGrayBG(t *testing.T) {
+	bgs := []string{"#838383", "#888888", "#909090"}
+	for _, bg := range bgs {
+		adjusted := EnsureContrastOnBackground("#ffffff", bg, 5.5)
+		ratio := GetColorContrast(adjusted, bg)
+		if ratio < 5.5 {
+			t.Errorf("EnsureContrastOnBackground(#ffffff, %s, 5.5) = %s (contrast %.2f), want >= 5.5",
+				bg, adjusted, ratio)
+		}
+	}
+}
+
+func TestEnsureContrastOnBackground_FallbackPicksBetterExtreme(t *testing.T) {
+	// For a bg where neither extreme fully satisfies an extreme threshold,
+	// the fallback should pick the one with higher contrast.
+	bg := "#777777"
+	adjusted := EnsureContrastOnBackground("#787878", bg, 21)
+	blackContrast := GetColorContrast("#000000", bg)
+	whiteContrast := GetColorContrast("#ffffff", bg)
+	if blackContrast > whiteContrast && adjusted != "#000000" {
+		t.Errorf("fallback should pick #000000 (contrast %.2f) over #ffffff (contrast %.2f), got %s",
+			blackContrast, whiteContrast, adjusted)
+	}
+}
+
 func TestToHex(t *testing.T) {
 	if got := ToHex(1, 0, 0); got != "#ff0000" {
 		t.Errorf("ToHex(1,0,0) = %q, want #ff0000", got)

@@ -175,31 +175,31 @@ func EnsureContrastOnBackground(color, bg string, minContrast float64) string {
 		return color
 	}
 
-	bgLum := GetLuminance(bg)
-
 	// Try both lighter and darker directions, pick the one that meets contrast first.
+	// Use integer-indexed loop to avoid floating-point accumulation drift
+	// (adding 0.05 nineteen times yields 1.00000000000000022, skipping the 20th step).
 	for _, lighten := range []bool{true, false} {
-		for step := 0.05; step <= 1.0; step += 0.05 {
-			var candidate string
+		for i := 1; i <= 20; i++ {
+			step := float64(i) * 0.05
+			var cr, cg, cb float64
 			if lighten {
-				cr := r + (1-r)*step
-				cg := g + (1-g)*step
-				cb := b + (1-b)*step
-				candidate = ToHex(clamp01(cr), clamp01(cg), clamp01(cb))
+				cr = r + (1-r)*step
+				cg = g + (1-g)*step
+				cb = b + (1-b)*step
 			} else {
-				cr := r * (1 - step)
-				cg := g * (1 - step)
-				cb := b * (1 - step)
-				candidate = ToHex(clamp01(cr), clamp01(cg), clamp01(cb))
+				cr = r * (1 - step)
+				cg = g * (1 - step)
+				cb = b * (1 - step)
 			}
+			candidate := ToHex(clamp01(cr), clamp01(cg), clamp01(cb))
 			if GetColorContrast(candidate, bg) >= minContrast {
 				return candidate
 			}
 		}
 	}
 
-	// If neither direction works well, choose based on background luminance.
-	if bgLum > 0.5 {
+	// Neither direction reached the threshold; return whichever extreme has higher contrast.
+	if GetColorContrast("#000000", bg) > GetColorContrast("#ffffff", bg) {
 		return "#000000"
 	}
 	return "#ffffff"

@@ -301,6 +301,11 @@ html, err := engine.Render(code, kazari.Options{
 				HTML:        b.renderMeta(engine, wrapCode, `go title="no-preserve.go" showLineNumbers wrap preserveIndent=false`),
 				Recipes: []Recipe{
 					recipe("Meta", `go title="no-preserve.go" showLineNumbers wrap preserveIndent=false`),
+					recipe("Go", `enabled, wrap, noPreserve := true, true, false
+html, err := engine.Render(code, kazari.Options{
+	Lang: "go", Title: "no-preserve.go",
+	LineNumbers: &enabled, Wrap: &wrap, PreserveIndent: &noPreserve,
+})`),
 				},
 			},
 			{
@@ -311,6 +316,12 @@ html, err := engine.Render(code, kazari.Options{
 				HTML:        b.renderMeta(engine, wrapCode, `go title="hanging.go" showLineNumbers wrap preserveIndent=false hangingIndent=4`),
 				Recipes: []Recipe{
 					recipe("Meta", `go title="hanging.go" showLineNumbers wrap preserveIndent=false hangingIndent=4`),
+					recipe("Go", `enabled, wrap, noPreserve, hanging := true, true, false, 4
+html, err := engine.Render(code, kazari.Options{
+	Lang: "go", Title: "hanging.go",
+	LineNumbers: &enabled, Wrap: &wrap,
+	PreserveIndent: &noPreserve, HangingIndent: &hanging,
+})`),
 				},
 			},
 		},
@@ -592,13 +603,37 @@ html, err := engine.Render(code, kazari.Options{
 			},
 			metaGoExample(b, collapseEngine, "collapse-start", "collapsible-start (re-collapsible, summary above)", "Collapsible start", rangeCode,
 				`go title="calc.go" showLineNumbers collapse={3-8} collapseStyle="collapsible-start"`,
-				`html, err := engine.RenderWithMeta(code, meta)`),
+				`enabled := true
+style := kazari.CollapseCollapsibleStart
+html, err := engine.Render(code, kazari.Options{
+	Lang: "go", Title: "calc.go", LineNumbers: &enabled,
+	Collapse: &kazari.CollapseOptions{
+		Ranges: []kazari.Range{{Start: 3, End: 8}},
+		Style:  &style,
+	},
+})`),
 			metaGoExample(b, collapseEngine, "collapse-end", "collapsible-end (re-collapsible, summary below)", "Collapsible end", rangeCode,
 				`go title="calc.go" showLineNumbers collapse={3-8} collapseStyle="collapsible-end"`,
-				`html, err := engine.RenderWithMeta(code, meta)`),
+				`enabled := true
+style := kazari.CollapseCollapsibleEnd
+html, err := engine.Render(code, kazari.Options{
+	Lang: "go", Title: "calc.go", LineNumbers: &enabled,
+	Collapse: &kazari.CollapseOptions{
+		Ranges: []kazari.Range{{Start: 3, End: 8}},
+		Style:  &style,
+	},
+})`),
 			metaGoExample(b, collapseEngine, "collapse-auto", "collapsible-auto (auto start/end based on position)", "Collapsible auto", rangeCode,
 				`go title="calc.go" showLineNumbers collapse={3-8,20-24} collapseStyle="collapsible-auto"`,
-				`html, err := engine.RenderWithMeta(code, meta)`),
+				`enabled := true
+style := kazari.CollapseCollapsibleAuto
+html, err := engine.Render(code, kazari.Options{
+	Lang: "go", Title: "calc.go", LineNumbers: &enabled,
+	Collapse: &kazari.CollapseOptions{
+		Ranges: []kazari.Range{{Start: 3, End: 8}, {Start: 20, End: 24}},
+		Style:  &style,
+	},
+})`),
 		},
 	}
 
@@ -649,7 +684,11 @@ html, err := engine.Render(code, kazari.Options{
 				`html, err := engine.RenderWithMeta(code, `+"`"+`python title="capture_group.py" /ye(s|p)/`+"`"+`)`),
 			metaGoExample(b, engine, "hybrid-diff", `Hybrid Diff + Syntax Highlighting (diff lang="go")`, "Hybrid diff", diffCode,
 				`diff lang="go" title="hybrid-diff.go" showLineNumbers`,
-				`html, err := engine.RenderWithMeta(code, `+"`"+`diff lang="go" title="hybrid-diff.go" showLineNumbers`+"`"+`)`),
+				`enabled := true
+html, err := engine.Render(code, kazari.Options{
+	Lang: "diff", DiffLang: "go",
+	Title: "hybrid-diff.go", LineNumbers: &enabled,
+})`),
 			{
 				ID:       "code-group",
 				Title:    "Code Group (tabbed code blocks via Goldmark)",

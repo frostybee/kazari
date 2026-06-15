@@ -575,7 +575,11 @@ html, err := engine.Render(code, kazari.Options{
     </article>
 
 
-    <article class="demo-example" id="word-wrap-no-preserve" data-example="word-wrap-no-preserve" data-search="layout word wrap (preserveindent=false) wrapped continuations start at the left edge instead of aligning with the original indentation. meta go title=&#34;no-preserve.go&#34; showlinenumbers wrap preserveindent=false">
+    <article class="demo-example" id="word-wrap-no-preserve" data-example="word-wrap-no-preserve" data-search="layout word wrap (preserveindent=false) wrapped continuations start at the left edge instead of aligning with the original indentation. meta go title=&#34;no-preserve.go&#34; showlinenumbers wrap preserveindent=false go enabled, wrap, nopreserve := true, true, false
+html, err := engine.render(code, kazari.options{
+	lang: &#34;go&#34;, title: &#34;no-preserve.go&#34;,
+	linenumbers: &amp;enabled, wrap: &amp;wrap, preserveindent: &amp;nopreserve,
+})">
       <div class="example-heading">
         <h3>Word Wrap (preserveIndent=false)</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="word-wrap-no-preserve" aria-label="Copy link to Word Wrap (preserveIndent=false)">
@@ -591,9 +595,13 @@ html, err := engine.Render(code, kazari.Options{
         <summary>How to build this</summary>
         <div class="recipe-content" data-recipe-group>
 
+          <div class="recipe-tabs" role="tablist" aria-label="Implementation recipes">
+            <button type="button" role="tab" data-recipe-tab aria-selected="true" tabindex="0">Meta</button><button type="button" role="tab" data-recipe-tab aria-selected="false" tabindex="-1">Go</button>
+          </div>
+
 
           <section class="recipe-panel" data-recipe-panel >
-            <h4>Meta</h4>
+
             <button class="copy-action copy-recipe" type="button" data-copy-label="Meta">
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Meta</span>
@@ -601,12 +609,30 @@ html, err := engine.Render(code, kazari.Options{
             <pre><code>go title=&#34;no-preserve.go&#34; showLineNumbers wrap preserveIndent=false</code></pre>
           </section>
 
+          <section class="recipe-panel" data-recipe-panel hidden>
+
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Go">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Go</span>
+            </button>
+            <pre><code>enabled, wrap, noPreserve := true, true, false
+html, err := engine.Render(code, kazari.Options{
+	Lang: &#34;go&#34;, Title: &#34;no-preserve.go&#34;,
+	LineNumbers: &amp;enabled, Wrap: &amp;wrap, PreserveIndent: &amp;noPreserve,
+})</code></pre>
+          </section>
+
         </div>
       </details>
     </article>
 
 
-    <article class="demo-example" id="word-wrap-hanging" data-example="word-wrap-hanging" data-search="layout word wrap (hangingindent=4) adds a fixed hanging indent to wrapped continuations so new logical lines are easy to spot. meta go title=&#34;hanging.go&#34; showlinenumbers wrap preserveindent=false hangingindent=4">
+    <article class="demo-example" id="word-wrap-hanging" data-example="word-wrap-hanging" data-search="layout word wrap (hangingindent=4) adds a fixed hanging indent to wrapped continuations so new logical lines are easy to spot. meta go title=&#34;hanging.go&#34; showlinenumbers wrap preserveindent=false hangingindent=4 go enabled, wrap, nopreserve, hanging := true, true, false, 4
+html, err := engine.render(code, kazari.options{
+	lang: &#34;go&#34;, title: &#34;hanging.go&#34;,
+	linenumbers: &amp;enabled, wrap: &amp;wrap,
+	preserveindent: &amp;nopreserve, hangingindent: &amp;hanging,
+})">
       <div class="example-heading">
         <h3>Word Wrap (hangingIndent=4)</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="word-wrap-hanging" aria-label="Copy link to Word Wrap (hangingIndent=4)">
@@ -622,14 +648,32 @@ html, err := engine.Render(code, kazari.Options{
         <summary>How to build this</summary>
         <div class="recipe-content" data-recipe-group>
 
+          <div class="recipe-tabs" role="tablist" aria-label="Implementation recipes">
+            <button type="button" role="tab" data-recipe-tab aria-selected="true" tabindex="0">Meta</button><button type="button" role="tab" data-recipe-tab aria-selected="false" tabindex="-1">Go</button>
+          </div>
+
 
           <section class="recipe-panel" data-recipe-panel >
-            <h4>Meta</h4>
+
             <button class="copy-action copy-recipe" type="button" data-copy-label="Meta">
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Meta</span>
             </button>
             <pre><code>go title=&#34;hanging.go&#34; showLineNumbers wrap preserveIndent=false hangingIndent=4</code></pre>
+          </section>
+
+          <section class="recipe-panel" data-recipe-panel hidden>
+
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Go">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Go</span>
+            </button>
+            <pre><code>enabled, wrap, noPreserve, hanging := true, true, false, 4
+html, err := engine.Render(code, kazari.Options{
+	Lang: &#34;go&#34;, Title: &#34;hanging.go&#34;,
+	LineNumbers: &amp;enabled, Wrap: &amp;wrap,
+	PreserveIndent: &amp;noPreserve, HangingIndent: &amp;hanging,
+})</code></pre>
           </section>
 
         </div>
@@ -1171,7 +1215,15 @@ html, err := engine.Render(code, kazari.Options{
     </article>
 
 
-    <article class="demo-example" id="collapse-start" data-example="collapse-start" data-search="collapsible sections collapsible-start (re-collapsible, summary above) places the expansion summary above a range that can be collapsed again after opening. meta go title=&#34;calc.go&#34; showlinenumbers collapse={3-8} collapsestyle=&#34;collapsible-start&#34; go html, err := engine.renderwithmeta(code, meta)">
+    <article class="demo-example" id="collapse-start" data-example="collapse-start" data-search="collapsible sections collapsible-start (re-collapsible, summary above) places the expansion summary above a range that can be collapsed again after opening. meta go title=&#34;calc.go&#34; showlinenumbers collapse={3-8} collapsestyle=&#34;collapsible-start&#34; go enabled := true
+style := kazari.collapsecollapsiblestart
+html, err := engine.render(code, kazari.options{
+	lang: &#34;go&#34;, title: &#34;calc.go&#34;, linenumbers: &amp;enabled,
+	collapse: &amp;kazari.collapseoptions{
+		ranges: []kazari.range{{start: 3, end: 8}},
+		style:  &amp;style,
+	},
+})">
       <div class="example-heading">
         <h3>collapsible-start (re-collapsible, summary above)</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="collapse-start" aria-label="Copy link to collapsible-start (re-collapsible, summary above)">
@@ -1207,7 +1259,15 @@ html, err := engine.Render(code, kazari.Options{
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Go</span>
             </button>
-            <pre><code>html, err := engine.RenderWithMeta(code, meta)</code></pre>
+            <pre><code>enabled := true
+style := kazari.CollapseCollapsibleStart
+html, err := engine.Render(code, kazari.Options{
+	Lang: &#34;go&#34;, Title: &#34;calc.go&#34;, LineNumbers: &amp;enabled,
+	Collapse: &amp;kazari.CollapseOptions{
+		Ranges: []kazari.Range{{Start: 3, End: 8}},
+		Style:  &amp;style,
+	},
+})</code></pre>
           </section>
 
         </div>
@@ -1215,7 +1275,15 @@ html, err := engine.Render(code, kazari.Options{
     </article>
 
 
-    <article class="demo-example" id="collapse-end" data-example="collapse-end" data-search="collapsible sections collapsible-end (re-collapsible, summary below) places the expansion summary below a range that can be collapsed again after opening. meta go title=&#34;calc.go&#34; showlinenumbers collapse={3-8} collapsestyle=&#34;collapsible-end&#34; go html, err := engine.renderwithmeta(code, meta)">
+    <article class="demo-example" id="collapse-end" data-example="collapse-end" data-search="collapsible sections collapsible-end (re-collapsible, summary below) places the expansion summary below a range that can be collapsed again after opening. meta go title=&#34;calc.go&#34; showlinenumbers collapse={3-8} collapsestyle=&#34;collapsible-end&#34; go enabled := true
+style := kazari.collapsecollapsibleend
+html, err := engine.render(code, kazari.options{
+	lang: &#34;go&#34;, title: &#34;calc.go&#34;, linenumbers: &amp;enabled,
+	collapse: &amp;kazari.collapseoptions{
+		ranges: []kazari.range{{start: 3, end: 8}},
+		style:  &amp;style,
+	},
+})">
       <div class="example-heading">
         <h3>collapsible-end (re-collapsible, summary below)</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="collapse-end" aria-label="Copy link to collapsible-end (re-collapsible, summary below)">
@@ -1251,7 +1319,15 @@ html, err := engine.Render(code, kazari.Options{
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Go</span>
             </button>
-            <pre><code>html, err := engine.RenderWithMeta(code, meta)</code></pre>
+            <pre><code>enabled := true
+style := kazari.CollapseCollapsibleEnd
+html, err := engine.Render(code, kazari.Options{
+	Lang: &#34;go&#34;, Title: &#34;calc.go&#34;, LineNumbers: &amp;enabled,
+	Collapse: &amp;kazari.CollapseOptions{
+		Ranges: []kazari.Range{{Start: 3, End: 8}},
+		Style:  &amp;style,
+	},
+})</code></pre>
           </section>
 
         </div>
@@ -1259,7 +1335,15 @@ html, err := engine.Render(code, kazari.Options{
     </article>
 
 
-    <article class="demo-example" id="collapse-auto" data-example="collapse-auto" data-search="collapsible sections collapsible-auto (auto start/end based on position) chooses the summary position from the collapsed range&#39;s location within the code block. meta go title=&#34;calc.go&#34; showlinenumbers collapse={3-8,20-24} collapsestyle=&#34;collapsible-auto&#34; go html, err := engine.renderwithmeta(code, meta)">
+    <article class="demo-example" id="collapse-auto" data-example="collapse-auto" data-search="collapsible sections collapsible-auto (auto start/end based on position) chooses the summary position from the collapsed range&#39;s location within the code block. meta go title=&#34;calc.go&#34; showlinenumbers collapse={3-8,20-24} collapsestyle=&#34;collapsible-auto&#34; go enabled := true
+style := kazari.collapsecollapsibleauto
+html, err := engine.render(code, kazari.options{
+	lang: &#34;go&#34;, title: &#34;calc.go&#34;, linenumbers: &amp;enabled,
+	collapse: &amp;kazari.collapseoptions{
+		ranges: []kazari.range{{start: 3, end: 8}, {start: 20, end: 24}},
+		style:  &amp;style,
+	},
+})">
       <div class="example-heading">
         <h3>collapsible-auto (auto start/end based on position)</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="collapse-auto" aria-label="Copy link to collapsible-auto (auto start/end based on position)">
@@ -1295,7 +1379,15 @@ html, err := engine.Render(code, kazari.Options{
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Go</span>
             </button>
-            <pre><code>html, err := engine.RenderWithMeta(code, meta)</code></pre>
+            <pre><code>enabled := true
+style := kazari.CollapseCollapsibleAuto
+html, err := engine.Render(code, kazari.Options{
+	Lang: &#34;go&#34;, Title: &#34;calc.go&#34;, LineNumbers: &amp;enabled,
+	Collapse: &amp;kazari.CollapseOptions{
+		Ranges: []kazari.Range{{Start: 3, End: 8}, {Start: 20, End: 24}},
+		Style:  &amp;style,
+	},
+})</code></pre>
           </section>
 
         </div>
@@ -1445,7 +1537,11 @@ html, err := engine.Render(code, kazari.Options{
     </article>
 
 
-    <article class="demo-example" id="hybrid-diff" data-example="hybrid-diff" data-search="formats and groups hybrid diff &#43; syntax highlighting (diff lang=&#34;go&#34;) combines diff prefixes with syntax highlighting from the underlying source language. meta diff lang=&#34;go&#34; title=&#34;hybrid-diff.go&#34; showlinenumbers go html, err := engine.renderwithmeta(code, `diff lang=&#34;go&#34; title=&#34;hybrid-diff.go&#34; showlinenumbers`)">
+    <article class="demo-example" id="hybrid-diff" data-example="hybrid-diff" data-search="formats and groups hybrid diff &#43; syntax highlighting (diff lang=&#34;go&#34;) combines diff prefixes with syntax highlighting from the underlying source language. meta diff lang=&#34;go&#34; title=&#34;hybrid-diff.go&#34; showlinenumbers go enabled := true
+html, err := engine.render(code, kazari.options{
+	lang: &#34;diff&#34;, difflang: &#34;go&#34;,
+	title: &#34;hybrid-diff.go&#34;, linenumbers: &amp;enabled,
+})">
       <div class="example-heading">
         <h3>Hybrid Diff &#43; Syntax Highlighting (diff lang=&#34;go&#34;)</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="hybrid-diff" aria-label="Copy link to Hybrid Diff &#43; Syntax Highlighting (diff lang=&#34;go&#34;)">
@@ -1481,7 +1577,11 @@ html, err := engine.Render(code, kazari.Options{
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Go</span>
             </button>
-            <pre><code>html, err := engine.RenderWithMeta(code, `diff lang=&#34;go&#34; title=&#34;hybrid-diff.go&#34; showLineNumbers`)</code></pre>
+            <pre><code>enabled := true
+html, err := engine.Render(code, kazari.Options{
+	Lang: &#34;diff&#34;, DiffLang: &#34;go&#34;,
+	Title: &#34;hybrid-diff.go&#34;, LineNumbers: &amp;enabled,
+})</code></pre>
           </section>
 
         </div>

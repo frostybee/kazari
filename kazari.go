@@ -163,6 +163,7 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 	resolved.LineMarkers = convertLineMarkers(opts.LineMarkers)
 	resolved.InlineMarkers = convertInlineMarkers(opts.InlineMarkers)
 	resolved.FocusLines = convertRanges(opts.FocusLines)
+	resolved.DiffLang = opts.DiffLang
 
 	var spec *config.CollapseSpec
 	if opts.Collapse != nil {
@@ -170,6 +171,7 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 			Enabled:  opts.Collapse.Enabled,
 			Disabled: opts.Collapse.Disabled,
 			Ranges:   convertRanges(opts.Collapse.Ranges),
+			Style:    convertCollapseStyle(opts.Collapse.Style),
 		}
 	}
 
@@ -335,6 +337,14 @@ func convertRanges(ranges []Range) []config.LineRange {
 		out[i] = config.LineRange{Start: r.Start, End: r.End}
 	}
 	return out
+}
+
+func convertCollapseStyle(s *CollapseStyle) *config.CollapseStyle {
+	if s == nil {
+		return nil
+	}
+	cs := config.CollapseStyle(*s)
+	return &cs
 }
 
 func (e *Engine) resolveCollapse(code string, resolved *config.ResolvedBlock, spec *config.CollapseSpec) {

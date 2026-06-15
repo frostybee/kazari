@@ -122,19 +122,23 @@ type Options struct {
 	Theme           string
 	Frame           *Frame // nil = use default
 	LineNumbers     *bool  // nil = use default
-	StartLineNumber *int  // nil = use default (1)
-	Wrap            *bool // nil = use default
+	StartLineNumber *int   // nil = use default (1)
+	Wrap            *bool  // nil = use default
+	PreserveIndent  *bool  // nil = use default
+	HangingIndent   *int   // nil = use default
+	DiffLang        string // original language for diff+syntax hybrid (e.g., "go")
 	LineMarkers     []LineMarker
 	InlineMarkers   []InlineMarker
 	FocusLines      []Range
 	Collapse        *CollapseOptions
 }
 
-// CollapseOptions holds per-block collapse configuration from meta string.
+// CollapseOptions holds per-block collapse configuration.
 type CollapseOptions struct {
-	Enabled  bool    // true = force threshold-based collapse
-	Disabled bool    // true = force no collapse (nocollapse)
-	Ranges   []Range // specific ranges to collapse
+	Enabled  bool           // true = force threshold-based collapse
+	Disabled bool           // true = force no collapse (nocollapse)
+	Ranges   []Range        // specific ranges to collapse
+	Style    *CollapseStyle // nil = use engine default
 }
 
 // DarkMode controls how dark mode CSS is generated.
