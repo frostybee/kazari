@@ -13,7 +13,11 @@ document.addEventListener('click', function(e) {
             bottomBtn.setAttribute('aria-expanded', 'true');
             bottomBtn.textContent = bottomBtn.getAttribute('data-collapse');
         }
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            toggleBtn.setAttribute('aria-label', toggleBtn.getAttribute('data-collapse') || '');
+            toggleBtn.setAttribute('data-tooltip', toggleBtn.getAttribute('data-collapse') || '');
+        }
         if (announce && bottomBtn) announce.textContent = bottomBtn.getAttribute('data-expanded-msg') || '';
     } else {
         block.classList.add('kz-collapsed');
@@ -21,7 +25,11 @@ document.addEventListener('click', function(e) {
             bottomBtn.setAttribute('aria-expanded', 'false');
             bottomBtn.textContent = bottomBtn.getAttribute('data-expand');
         }
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.setAttribute('aria-label', toggleBtn.getAttribute('data-expand') || '');
+            toggleBtn.setAttribute('data-tooltip', toggleBtn.getAttribute('data-expand') || '');
+        }
         if (announce && bottomBtn) announce.textContent = bottomBtn.getAttribute('data-collapsed-msg') || '';
     }
 });

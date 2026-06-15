@@ -1,9 +1,15 @@
 .kazari-code .frame {
   position: relative;
-  overflow: hidden;
   border-radius: var(--kz-radius);
   box-shadow: var(--kz-shadow);
   border: var(--kz-border);
+}
+.kazari-code .frame > :first-child {
+  border-radius: var(--kz-radius) var(--kz-radius) 0 0;
+}
+.kazari-code .frame > :last-child {
+  border-radius: 0 0 var(--kz-radius) var(--kz-radius);
+  overflow: hidden;
 }
 /* Themed blocks need their own backdrop: the translucent toolbar colors
    composite over the frame, which otherwise shows the page background. */

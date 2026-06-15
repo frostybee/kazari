@@ -1,0 +1,47 @@
+.kazari-code [data-tooltip] {
+  position: relative;
+}
+.kazari-code [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + var(--kz-tooltip-offset));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--kz-tooltip-padding);
+  border-radius: var(--kz-tooltip-radius);
+  background: var(--kz-tooltip-bg);
+  color: var(--kz-tooltip-fg);
+  font-family: var(--kz-ui-font-family);
+  font-size: var(--kz-tooltip-font-size);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--kz-tooltip-shadow);
+  visibility: hidden;
+  z-index: 10;
+}
+.kazari-code [data-tooltip]:hover::after,
+.kazari-code [data-tooltip]:focus-visible::after {
+  visibility: visible;
+}
+.kazari-code [data-tooltip]:active::after {
+  visibility: hidden;
+}
+.kazari-code .kz-copy-btn.copied::after {
+  visibility: hidden;
+}
+.kazari-code:fullscreen [data-tooltip]::after,
+.kazari-code:-webkit-full-screen [data-tooltip]::after {
+  z-index: 100;
+}
+@media (hover: none) {
+  .kazari-code [data-tooltip]::after {
+    display: none;
+  }
+}
+@media print {
+  .kazari-code [data-tooltip]::after {
+    display: none;
+  }
+}

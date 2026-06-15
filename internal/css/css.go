@@ -34,7 +34,6 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	sb.WriteString(theme.TokenSwitchingCSS(cfg))
 
 	// Static: always included
-	sb.WriteString(readCSS("font-style.css"))
 	sb.WriteString(readCSS("base.css"))
 	sb.WriteString(readCSS("line-numbers.css"))
 	sb.WriteString(readCSS("markers.css"))
@@ -54,6 +53,7 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 
 	sb.WriteString(readCSS("frame.css"))
 	sb.WriteString(readCSS("toolbar.css"))
+	sb.WriteString(readCSS("tooltip.css"))
 	if cfg.FileIcons {
 		sb.WriteString(readCSS("file-icons.css"))
 	}

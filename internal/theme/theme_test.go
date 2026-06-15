@@ -177,10 +177,10 @@ func TestTokenSwitchingCSS_NoDarkTheme(t *testing.T) {
 	cfg.DarkTheme = ""
 	css := TokenSwitchingCSS(cfg)
 
-	if !strings.Contains(css, "color: var(--sl)") {
+	if !strings.Contains(css, "color: var(--sl, inherit)") {
 		t.Error("should contain light color rule")
 	}
-	if strings.Contains(css, "var(--sd)") {
+	if strings.Contains(css, "var(--sd, inherit)") {
 		t.Error("should not contain dark color rule when no dark theme")
 	}
 }
@@ -192,7 +192,7 @@ func TestTokenSwitchingCSS_SelectorMode(t *testing.T) {
 	if !strings.Contains(css, ".dark .kazari-code") {
 		t.Error("should contain .dark selector rule")
 	}
-	if !strings.Contains(css, "var(--sd)") {
+	if !strings.Contains(css, "var(--sd, inherit)") {
 		t.Error("should contain dark color variable")
 	}
 }

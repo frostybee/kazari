@@ -81,6 +81,13 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 		{"--kz-copy-success-bg", "rgba(34, 197, 94, 0.9)"},
 		{"--kz-copy-success-fg", "#ffffff"},
 		{"--kz-copy-success-border", "rgba(34, 197, 94, 0.8)"},
+		{"--kz-tooltip-bg", "rgba(30,30,30,0.92)"},
+		{"--kz-tooltip-fg", "#ffffff"},
+		{"--kz-tooltip-font-size", "0.75rem"},
+		{"--kz-tooltip-padding", "0.25rem 0.625rem"},
+		{"--kz-tooltip-radius", "999px"},
+		{"--kz-tooltip-offset", "6px"},
+		{"--kz-tooltip-shadow", "0 2px 6px rgba(0,0,0,0.25)"},
 		{"--kz-terminal-bg", "var(--kz-editor-bg)"},
 		{"--kz-terminal-titlebar-bg", "var(--kz-toolbar-bg)"},
 		{"--kz-terminal-dot-red", "#ff5f57"},
@@ -256,15 +263,14 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 func TokenSwitchingCSS(cfg *config.Config) string {
 	var sb strings.Builder
 
-	sb.WriteString(".kazari-code .kz-line span[style] { color: var(--sl); }\n")
+	sb.WriteString(".kazari-code .kz-line span[style^=\"--\"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n")
 	sb.WriteString(themedLightRule(cfg))
 
 	if cfg.DarkTheme == "" {
 		return sb.String()
 	}
 
-	darkRules := ".kazari-code .kz-line span[style] { color: var(--sd); }\n" +
-		".kazari-code .kz-line span[style*=\"--sdbg\"] { background-color: var(--sdbg); }\n" +
+	darkRules := ".kazari-code .kz-line span[style^=\"--\"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n" +
 		themedDarkRule(cfg)
 
 	switch cfg.DarkMode.Kind {

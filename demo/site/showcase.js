@@ -124,7 +124,7 @@ document.addEventListener('click', function(e) {
   var wrapped = pre.classList.toggle('wrap');
   btn.setAttribute('aria-pressed', wrapped);
   var label = wrapped ? btn.getAttribute('data-disable') : btn.getAttribute('data-enable');
-  btn.setAttribute('title', label);
+  btn.setAttribute('data-tooltip', label);
   btn.setAttribute('aria-label', label);
 });
 document.addEventListener('click', function(e) {
@@ -142,7 +142,11 @@ document.addEventListener('click', function(e) {
             bottomBtn.setAttribute('aria-expanded', 'true');
             bottomBtn.textContent = bottomBtn.getAttribute('data-collapse');
         }
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            toggleBtn.setAttribute('aria-label', toggleBtn.getAttribute('data-collapse') || '');
+            toggleBtn.setAttribute('data-tooltip', toggleBtn.getAttribute('data-collapse') || '');
+        }
         if (announce && bottomBtn) announce.textContent = bottomBtn.getAttribute('data-expanded-msg') || '';
     } else {
         block.classList.add('kz-collapsed');
@@ -150,7 +154,11 @@ document.addEventListener('click', function(e) {
             bottomBtn.setAttribute('aria-expanded', 'false');
             bottomBtn.textContent = bottomBtn.getAttribute('data-expand');
         }
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.setAttribute('aria-label', toggleBtn.getAttribute('data-expand') || '');
+            toggleBtn.setAttribute('data-tooltip', toggleBtn.getAttribute('data-expand') || '');
+        }
         if (announce && bottomBtn) announce.textContent = bottomBtn.getAttribute('data-collapsed-msg') || '';
     }
 });

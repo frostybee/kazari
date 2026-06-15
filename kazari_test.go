@@ -514,8 +514,8 @@ func TestRender_CopyButton(t *testing.T) {
 	if !strings.Contains(html, "<svg") {
 		t.Error("missing copy SVG icon")
 	}
-	if !strings.Contains(html, `title="Copy to clipboard"`) {
-		t.Error("missing copy title attribute")
+	if !strings.Contains(html, `data-tooltip="Copy"`) {
+		t.Error("missing copy tooltip attribute")
 	}
 }
 
@@ -2921,8 +2921,8 @@ func TestRender_Locale_CopyButton(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, `title="Copier dans le presse-papiers"`) {
-		t.Error("copy button should use French title")
+	if !strings.Contains(html, `data-tooltip="Copier"`) {
+		t.Error("copy button should use French tooltip")
 	}
 	if !strings.Contains(html, `data-copied="Copié !"`) {
 		t.Error("copy button should use French success text")
@@ -3010,8 +3010,8 @@ func TestRender_Locale_DefaultEnglish(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, `title="Copy to clipboard"`) {
-		t.Error("default should use English copy title")
+	if !strings.Contains(html, `data-tooltip="Copy"`) {
+		t.Error("default should use English copy tooltip")
 	}
 	if !strings.Contains(html, `aria-label="Fullscreen"`) {
 		t.Error("default should use English fullscreen label")
@@ -3346,20 +3346,20 @@ func TestCSS_TokenBackground_LightRule(t *testing.T) {
 	hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
 	engine := New(WithHighlighter(hl), WithMinify(false))
 	css := engine.CSS()
-	if !strings.Contains(css, `span[style*="--slbg"] { background-color: var(--slbg); }`) {
-		t.Error("CSS should contain light token background rule")
+	if !strings.Contains(css, `span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent);`) {
+		t.Error("CSS should contain unconditional light token properties rule with starts-with selector")
 	}
 }
 
 func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
-	darkRule := `span[style*="--sdbg"] { background-color: var(--sdbg); }`
+	darkRule := `span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent);`
 
 	t.Run("selector", func(t *testing.T) {
 		hl := &mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}
 		engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"),
 			WithDarkMode(SelectorMode(".dark")), WithMinify(false))
 		if !strings.Contains(engine.CSS(), ".dark .kazari-code .kz-line "+darkRule) {
-			t.Error("selector mode should scope dark bg rule under .dark")
+			t.Error("selector mode should scope dark token rule under .dark")
 		}
 	})
 
@@ -3369,7 +3369,7 @@ func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
 			WithDarkMode(MediaQueryMode()), WithMinify(false))
 		css := engine.CSS()
 		if !strings.Contains(css, ".kazari-code .kz-line "+darkRule) {
-			t.Error("media mode should emit dark bg rule")
+			t.Error("media mode should emit dark token rule")
 		}
 	})
 
@@ -3379,10 +3379,10 @@ func TestCSS_TokenBackground_DarkRulePerStrategy(t *testing.T) {
 			WithDarkMode(BothMode(".dark")), WithMinify(false))
 		css := engine.CSS()
 		if !strings.Contains(css, ".dark .kazari-code .kz-line "+darkRule) {
-			t.Error("both mode should scope dark bg rule under .dark")
+			t.Error("both mode should scope dark token rule under .dark")
 		}
 		if strings.Count(css, darkRule) < 2 {
-			t.Error("both mode should emit dark bg rule in media query and under selector")
+			t.Error("both mode should emit dark token rule in media query and under selector")
 		}
 	})
 }

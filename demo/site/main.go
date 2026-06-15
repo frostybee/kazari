@@ -467,7 +467,7 @@ const chromaPageTmpl = `<!DOCTYPE html>
 <body>
 %s
 <header class="cmp-header">
-  <p>Both sides are pre-rendered at build time. Nuri uses TextMate grammars (same as Shiki/VS Code). Chroma uses its own lexer-based tokenization.</p>
+  <p>Both sides are pre-rendered at build time. Nuri uses TextMate grammars (same as Shiki/VS Code). Chroma uses Pygments-based lexers.</p>
 </header>
 <main>%s</main>
 <footer class="site-footer">

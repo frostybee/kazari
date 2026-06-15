@@ -176,8 +176,21 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 		renderFullscreenButton(sb, cfg)
 	}
 	if resolved.CollapseThreshold {
-		sb.WriteString(fmt.Sprintf("<button class=\"kz-collapse-toggle\" aria-expanded=\"false\" aria-label=\"%s\">",
-			html.EscapeString(cfg.UIStrings.CollapseButtonText)))
+		initiallyCollapsed := resolved.CollapseConfig == nil || resolved.CollapseConfig.DefaultCollapsed
+		expanded := "false"
+		tooltipText := cfg.UIStrings.ExpandButtonText
+		if !initiallyCollapsed {
+			expanded = "true"
+			tooltipText = cfg.UIStrings.CollapseButtonText
+		}
+		sb.WriteString(fmt.Sprintf(
+			"<button class=\"kz-collapse-toggle\" aria-expanded=\"%s\" aria-label=\"%s\" data-tooltip=\"%s\" data-expand=\"%s\" data-collapse=\"%s\">",
+			expanded,
+			html.EscapeString(tooltipText),
+			html.EscapeString(tooltipText),
+			html.EscapeString(cfg.UIStrings.ExpandButtonText),
+			html.EscapeString(cfg.UIStrings.CollapseButtonText),
+		))
 		sb.WriteString(chevronSVG)
 		sb.WriteString("</button>")
 	}
@@ -189,9 +202,9 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {
 	encoded := encodeForDataCode(rawCode)
 	sb.WriteString(fmt.Sprintf(
-		"<button class=\"kz-copy-btn\" aria-label=\"%s\" title=\"%s\" data-copied=\"%s\" data-code=\"%s\">",
+		"<button class=\"kz-copy-btn\" aria-label=\"%s\" data-tooltip=\"%s\" data-copied=\"%s\" data-code=\"%s\">",
 		html.EscapeString(cfg.UIStrings.CopyLabel),
-		html.EscapeString(cfg.UIStrings.CopyTitle),
+		html.EscapeString(cfg.UIStrings.CopyLabel),
 		html.EscapeString(cfg.UIStrings.CopySuccess),
 		html.EscapeString(encoded),
 	))
@@ -208,7 +221,7 @@ func renderWrapButton(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *
 		title = cfg.UIStrings.WrapDisableLabel
 	}
 	sb.WriteString(fmt.Sprintf(
-		"<button class=\"kz-wrap-btn\" aria-pressed=\"%s\" aria-label=\"%s\" title=\"%s\" data-enable=\"%s\" data-disable=\"%s\">",
+		"<button class=\"kz-wrap-btn\" aria-pressed=\"%s\" aria-label=\"%s\" data-tooltip=\"%s\" data-enable=\"%s\" data-disable=\"%s\">",
 		pressed,
 		html.EscapeString(title),
 		html.EscapeString(title),
@@ -221,7 +234,8 @@ func renderWrapButton(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *
 }
 
 func renderFullscreenButton(sb *strings.Builder, cfg *config.Config) {
-	sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\" aria-expanded=\"false\">",
+	sb.WriteString(fmt.Sprintf("<button class=\"kz-fs-btn\" aria-label=\"%s\" data-tooltip=\"%s\" aria-expanded=\"false\">",
+		html.EscapeString(cfg.UIStrings.FullscreenLabel),
 		html.EscapeString(cfg.UIStrings.FullscreenLabel)))
 	sb.WriteString(fullscreenSVG)
 	sb.WriteString(fullscreenExitSVG)
@@ -230,12 +244,13 @@ func renderFullscreenButton(sb *strings.Builder, cfg *config.Config) {
 
 func renderFontControls(sb *strings.Builder, cfg *config.Config) {
 	sb.WriteString("<div class=\"kz-font-controls\">")
-	sb.WriteString(fmt.Sprintf("<button class=\"kz-font-dec\" aria-label=\"%s\" title=\"%s\">",
+	sb.WriteString(fmt.Sprintf("<button class=\"kz-font-dec\" aria-label=\"%s\" data-tooltip=\"%s\">",
 		html.EscapeString(cfg.UIStrings.FontDecreaseLabel),
-		html.EscapeString(cfg.UIStrings.FontResetLabel)))
+		html.EscapeString(cfg.UIStrings.FontDecreaseLabel)))
 	sb.WriteString(fontDecreaseSVG)
 	sb.WriteString("</button>")
-	sb.WriteString(fmt.Sprintf("<button class=\"kz-font-inc\" aria-label=\"%s\">",
+	sb.WriteString(fmt.Sprintf("<button class=\"kz-font-inc\" aria-label=\"%s\" data-tooltip=\"%s\">",
+		html.EscapeString(cfg.UIStrings.FontIncreaseLabel),
 		html.EscapeString(cfg.UIStrings.FontIncreaseLabel)))
 	sb.WriteString(fontIncreaseSVG)
 	sb.WriteString("</button>")
