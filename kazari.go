@@ -12,12 +12,13 @@ import (
 	"github.com/frostybee/kazari/internal/ansi"
 	"github.com/frostybee/kazari/internal/collapsible"
 	"github.com/frostybee/kazari/internal/color"
-	"github.com/frostybee/kazari/internal/locale"
-	"github.com/frostybee/kazari/internal/diff"
 	"github.com/frostybee/kazari/internal/config"
 	"github.com/frostybee/kazari/internal/css"
+	"github.com/frostybee/kazari/internal/diff"
 	"github.com/frostybee/kazari/internal/frame"
 	"github.com/frostybee/kazari/internal/js"
+	"github.com/frostybee/kazari/internal/link"
+	"github.com/frostybee/kazari/internal/locale"
 	"github.com/frostybee/kazari/internal/meta"
 	"github.com/frostybee/kazari/internal/render"
 	"github.com/frostybee/kazari/internal/theme"
@@ -233,6 +234,10 @@ func (e *Engine) preprocess(code string, resolved *config.ResolvedBlock) string 
 			resolved.Title = title
 			code = modified
 		}
+	}
+
+	if e.cfg.Links {
+		code, resolved.Links = link.ExtractLinks(code)
 	}
 
 	if resolved.Frame == config.FrameAuto {

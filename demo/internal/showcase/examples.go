@@ -128,6 +128,8 @@ var exampleDescriptions = map[string]string{
 	"file-icons":            "Resolves a custom icon from each title's file extension and places it in the frame toolbar.",
 	"lang-icon-only":        `Replaces the language text badge with a CSS icon slot that the consumer styles via [data-lang] selectors. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
 	"lang-icon-and-text":    `Shows a language icon before the text label, giving both a visual cue and a readable name. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
+	"links-basic":           "Wraps identifiers in clickable links using @[text](url) syntax. The link text keeps its syntax color and gains a dotted underline.",
+	"links-with-markers":    "Links compose with inline markers on the same line. Marked text inside a link gets both the marker element and the anchor wrapper.",
 	"svg-default":           "Renders a Go snippet to a self-contained SVG image using Nuri's CodeToSVG with default settings.",
 	"svg-custom-font":       "Increases the font size to 18px to produce a larger, more readable SVG image.",
 	"svg-no-background":     "Strips the background rectangle and corner radius for transparent SVG output suitable for embedding.",
@@ -470,6 +472,7 @@ function getOrSet<T>(cache: Map<string, CacheEntry<T>>, key: string, factory: ()
 			DefaultCollapsed: true,
 			PreserveIndent:   true,
 		}),
+		kazari.WithLinks(true),
 	)
 	thresholdCode := `package main
 
@@ -961,6 +964,55 @@ html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "locale-fr.go
 		},
 	}
 
+	// --- Links ---
+
+	linksEngine := b.engine(kazari.WithLinks(true))
+	linksLNEngine := b.engine(kazari.WithLinks(true), kazari.WithLineNumbers(true))
+
+	linkCode := `import (
+	@[fmt](https://pkg.go.dev/fmt)
+	@[net/http](https://pkg.go.dev/net/http)
+)
+
+func main() {
+	@[http.HandleFunc](https://pkg.go.dev/net/http#HandleFunc)("/", handler)
+	@[http.ListenAndServe](https://pkg.go.dev/net/http#ListenAndServe)(":8080", nil)
+}`
+	linkInlineCode := `const root = @[createRoot](https://react.dev/reference/react-dom/client/createRoot)(
+	document.getElementById("root")
+)
+root.render(<@[StrictMode](https://react.dev/reference/react/StrictMode)><App /></@[StrictMode](https://react.dev/reference/react/StrictMode)>)`
+
+	links := Category{
+		ID:          "links",
+		Title:       "Links",
+		Description: "Clickable hyperlinks inside code blocks using @[text](url) syntax.",
+		Examples: []Example{
+			{
+				ID:       "links-basic",
+				Title:    "Inline Links",
+				NavTitle: "Basic links",
+				HTML:     b.render(linksLNEngine, linkCode, kazari.Options{Lang: "go", Title: "main.go"}),
+				Recipes: []Recipe{
+					recipe("Source", linkCode),
+					recipe("Go", `engine := kazari.New(kazari.WithLinks(true))
+html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "main.go"})`),
+				},
+			},
+			{
+				ID:       "links-with-markers",
+				Title:    "Links + Inline Markers",
+				NavTitle: "Links + markers",
+				HTML: b.renderMeta(linksEngine, linkInlineCode,
+					`jsx title="index.tsx" "createRoot" ins="StrictMode"`),
+				Recipes: []Recipe{
+					recipe("Source", linkInlineCode),
+					recipe("Meta", `jsx title="index.tsx" "createRoot" ins="StrictMode"`),
+				},
+			},
+		},
+	}
+
 	svgGoCode := "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tname := \"Kazari\"\n\tfmt.Printf(\"Hello, %s!\\n\", name)\n}"
 	svgPyCode := "import json\nfrom pathlib import Path\n\ndef load_config(path: str) -> dict:\n    data = Path(path).read_text()\n    return json.loads(data)"
 	svgTsCode := "interface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nfunction greet(user: User): string {\n  return `Hello, ${user.name}!`;\n}"
@@ -1036,7 +1088,7 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		`.kazari-block .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
 	}, "\n")
 
-	categories := []Category{frames, layout, markers, collapsible, formats, ansi, themes, localization}
+	categories := []Category{frames, layout, markers, links, collapsible, formats, ansi, themes, localization}
 	if svgCategory != nil {
 		categories = append(categories, *svgCategory)
 	}

@@ -4219,3 +4219,126 @@ func TestRender_LangIcon_BadgeDisabledSuppressesBoth(t *testing.T) {
 		t.Error("LanguageBadge=false should suppress text")
 	}
 }
+
+// --- Links tests ---
+
+func TestRender_Links_BasicLink(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "import fmt", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLinks(true))
+	result, err := engine.Render("import @[fmt](https://pkg.go.dev/fmt)", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(result, `<a class="kz-link" href="https://pkg.go.dev/fmt" rel="noopener noreferrer">`) {
+		t.Errorf("expected kz-link anchor, got: %s", result)
+	}
+	if !strings.Contains(result, "fmt</a>") && !strings.Contains(result, "fmt</span></a>") {
+		t.Errorf("expected link text 'fmt' inside anchor, got: %s", result)
+	}
+}
+
+func TestRender_Links_DisabledByDefault(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "import @[fmt](https://pkg.go.dev/fmt)", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	result, err := engine.Render("import @[fmt](https://pkg.go.dev/fmt)", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(result, "kz-link") {
+		t.Errorf("links should not render when feature is disabled, got: %s", result)
+	}
+}
+
+func TestRender_Links_StrippedFromRawCode(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "import fmt", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLinks(true), WithCopyButton(true))
+	result, err := engine.Render("import @[fmt](https://pkg.go.dev/fmt)", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(result, `data-code="import @[fmt]`) {
+		t.Errorf("copy button data should not contain link syntax, got: %s", result)
+	}
+	if !strings.Contains(result, `data-code="import fmt"`) {
+		t.Errorf("copy button should contain cleaned code, got: %s", result)
+	}
+}
+
+func TestRender_Links_MultiTokenSpan(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{
+				{Content: "fmt", Color: "#000"},
+				{Content: ".", Color: "#111"},
+				{Content: "Println", Color: "#222"},
+			},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLinks(true))
+	result, err := engine.Render("@[fmt.Println](https://pkg.go.dev/fmt#Println)", Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	count := strings.Count(result, "kz-link")
+	if count < 2 {
+		t.Errorf("expected multiple kz-link anchors for multi-token link, got %d in: %s", count, result)
+	}
+}
+
+func TestRender_Links_HrefEscaped(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: [][]Token{
+			{{Content: "click here", Color: "#000"}},
+		},
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLinks(true))
+	result, err := engine.Render(`@[click here](https://example.com/a&b<c>d"e)`, Options{Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(result, `href="https://example.com/a&b<`) {
+		t.Errorf("href should be HTML-escaped, got: %s", result)
+	}
+	if !strings.Contains(result, "&amp;") {
+		t.Errorf("expected HTML entity in href, got: %s", result)
+	}
+}
+
+func TestRender_Links_CSS_Included(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl, WithLinks(true))
+	css := engine.CSS()
+	if !strings.Contains(css, ".kz-link") {
+		t.Errorf("CSS should include .kz-link rules when links enabled")
+	}
+}
+
+func TestRender_Links_CSS_ExcludedWhenDisabled(t *testing.T) {
+	hl := &mockHighlighter{
+		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl)
+	css := engine.CSS()
+	if strings.Contains(css, ".kz-link") {
+		t.Errorf("CSS should not include .kz-link rules when links disabled")
+	}
+}

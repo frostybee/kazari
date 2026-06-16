@@ -592,6 +592,18 @@
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
+.kazari-block .kz-link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--kz-link-underline, currentColor);
+  text-decoration-thickness: var(--kz-link-underline-width, 1px);
+  text-underline-offset: var(--kz-link-underline-offset, 0.15em);
+  cursor: pointer;
+}
+.kazari-block .kz-link:hover {
+  text-decoration-style: solid;
+}
 .kazari-block .kz-copy-btn {
   display: flex;
   align-items: center;

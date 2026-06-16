@@ -45,6 +45,9 @@ const (
 // MarkerType identifies the kind of line or inline marker.
 type MarkerType int
 
+// MarkerNone indicates a segment with no line/inline marker (used for link-only annotations).
+const MarkerNone MarkerType = -1
+
 // Priority order: mark(0) < del(1) < ins(2). Higher value wins in overlap resolution.
 const (
 	MarkerMark MarkerType = iota // highlight (default, lowest priority)
@@ -70,6 +73,13 @@ type InlineMarker struct {
 	Type    MarkerType
 	Text    string
 	IsRegex bool
+}
+
+// LinkAnnotation records the position and URL of an extracted inline link.
+type LinkAnnotation struct {
+	Start int    // character offset in cleaned text (inclusive)
+	End   int    // character offset in cleaned text (exclusive)
+	URL   string
 }
 
 // MarkerBGColors maps marker types to their CSS rgba background values.
@@ -235,6 +245,7 @@ type Config struct {
 	UIStringOverrides          map[string]string
 	UIStrings                  *locale.UIStrings
 	LangIconMode               int
+	Links                      bool
 	FileIcons                  bool
 	FileIconResolver           func(string) string
 	WarningHandler             func(string)
@@ -311,6 +322,7 @@ type ResolvedBlock struct {
 	RawCode       string // code for copy button (post file-name extraction)
 	LineMarkers   []LineMarker
 	InlineMarkers []InlineMarker
+	Links         [][]LinkAnnotation // per-line link annotations (indexed by line)
 	FocusLines    []LineRange
 	// Per-block theme override state (populated when Theme is set)
 	ThemeOverrideStyle string              // inline --kz-ovl-*/--kz-ovd-* declarations for the wrapper

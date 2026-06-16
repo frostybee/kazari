@@ -92,6 +92,10 @@ func WithLanguageIconMode(mode LangIconMode) Option {
 	return func(b *engineBuilder) { b.cfg.LangIconMode = int(mode) }
 }
 
+func WithLinks(enabled bool) Option {
+	return func(b *engineBuilder) { b.cfg.Links = enabled }
+}
+
 func WithFileIcons(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.FileIcons = enabled }
 }

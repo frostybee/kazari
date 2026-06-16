@@ -58,6 +58,11 @@
       <a href="#line-markers" data-example-link="line-markers">Line markers</a><a href="#labeled-range" data-example-link="labeled-range">Labeled range</a><a href="#labeled-range-no-ln" data-example-link="labeled-range-no-ln">No line numbers</a><a href="#labeled-range-numbers" data-example-link="labeled-range-numbers">Numbered labels</a><a href="#focus-lines" data-example-link="focus-lines">Focus lines</a><a href="#inline-markers" data-example-link="inline-markers">Inline markers</a><a href="#inline-markers-single" data-example-link="inline-markers-single">Single quotes</a><a href="#combined-markers" data-example-link="combined-markers">Combined markers</a>
     </div>
 
+    <div class="nav-category" data-nav-category="links">
+      <a class="category-link" href="#links" data-category-link="links">Links</a>
+      <a href="#links-basic" data-example-link="links-basic">Basic links</a><a href="#links-with-markers" data-example-link="links-with-markers">Links &#43; markers</a>
+    </div>
+
     <div class="nav-category" data-nav-category="collapsible">
       <a class="category-link" href="#collapsible" data-category-link="collapsible">Collapsible Sections</a>
       <a href="#collapse-threshold" data-example-link="collapse-threshold">Threshold</a><a href="#collapse-range" data-example-link="collapse-range">Range</a><a href="#collapse-multiple" data-example-link="collapse-multiple">Multiple ranges</a><a href="#collapse-gaps" data-example-link="collapse-gaps">Gap indicators</a><a href="#collapse-start" data-example-link="collapse-start">Collapsible start</a><a href="#collapse-end" data-example-link="collapse-end">Collapsible end</a><a href="#collapse-auto" data-example-link="collapse-auto">Collapsible auto</a>
@@ -104,6 +109,10 @@
         <option value="#line-markers" data-jump-example="line-markers">Line markers</option><option value="#labeled-range" data-jump-example="labeled-range">Labeled range</option><option value="#labeled-range-no-ln" data-jump-example="labeled-range-no-ln">No line numbers</option><option value="#labeled-range-numbers" data-jump-example="labeled-range-numbers">Numbered labels</option><option value="#focus-lines" data-jump-example="focus-lines">Focus lines</option><option value="#inline-markers" data-jump-example="inline-markers">Inline markers</option><option value="#inline-markers-single" data-jump-example="inline-markers-single">Single quotes</option><option value="#combined-markers" data-jump-example="combined-markers">Combined markers</option>
       </optgroup>
 
+      <optgroup label="Links" data-jump-category="links">
+        <option value="#links-basic" data-jump-example="links-basic">Basic links</option><option value="#links-with-markers" data-jump-example="links-with-markers">Links &#43; markers</option>
+      </optgroup>
+
       <optgroup label="Collapsible Sections" data-jump-category="collapsible">
         <option value="#collapse-threshold" data-jump-example="collapse-threshold">Threshold</option><option value="#collapse-range" data-jump-example="collapse-range">Range</option><option value="#collapse-multiple" data-jump-example="collapse-multiple">Multiple ranges</option><option value="#collapse-gaps" data-jump-example="collapse-gaps">Gap indicators</option><option value="#collapse-start" data-jump-example="collapse-start">Collapsible start</option><option value="#collapse-end" data-jump-example="collapse-end">Collapsible end</option><option value="#collapse-auto" data-jump-example="collapse-auto">Collapsible auto</option>
       </optgroup>
@@ -136,11 +145,11 @@
       <label for="category-filter">Category</label>
       <select id="category-filter">
         <option value="all">All categories</option>
-        <option value="frames">Frames</option><option value="layout">Layout</option><option value="markers">Markers and Focus</option><option value="collapsible">Collapsible Sections</option><option value="formats">Formats and Groups</option><option value="ansi">ANSI Terminal Output</option><option value="themes">Themes and Customization</option><option value="localization">Localization and Assets</option>
+        <option value="frames">Frames</option><option value="layout">Layout</option><option value="markers">Markers and Focus</option><option value="links">Links</option><option value="collapsible">Collapsible Sections</option><option value="formats">Formats and Groups</option><option value="ansi">ANSI Terminal Output</option><option value="themes">Themes and Customization</option><option value="localization">Localization and Assets</option>
       </select>
     </div>
     <button class="clear-filters" id="clear-filters" type="button">Clear</button>
-    <p class="result-count" id="result-count" role="status" aria-live="polite">46 examples</p>
+    <p class="result-count" id="result-count" role="status" aria-live="polite">48 examples</p>
   </section>
 
   <div class="no-results" id="no-results" hidden>
@@ -1041,6 +1050,122 @@ html, err := engine.Render(code, kazari.Options{
               <span>Copy Go</span>
             </button>
             <pre><code>html, err := engine.RenderWithMeta(code, meta)</code></pre>
+          </section>
+
+        </div>
+      </details>
+    </article>
+
+  </section>
+
+  <section class="demo-category" id="links" data-category="links">
+    <h2>Links</h2>
+    <p class="category-description">Clickable hyperlinks inside code blocks using @[text](url) syntax.</p>
+
+
+    <article class="demo-example" id="links-basic" data-example="links-basic" data-search="links inline links wraps identifiers in clickable links using @[text](url) syntax. the link text keeps its syntax color and gains a dotted underline. source import (
+	@[fmt](https://pkg.go.dev/fmt)
+	@[net/http](https://pkg.go.dev/net/http)
+)
+
+func main() {
+	@[http.handlefunc](https://pkg.go.dev/net/http#handlefunc)(&#34;/&#34;, handler)
+	@[http.listenandserve](https://pkg.go.dev/net/http#listenandserve)(&#34;:8080&#34;, nil)
+} go engine := kazari.new(kazari.withlinks(true))
+html, err := engine.render(code, kazari.options{lang: &#34;go&#34;, title: &#34;main.go&#34;})">
+      <div class="example-heading">
+        <h3>Inline Links</h3>
+        <button class="copy-action copy-link" type="button" data-copy-link="links-basic" aria-label="Copy link to Inline Links">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
+          <span>Copy link</span>
+        </button>
+      </div>
+      <p class="example-description">Wraps identifiers in clickable links using @[text](url) syntax. The link text keeps its syntax color and gains a dotted underline.</p>
+      <div class="example-output"><div class="kazari-block" data-lines="9">
+<figure class="frame has-title" data-lang="go"><div class="kz-toolbar"><div class="kz-toolbar-left"><span class="kz-lang">Go</span><span class="kz-file-icon" data-ext="go"></span><span class="kz-title">main.go</span></div><div class="kz-toolbar-right"><button class="kz-copy-btn" aria-label="Copy" data-tooltip="Copy" data-copied="Copied!" data-code="import (	fmt	net/http)func main() {	http.HandleFunc(&#34;/&#34;, handler)	http.ListenAndServe(&#34;:8080&#34;, nil)}"><svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button><span class="kz-sr-announce" aria-live="polite"></span><button class="kz-wrap-btn" aria-pressed="false" aria-label="Enable word wrap" data-tooltip="Enable word wrap" data-enable="Enable word wrap" data-disable="Disable word wrap"><svg class="kz-wrap-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg><svg class="kz-wrap-off-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="kz-font-controls"><button class="kz-font-dec" aria-label="Decrease font size" data-tooltip="Decrease font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg></button><button class="kz-font-inc" aria-label="Increase font size" data-tooltip="Increase font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg></button></div><button class="kz-fs-btn" aria-label="Fullscreen" data-tooltip="Fullscreen" aria-expanded="false"><svg class="kz-fs-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg><svg class="kz-fs-exit-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg></button></div></div><pre data-language="go"><code><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">1</div></div><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">import</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">(</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">2</div></div><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a"> <a class="kz-link" href="https://pkg.go.dev/fmt" rel="noopener noreferrer"> </a></span><span style="--sl:#1f2328;--sd:#e6edf3"><a class="kz-link" href="https://pkg.go.dev/fmt" rel="noopener noreferrer">fm</a>t</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">3</div></div><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a"> <a class="kz-link" href="https://pkg.go.dev/net/http" rel="noopener noreferrer"> </a></span><a class="kz-link" href="https://pkg.go.dev/net/http" rel="noopener noreferrer"><span style="--sl:#1f2328;--sd:#e6edf3">net</span></a><a class="kz-link" href="https://pkg.go.dev/net/http" rel="noopener noreferrer"><span style="--sl:#0550ae;--sd:#ff7b72">/</span></a><span style="--sl:#1f2328;--sd:#e6edf3"><a class="kz-link" href="https://pkg.go.dev/net/http" rel="noopener noreferrer">htt</a>p</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">4</div></div><div class="kz-code"><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">5</div></div><div class="kz-code"></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">6</div></div><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">func</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#6639ba;--sd:#d2a8ff">main</span><span style="--sl:#1f2328;--sd:#e6edf3">()</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">{</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">7</div></div><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a"> <a class="kz-link" href="https://pkg.go.dev/net/http#HandleFunc" rel="noopener noreferrer"> </a></span><a class="kz-link" href="https://pkg.go.dev/net/http#HandleFunc" rel="noopener noreferrer"><span style="--sl:#1f2328;--sd:#e6edf3">http</span></a><a class="kz-link" href="https://pkg.go.dev/net/http#HandleFunc" rel="noopener noreferrer"><span style="--sl:#1f2328;--sd:#e6edf3">.</span></a><span style="--sl:#6639ba;--sd:#d2a8ff"><a class="kz-link" href="https://pkg.go.dev/net/http#HandleFunc" rel="noopener noreferrer">HandleFun</a>c</span><span style="--sl:#1f2328;--sd:#e6edf3">(</span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;/&#34;</span><span style="--sl:#1f2328;--sd:#e6edf3">,</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">handler</span><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">8</div></div><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a"> <a class="kz-link" href="https://pkg.go.dev/net/http#ListenAndServe" rel="noopener noreferrer"> </a></span><a class="kz-link" href="https://pkg.go.dev/net/http#ListenAndServe" rel="noopener noreferrer"><span style="--sl:#1f2328;--sd:#e6edf3">http</span></a><a class="kz-link" href="https://pkg.go.dev/net/http#ListenAndServe" rel="noopener noreferrer"><span style="--sl:#1f2328;--sd:#e6edf3">.</span></a><span style="--sl:#6639ba;--sd:#d2a8ff"><a class="kz-link" href="https://pkg.go.dev/net/http#ListenAndServe" rel="noopener noreferrer">ListenAndServ</a>e</span><span style="--sl:#1f2328;--sd:#e6edf3">(</span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;:8080&#34;</span><span style="--sl:#1f2328;--sd:#e6edf3">,</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#ba1f29;--sd:#79c0ff">nil</span><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-gutter"><div class="kz-ln" aria-hidden="true">9</div></div><div class="kz-code"><span style="--sl:#1f2328;--sd:#e6edf3">}</span></div></div></code></pre></figure>
+</div></div>
+      <details class="recipe-disclosure">
+        <summary>How to build this</summary>
+        <div class="recipe-content" data-recipe-group>
+
+          <div class="recipe-tabs" role="tablist" aria-label="Implementation recipes">
+            <button type="button" role="tab" data-recipe-tab aria-selected="true" tabindex="0">Source</button><button type="button" role="tab" data-recipe-tab aria-selected="false" tabindex="-1">Go</button>
+          </div>
+
+
+          <section class="recipe-panel" data-recipe-panel >
+
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Source">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Source</span>
+            </button>
+            <pre><code>import (
+	@[fmt](https://pkg.go.dev/fmt)
+	@[net/http](https://pkg.go.dev/net/http)
+)
+
+func main() {
+	@[http.HandleFunc](https://pkg.go.dev/net/http#HandleFunc)(&#34;/&#34;, handler)
+	@[http.ListenAndServe](https://pkg.go.dev/net/http#ListenAndServe)(&#34;:8080&#34;, nil)
+}</code></pre>
+          </section>
+
+          <section class="recipe-panel" data-recipe-panel hidden>
+
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Go">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Go</span>
+            </button>
+            <pre><code>engine := kazari.New(kazari.WithLinks(true))
+html, err := engine.Render(code, kazari.Options{Lang: &#34;go&#34;, Title: &#34;main.go&#34;})</code></pre>
+          </section>
+
+        </div>
+      </details>
+    </article>
+
+
+    <article class="demo-example" id="links-with-markers" data-example="links-with-markers" data-search="links links &#43; inline markers links compose with inline markers on the same line. marked text inside a link gets both the marker element and the anchor wrapper. source const router = @[createbrowserrouter](https://reactrouter.com/en/main/routers/create-browser-router)([
+	{ path: &#34;/&#34;, element: &lt;@[app](https://react.dev/reference/react/component) /&gt; },
+]) meta jsx title=&#34;router.tsx&#34; &#34;createbrowserrouter&#34; ins=&#34;app&#34;">
+      <div class="example-heading">
+        <h3>Links &#43; Inline Markers</h3>
+        <button class="copy-action copy-link" type="button" data-copy-link="links-with-markers" aria-label="Copy link to Links &#43; Inline Markers">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
+          <span>Copy link</span>
+        </button>
+      </div>
+      <p class="example-description">Links compose with inline markers on the same line. Marked text inside a link gets both the marker element and the anchor wrapper.</p>
+      <div class="example-output"><div class="kazari-block" data-lines="3">
+<figure class="frame has-title" data-lang="jsx"><div class="kz-toolbar"><div class="kz-toolbar-left"><span class="kz-lang">JSX</span><span class="kz-file-icon" data-ext="tsx"></span><span class="kz-title">router.tsx</span></div><div class="kz-toolbar-right"><button class="kz-copy-btn" aria-label="Copy" data-tooltip="Copy" data-copied="Copied!" data-code="const router = createBrowserRouter([	{ path: &#34;/&#34;, element: &lt;App /&gt; },])"><svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button><span class="kz-sr-announce" aria-live="polite"></span><button class="kz-wrap-btn" aria-pressed="false" aria-label="Enable word wrap" data-tooltip="Enable word wrap" data-enable="Enable word wrap" data-disable="Disable word wrap"><svg class="kz-wrap-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg><svg class="kz-wrap-off-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="kz-font-controls"><button class="kz-font-dec" aria-label="Decrease font size" data-tooltip="Decrease font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg></button><button class="kz-font-inc" aria-label="Increase font size" data-tooltip="Increase font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg></button></div><button class="kz-fs-btn" aria-label="Fullscreen" data-tooltip="Fullscreen" aria-expanded="false"><svg class="kz-fs-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg><svg class="kz-fs-exit-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg></button></div></div><pre data-language="jsx"><code><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">const</span><span style="--sd:#e6edf3"> </span><span style="--sl:#1f2328;--sd:#e6edf3">router</span><span style="--sd:#e6edf3"> </span><span style="--sl:#0550ae;--sd:#ff7b72">=</span><span style="--sd:#e6edf3"> </span><span style="--sl:#1f2328;--sd:#e6edf3"><a class="kz-link" href="https://reactrouter.com/en/main/routers/create-browser-router" rel="noopener noreferrer"><mark>createBrowserRouter</mark></a></span><span style="--sl:#1f2328;--sd:#e6edf3">([</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sd:#e6edf3">  </span><span style="--sl:#1f2328;--sd:#e6edf3">{</span><span style="--sd:#e6edf3"> </span><span style="--sl:#1f2328;--sd:#e6edf3">path</span><span style="--sl:#0550ae;--sd:#ff7b72">:</span><span style="--sd:#e6edf3"> </span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;/&#34;</span><span style="--sl:#1f2328;--sd:#e6edf3">,</span><span style="--sd:#e6edf3"> </span><span style="--sl:#1f2328;--sd:#e6edf3">element</span><span style="--sl:#0550ae;--sd:#ff7b72">:</span><span style="--sd:#e6edf3"> </span><a class="kz-link" href="https://react.dev/reference/react/Component" rel="noopener noreferrer"><span style="--sl:#1f2328;--sd:#e6edf3">&lt;</span></a><span style="--sl:#0550ae;--sd:#7ee787"><a class="kz-link" href="https://react.dev/reference/react/Component" rel="noopener noreferrer"><ins>Ap</ins></a><ins>p</ins></span><span style="--sd:#e6edf3"> </span><span style="--sl:#1f2328;--sd:#e6edf3">/&gt;</span><span style="--sd:#e6edf3"> </span><span style="--sl:#1f2328;--sd:#e6edf3">},</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#1f2328;--sd:#e6edf3">])</span></div></div></code></pre></figure>
+</div></div>
+      <details class="recipe-disclosure">
+        <summary>How to build this</summary>
+        <div class="recipe-content" data-recipe-group>
+
+          <div class="recipe-tabs" role="tablist" aria-label="Implementation recipes">
+            <button type="button" role="tab" data-recipe-tab aria-selected="true" tabindex="0">Source</button><button type="button" role="tab" data-recipe-tab aria-selected="false" tabindex="-1">Meta</button>
+          </div>
+
+
+          <section class="recipe-panel" data-recipe-panel >
+
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Source">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Source</span>
+            </button>
+            <pre><code>const router = @[createBrowserRouter](https://reactrouter.com/en/main/routers/create-browser-router)([
+	{ path: &#34;/&#34;, element: &lt;@[App](https://react.dev/reference/react/Component) /&gt; },
+])</code></pre>
+          </section>
+
+          <section class="recipe-panel" data-recipe-panel hidden>
+
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Meta">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Meta</span>
+            </button>
+            <pre><code>jsx title=&#34;router.tsx&#34; &#34;createBrowserRouter&#34; ins=&#34;App&#34;</code></pre>
           </section>
 
         </div>

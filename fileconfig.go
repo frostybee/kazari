@@ -21,7 +21,7 @@ type FileConfig struct {
 	CopyButton               *bool                             `yaml:"copyButton" json:"copyButton"`
 	FullscreenButton         *bool                             `yaml:"fullscreenButton" json:"fullscreenButton"`
 	WrapButton               *bool                             `yaml:"wrapButton" json:"wrapButton"`
-	ThemeToggle              *bool                             `yaml:"themeToggle" json:"themeToggle"`
+	ThemeToggleButton        *bool                             `yaml:"themeToggleButton" json:"themeToggleButton"`
 	LineNumbers              *bool                             `yaml:"lineNumbers" json:"lineNumbers"`
 	FrameDetection           *bool                             `yaml:"frameDetection" json:"frameDetection"`
 	FileNameExtraction       *bool                             `yaml:"fileNameExtraction" json:"fileNameExtraction"`
@@ -33,6 +33,7 @@ type FileConfig struct {
 	TerminalCommentStripping *bool                             `yaml:"terminalCommentStripping" json:"terminalCommentStripping"`
 	DataLineCount            *bool                             `yaml:"dataLineCount" json:"dataLineCount"`
 	FileIcons                *bool                             `yaml:"fileIcons" json:"fileIcons"`
+	Links                    *bool                             `yaml:"links" json:"links"`
 	StyleReset               *bool                             `yaml:"styleReset" json:"styleReset"`
 	Minify                   *bool                             `yaml:"minify" json:"minify"`
 	TabWidth                 *int                              `yaml:"tabWidth" json:"tabWidth"`
@@ -266,8 +267,8 @@ func FileConfigToOptions(fc *FileConfig) ([]Option, error) {
 	if fc.WrapButton != nil {
 		opts = append(opts, WithWrapButton(*fc.WrapButton))
 	}
-	if fc.ThemeToggle != nil {
-		opts = append(opts, WithThemeToggle(*fc.ThemeToggle))
+	if fc.ThemeToggleButton != nil {
+		opts = append(opts, WithThemeToggle(*fc.ThemeToggleButton))
 	}
 	if fc.LineNumbers != nil {
 		opts = append(opts, WithLineNumbers(*fc.LineNumbers))
@@ -301,6 +302,9 @@ func FileConfigToOptions(fc *FileConfig) ([]Option, error) {
 	}
 	if fc.FileIcons != nil {
 		opts = append(opts, WithFileIcons(*fc.FileIcons))
+	}
+	if fc.Links != nil {
+		opts = append(opts, WithLinks(*fc.Links))
 	}
 	if fc.StyleReset != nil {
 		opts = append(opts, WithStyleReset(*fc.StyleReset))

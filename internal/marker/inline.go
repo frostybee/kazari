@@ -10,8 +10,9 @@ import (
 // InlineAnnotation describes how a segment of text is marked inline.
 type InlineAnnotation struct {
 	Type      config.MarkerType
-	OpenStart bool // match started in a previous token
-	OpenEnd   bool // match continues into the next token
+	OpenStart bool   // match started in a previous token
+	OpenEnd   bool   // match continues into the next token
+	Link      string // non-empty = this segment is a hyperlink
 }
 
 // Segment is a piece of a token's content, optionally wrapped in an inline marker.
@@ -31,6 +32,7 @@ type inlineMatch struct {
 	end      int // character offset in plain text (exclusive)
 	mtype    config.MarkerType
 	priority int
+	link     string // non-empty for link annotations
 }
 
 // ProcessInlineMarkers finds all inline marker matches in a line of tokens
@@ -161,12 +163,14 @@ func subtractClaimedRange(fragments []inlineMatch, start, end int) []inlineMatch
 			out = append(out, inlineMatch{
 				start: f.start, end: start,
 				mtype: f.mtype, priority: f.priority,
+				link: f.link,
 			})
 		}
 		if f.end > end {
 			out = append(out, inlineMatch{
 				start: end, end: f.end,
 				mtype: f.mtype, priority: f.priority,
+				link: f.link,
 			})
 		}
 	}
@@ -255,8 +259,9 @@ func splitTokens(tokens []config.MergedToken, matches []inlineMatch) []TokenWith
 				Content: tok.Content[segStart-tokStart : segEnd-tokStart],
 				Marker: &InlineAnnotation{
 					Type:      m.mtype,
-					OpenStart: m.start < tokStart, // match started before this token
-					OpenEnd:   m.end > tokEnd,      // match continues past this token
+					OpenStart: m.start < tokStart,
+					OpenEnd:   m.end > tokEnd,
+					Link:      m.link,
 				},
 			})
 
@@ -283,6 +288,123 @@ func splitTokens(tokens []config.MergedToken, matches []inlineMatch) []TokenWith
 	}
 
 	return result
+}
+
+// ProcessLinks splits tokens according to link annotations, producing segments
+// with the Link field set. This reuses the same splitTokens machinery as inline markers.
+func ProcessLinks(tokens []config.MergedToken, links []config.LinkAnnotation) []TokenWithSegments {
+	if len(links) == 0 {
+		return wrapTokens(tokens)
+	}
+
+	matches := make([]inlineMatch, len(links))
+	for i, l := range links {
+		matches[i] = inlineMatch{
+			start: l.Start,
+			end:   l.End,
+			mtype: config.MarkerNone,
+			link:  l.URL,
+		}
+	}
+
+	return splitTokens(tokens, matches)
+}
+
+// ProcessInlineMarkersAndLinks handles both inline markers and link annotations
+// on the same line. Inline markers are processed first, then link annotations
+// are applied on top by further splitting segments.
+func ProcessInlineMarkersAndLinks(tokens []config.MergedToken, markers []config.InlineMarker, links []config.LinkAnnotation) []TokenWithSegments {
+	result := ProcessInlineMarkers(tokens, markers)
+	if len(links) == 0 {
+		return result
+	}
+	return applyLinksToSegmented(result, links)
+}
+
+func applyLinksToSegmented(tokenSegs []TokenWithSegments, links []config.LinkAnnotation) []TokenWithSegments {
+	out := make([]TokenWithSegments, 0, len(tokenSegs))
+	cursor := 0
+	li := 0
+
+	for _, ts := range tokenSegs {
+		var newSegs []Segment
+		for _, seg := range ts.Segments {
+			segStart := cursor
+			segEnd := cursor + len(seg.Content)
+
+			var parts []Segment
+			pos := segStart
+
+			for li < len(links) && pos < segEnd {
+				l := links[li]
+				if l.Start >= segEnd {
+					break
+				}
+				if l.End <= pos {
+					li++
+					continue
+				}
+
+				lStart := l.Start
+				if lStart < pos {
+					lStart = pos
+				}
+				lEnd := l.End
+				if lEnd > segEnd {
+					lEnd = segEnd
+				}
+
+				if lStart > pos {
+					parts = append(parts, Segment{
+						Content: seg.Content[pos-segStart : lStart-segStart],
+						Marker:  seg.Marker,
+					})
+				}
+
+				linkMarker := &InlineAnnotation{
+					Type:      config.MarkerNone,
+					OpenStart: l.Start < segStart,
+					OpenEnd:   l.End > segEnd,
+					Link:      l.URL,
+				}
+				if seg.Marker != nil {
+					linkMarker.Type = seg.Marker.Type
+					linkMarker.OpenStart = linkMarker.OpenStart || seg.Marker.OpenStart
+					linkMarker.OpenEnd = linkMarker.OpenEnd || seg.Marker.OpenEnd
+				}
+
+				parts = append(parts, Segment{
+					Content: seg.Content[lStart-segStart : lEnd-segStart],
+					Marker:  linkMarker,
+				})
+
+				pos = lEnd
+				if l.End <= segEnd {
+					li++
+				} else {
+					break
+				}
+			}
+
+			if pos < segEnd {
+				parts = append(parts, Segment{
+					Content: seg.Content[pos-segStart:],
+					Marker:  seg.Marker,
+				})
+			}
+
+			if len(parts) == 0 {
+				parts = []Segment{seg}
+			}
+
+			newSegs = append(newSegs, parts...)
+			cursor = segEnd
+		}
+
+		out = append(out, TokenWithSegments{Token: ts.Token, Segments: newSegs})
+	}
+
+	return out
 }
 
 func wrapTokens(tokens []config.MergedToken) []TokenWithSegments {

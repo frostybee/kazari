@@ -497,8 +497,20 @@ func renderLine(sb *strings.Builder, line TokenLine, lineNum int, lctx *lineCont
 	if indentWS != "" {
 		sb.WriteString(fmt.Sprintf("<span class=\"indent\">%s</span>", indentWS))
 	}
-	if len(lctx.resolved.InlineMarkers) > 0 {
-		annotated := marker.ProcessInlineMarkers(tokens, lctx.resolved.InlineMarkers)
+	lineIdx := lineNum - lctx.resolved.StartLineNumber
+	hasInlineMarkers := len(lctx.resolved.InlineMarkers) > 0
+	hasLinks := lineIdx >= 0 && lineIdx < len(lctx.resolved.Links) && len(lctx.resolved.Links[lineIdx]) > 0
+
+	if hasInlineMarkers || hasLinks {
+		var annotated []marker.TokenWithSegments
+		switch {
+		case hasInlineMarkers && hasLinks:
+			annotated = marker.ProcessInlineMarkersAndLinks(tokens, lctx.resolved.InlineMarkers, lctx.resolved.Links[lineIdx])
+		case hasLinks:
+			annotated = marker.ProcessLinks(tokens, lctx.resolved.Links[lineIdx])
+		default:
+			annotated = marker.ProcessInlineMarkers(tokens, lctx.resolved.InlineMarkers)
+		}
 		for _, at := range annotated {
 			if at.Token.Content == "" {
 				continue
@@ -565,6 +577,19 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 	if allOneSegmentSpanning {
 		// Multi-token span: mark wraps the span.
 		seg := at.Segments[0]
+		isLinkOnly := seg.Marker.Link != "" && seg.Marker.Type == config.MarkerNone
+		if isLinkOnly {
+			sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+			style := buildTokenStyle(at.Token, lctx, markerType)
+			if style != "" {
+				sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
+			} else {
+				sb.WriteString("<span>")
+			}
+			sb.WriteString(html.EscapeString(seg.Content))
+			sb.WriteString("</span></a>")
+			return
+		}
 		elem := markerElement(seg.Marker.Type)
 		var classes []string
 		if seg.Marker.OpenStart {
@@ -572,6 +597,9 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 		}
 		if seg.Marker.OpenEnd {
 			classes = append(classes, "open-end")
+		}
+		if seg.Marker.Link != "" {
+			sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
 		}
 		sb.WriteString(fmt.Sprintf("<%s class=\"%s\">", elem, strings.Join(classes, " ")))
 		style := buildTokenStyle(at.Token, lctx, markerType)
@@ -583,6 +611,9 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 		sb.WriteString(html.EscapeString(seg.Content))
 		sb.WriteString("</span>")
 		sb.WriteString(fmt.Sprintf("</%s>", elem))
+		if seg.Marker.Link != "" {
+			sb.WriteString("</a>")
+		}
 		return
 	}
 
@@ -595,16 +626,29 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 	}
 	for _, seg := range at.Segments {
 		if seg.Marker != nil {
-			elem := markerElement(seg.Marker.Type)
-			sb.WriteString(fmt.Sprintf("<%s>", elem))
-			sb.WriteString(html.EscapeString(seg.Content))
-			sb.WriteString(fmt.Sprintf("</%s>", elem))
+			if seg.Marker.Link != "" && seg.Marker.Type == config.MarkerNone {
+				sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+				sb.WriteString(html.EscapeString(seg.Content))
+				sb.WriteString("</a>")
+			} else {
+				elem := markerElement(seg.Marker.Type)
+				if seg.Marker.Link != "" {
+					sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+				}
+				sb.WriteString(fmt.Sprintf("<%s>", elem))
+				sb.WriteString(html.EscapeString(seg.Content))
+				sb.WriteString(fmt.Sprintf("</%s>", elem))
+				if seg.Marker.Link != "" {
+					sb.WriteString("</a>")
+				}
+			}
 		} else {
 			sb.WriteString(html.EscapeString(seg.Content))
 		}
 	}
 	sb.WriteString("</span>")
 }
+
 
 func renderToken(sb *strings.Builder, tok MergedToken, lctx *lineContext, markerType *config.MarkerType) {
 	style := buildTokenStyle(tok, lctx, markerType)
