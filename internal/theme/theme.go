@@ -94,7 +94,7 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 		{"--kz-terminal-dot-yellow", "#febc2e"},
 		{"--kz-terminal-dot-green", "#28c840"},
 		{"--kz-ln-width", "2ch"},
-		{"--kz-ln-opacity", "0.4"},
+		{"--kz-ln-opacity", "0.9"},
 		{"--kz-ln-highlight-opacity", "0.8"},
 	}
 

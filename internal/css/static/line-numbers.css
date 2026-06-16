@@ -1,5 +1,6 @@
 .kazari-block .kz-gutter {
   grid-area: gutter;
+  min-width: calc(var(--kz-ln-width) + 2 * var(--kz-ln-padding-inline));
   border-right: var(--kz-gutter-border-width) solid var(--kz-gutter-border-color);
   -webkit-user-select: none;
   user-select: none;

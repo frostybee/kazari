@@ -1,7 +1,7 @@
 var toggle = document.getElementById("dark-toggle");
 var status = document.getElementById("shiki-status");
 
-var saved = localStorage.getItem("kz-demo-theme");
+var saved; try { saved = localStorage.getItem("kz-demo-theme"); } catch (e) {}
 if (saved === "dark") {
   document.body.classList.add("dark");
   document.documentElement.classList.add("dark");
@@ -12,7 +12,7 @@ toggle.addEventListener("change", function () {
   var dark = toggle.checked;
   document.body.classList.toggle("dark", dark);
   document.documentElement.classList.toggle("dark", dark);
-  localStorage.setItem("kz-demo-theme", dark ? "dark" : "light");
+  try { localStorage.setItem("kz-demo-theme", dark ? "dark" : "light"); } catch (e) {}
   if (window.__shikiHL) renderAll(window.__shikiHL, dark ? "github-dark" : "github-light");
 });
 

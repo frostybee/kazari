@@ -63,10 +63,11 @@
     document.querySelectorAll('.kazari-tinted, .kazari-scoped, .kazari-customizer').forEach(function (element) {
       element.classList.toggle('dark', isDark);
     });
-    localStorage.setItem('kz-demo-theme', isDark ? 'dark' : 'light');
+    try { localStorage.setItem('kz-demo-theme', isDark ? 'dark' : 'light'); } catch (e) {}
   }
 
-  var saved = localStorage.getItem('kz-demo-theme');
+  var saved;
+  try { saved = localStorage.getItem('kz-demo-theme'); } catch (e) {}
   if (saved === 'dark') applyTheme(true);
 
   var themeToggle = document.getElementById('theme-toggle');

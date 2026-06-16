@@ -71,7 +71,7 @@
   --kz-terminal-dot-yellow: #febc2e;
   --kz-terminal-dot-green: #28c840;
   --kz-ln-width: 2ch;
-  --kz-ln-opacity: 0.4;
+  --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
   --kz-collapse-btn-bg: rgba(255,255,255,0.08);
   --kz-collapse-btn-fg: rgba(255,255,255,0.7);
@@ -223,6 +223,7 @@
 }
 .kazari-block .kz-gutter {
   grid-area: gutter;
+  min-width: calc(var(--kz-ln-width) + 2 * var(--kz-ln-padding-inline));
   border-right: var(--kz-gutter-border-width) solid var(--kz-gutter-border-color);
   -webkit-user-select: none;
   user-select: none;
@@ -1227,7 +1228,7 @@
   --kz-terminal-dot-yellow: #febc2e;
   --kz-terminal-dot-green: #28c840;
   --kz-ln-width: 2ch;
-  --kz-ln-opacity: 0.4;
+  --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
@@ -1347,7 +1348,7 @@
   --kz-terminal-dot-yellow: #febc2e;
   --kz-terminal-dot-green: #28c840;
   --kz-ln-width: 2ch;
-  --kz-ln-opacity: 0.4;
+  --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
@@ -1463,7 +1464,7 @@
   --kz-terminal-dot-yellow: #febc2e;
   --kz-terminal-dot-green: #28c840;
   --kz-ln-width: 2ch;
-  --kz-ln-opacity: 0.4;
+  --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
@@ -1579,7 +1580,7 @@
   --kz-terminal-dot-yellow: #febc2e;
   --kz-terminal-dot-green: #28c840;
   --kz-ln-width: 2ch;
-  --kz-ln-opacity: 0.4;
+  --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
@@ -1695,7 +1696,7 @@
   --kz-terminal-dot-yellow: #febc2e;
   --kz-terminal-dot-green: #28c840;
   --kz-ln-width: 2ch;
-  --kz-ln-opacity: 0.4;
+  --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
