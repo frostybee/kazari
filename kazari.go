@@ -169,10 +169,11 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 	var spec *config.CollapseSpec
 	if opts.Collapse != nil {
 		spec = &config.CollapseSpec{
-			Enabled:  opts.Collapse.Enabled,
-			Disabled: opts.Collapse.Disabled,
-			Ranges:   convertRanges(opts.Collapse.Ranges),
-			Style:    convertCollapseStyle(opts.Collapse.Style),
+			Enabled:   opts.Collapse.Enabled,
+			Disabled:  opts.Collapse.Disabled,
+			Ranges:    convertRanges(opts.Collapse.Ranges),
+			Style:     convertCollapseStyle(opts.Collapse.Style),
+			Threshold: opts.Collapse.Threshold,
 		}
 	}
 

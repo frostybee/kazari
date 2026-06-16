@@ -8,6 +8,8 @@ import (
 	"github.com/frostybee/kazari/internal/locale"
 )
 
+func intPtr(n int) *int { return &n }
+
 func TestShouldThresholdCollapse(t *testing.T) {
 	cfg := &config.CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}
 
@@ -25,6 +27,11 @@ func TestShouldThresholdCollapse(t *testing.T) {
 		{"force collapse below threshold", 5, &config.CollapseSpec{Enabled: true}, cfg, true},
 		{"nocollapse above threshold", 50, &config.CollapseSpec{Disabled: true}, cfg, false},
 		{"nocollapse overrides enabled", 50, &config.CollapseSpec{Enabled: true, Disabled: true}, cfg, false},
+		{"per-block threshold below", 18, &config.CollapseSpec{Threshold: intPtr(20)}, cfg, false},
+		{"per-block threshold above", 21, &config.CollapseSpec{Threshold: intPtr(20)}, cfg, true},
+		{"per-block threshold overrides engine", 16, &config.CollapseSpec{Threshold: intPtr(20)}, cfg, false},
+		{"per-block threshold ignored with nocollapse", 21, &config.CollapseSpec{Disabled: true, Threshold: intPtr(20)}, cfg, false},
+		{"per-block threshold ignored with collapse", 5, &config.CollapseSpec{Enabled: true, Threshold: intPtr(20)}, cfg, true},
 	}
 
 	for _, tt := range tests {

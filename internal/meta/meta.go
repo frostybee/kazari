@@ -137,6 +137,15 @@ func Parse(meta string) *ParseResult {
 			}
 			result.Collapse.Style = &s
 
+		case strings.HasPrefix(tok, "collapseThreshold="):
+			val := strings.TrimPrefix(tok, "collapseThreshold=")
+			if n, err := strconv.Atoi(val); err == nil && n > 0 {
+				if result.Collapse == nil {
+					result.Collapse = &config.CollapseSpec{}
+				}
+				result.Collapse.Threshold = &n
+			}
+
 		case strings.HasPrefix(tok, "collapse="):
 			rangeStr := extractBraces(strings.TrimPrefix(tok, "collapse="))
 			if result.Collapse == nil {

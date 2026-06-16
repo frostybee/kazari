@@ -80,6 +80,9 @@ func ShouldThresholdCollapse(lineCount int, spec *config.CollapseSpec, cfg *conf
 		return true
 	}
 	threshold := cfg.LineThreshold
+	if spec != nil && spec.Threshold != nil && *spec.Threshold > 0 {
+		threshold = *spec.Threshold
+	}
 	if threshold <= 0 {
 		threshold = 15
 	}

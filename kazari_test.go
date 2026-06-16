@@ -1643,6 +1643,110 @@ func TestRenderWithMeta_Collapsible_Nocollapse(t *testing.T) {
 	}
 }
 
+func TestRenderWithMeta_Collapsible_PerBlockThreshold_PreventsCollapse(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(16),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
+	)
+
+	code := strings.Repeat("line\n", 15) + "line"
+	html, err := engine.RenderWithMeta(code, "go collapseThreshold=20")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-collapse-btn") {
+		t.Error("per-block threshold=20 should prevent collapse at 16 lines")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_PerBlockThreshold_TriggersCollapse(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(11),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 3}),
+	)
+
+	code := strings.Repeat("line\n", 10) + "line"
+	html, err := engine.RenderWithMeta(code, "go collapseThreshold=10")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-collapse-btn") {
+		t.Error("per-block threshold=10 should trigger collapse at 11 lines")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_PerBlockThreshold_NocollapseWins(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(20),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
+	)
+
+	code := strings.Repeat("line\n", 19) + "line"
+	html, err := engine.RenderWithMeta(code, "go nocollapse collapseThreshold=5")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-collapse-btn") {
+		t.Error("nocollapse should win over per-block threshold")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_PerBlockThreshold_CollapseWins(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(5),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 3}),
+	)
+
+	code := "a\nb\nc\nd\ne"
+	html, err := engine.RenderWithMeta(code, "go collapse collapseThreshold=999")
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-collapse-btn") {
+		t.Error("collapse should force collapse regardless of per-block threshold")
+	}
+}
+
+func TestRender_Collapsible_PerBlockThreshold_StructuredAPI(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(16),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
+	)
+
+	threshold := 20
+	code := strings.Repeat("line\n", 15) + "line"
+	html, err := engine.Render(code, Options{
+		Lang:     "go",
+		Collapse: &CollapseOptions{Threshold: &threshold},
+	})
+	if err != nil {
+		t.Fatalf("Render() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-collapse-btn") {
+		t.Error("structured API threshold=20 should prevent collapse at 16 lines")
+	}
+}
+
 func TestRender_Collapsible_ThresholdAfterFileNameExtraction(t *testing.T) {
 	hl := &mockHighlighter{
 		lightTokens: makeMultiLineTokens(15),

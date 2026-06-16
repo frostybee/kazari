@@ -144,10 +144,11 @@ type Options struct {
 
 // CollapseOptions holds per-block collapse configuration.
 type CollapseOptions struct {
-	Enabled  bool           // true = force threshold-based collapse
-	Disabled bool           // true = force no collapse (nocollapse)
-	Ranges   []Range        // specific ranges to collapse
-	Style    *CollapseStyle // nil = use engine default
+	Enabled   bool           // true = force threshold-based collapse
+	Disabled  bool           // true = force no collapse (nocollapse)
+	Ranges    []Range        // specific ranges to collapse
+	Style     *CollapseStyle // nil = use engine default
+	Threshold *int           // nil = use engine default; overrides engine LineThreshold for this block
 }
 
 // DarkMode controls how dark mode CSS is generated.

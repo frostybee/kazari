@@ -298,6 +298,38 @@ func TestParse_CollapseStyle(t *testing.T) {
 	}
 }
 
+func TestParse_CollapseThreshold(t *testing.T) {
+	result := Parse("go collapseThreshold=20")
+	if result.Collapse == nil || result.Collapse.Threshold == nil {
+		t.Fatal("Collapse.Threshold should not be nil")
+	}
+	if *result.Collapse.Threshold != 20 {
+		t.Errorf("Threshold = %d, want 20", *result.Collapse.Threshold)
+	}
+}
+
+func TestParse_CollapseThreshold_Invalid(t *testing.T) {
+	for _, meta := range []string{"go collapseThreshold=0", "go collapseThreshold=-5", "go collapseThreshold=abc"} {
+		result := Parse(meta)
+		if result.Collapse != nil && result.Collapse.Threshold != nil {
+			t.Errorf("Parse(%q): Threshold should be nil for invalid value", meta)
+		}
+	}
+}
+
+func TestParse_CollapseThreshold_WithStyle(t *testing.T) {
+	result := Parse("go collapseThreshold=20 collapseStyle=collapsible-start")
+	if result.Collapse == nil {
+		t.Fatal("Collapse should not be nil")
+	}
+	if result.Collapse.Threshold == nil || *result.Collapse.Threshold != 20 {
+		t.Error("Threshold should be 20")
+	}
+	if result.Collapse.Style == nil || *result.Collapse.Style != config.CollapseCollapsibleStart {
+		t.Error("Style should be collapsible-start")
+	}
+}
+
 // --- Combined meta strings ---
 
 func TestParse_Combined_AllOptions(t *testing.T) {

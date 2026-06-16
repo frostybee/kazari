@@ -102,6 +102,7 @@ var exampleDescriptions = map[string]string{
 	"inline-markers-single": "Uses single-quoted marker expressions when the highlighted text or meta string needs simpler escaping.",
 	"combined-markers":      "Layers line markers, inline matches, and focused ranges in the same code block.",
 	"collapse-threshold":    "Automatically collapses long blocks when they exceed the engine's configured line threshold.",
+	"collapse-per-block":    "Overrides the engine threshold for a single block via collapseThreshold=N in the meta string.",
 	"collapse-range":        "Hides a selected line range behind an expandable summary to keep the main logic visible.",
 	"collapse-multiple":     "Collapses multiple independent ranges so distant supporting sections stay compact.",
 	"collapse-gaps":         "Shows omitted regions as gap indicators while preserving important marked lines around them.",
@@ -606,6 +607,13 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 }))
 html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "server.go"})`)},
 			},
+			metaGoExample(b, collapseEngine, "collapse-per-block", "Per-block threshold override", "Per-block threshold", thresholdCode,
+				`go title="server.go" collapseThreshold=20`,
+				`threshold := 20
+html, err := engine.Render(code, kazari.Options{
+	Lang: "go", Title: "server.go",
+	Collapse: &kazari.CollapseOptions{Threshold: &threshold},
+})`),
 			metaGoExample(b, collapseEngine, "collapse-range", "Range-based (imports collapsed)", "Range", rangeCode,
 				`go title="calc.go" showLineNumbers collapse={3-8}`,
 				`html, err := engine.RenderWithMeta(code, `+"`"+`go title="calc.go" showLineNumbers collapse={3-8}`+"`"+`)`),

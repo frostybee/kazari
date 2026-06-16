@@ -157,10 +157,11 @@ type CollapsibleConfig struct {
 
 // CollapseSpec holds per-block collapse directives from meta string or Options.
 type CollapseSpec struct {
-	Enabled  bool
-	Disabled bool
-	Ranges   []LineRange
-	Style    *CollapseStyle // nil = use engine default
+	Enabled   bool
+	Disabled  bool
+	Ranges    []LineRange
+	Style     *CollapseStyle // nil = use engine default
+	Threshold *int           // nil = use engine default; overrides CollapsibleConfig.LineThreshold
 }
 
 // CollapseRange is a validated, render-ready collapse range with pre-computed metadata.
