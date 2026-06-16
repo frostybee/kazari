@@ -123,6 +123,7 @@ var exampleDescriptions = map[string]string{
 	"theme-customizer":      "Adjusts resolved theme colors through a callback before Kazari generates the CSS variables.",
 	"theme-adjustments":     "Applies an OKLCH tint to generated theme colors while preserving their visual relationships.",
 	"scoped-css":            "Emits theme variables beneath a custom selector so Kazari styles stay inside a chosen container.",
+	"per-block-theme-toggle": "Adds a per-block toggle button that lets readers switch an individual code block between light and dark themes independently of the page.",
 	"locale-french":         "Localizes built-in copy and fullscreen controls through the engine's locale setting.",
 	"file-icons":            "Resolves a custom icon from each title's file extension and places it in the frame toolbar.",
 	"lang-icon-only":        `Replaces the language text badge with a CSS icon slot that the consumer styles via [data-lang] selectors. Color SVG icons are available from <a href="https://devicon.dev/" target="_blank" rel="noopener">Devicon</a>.`,
@@ -797,6 +798,14 @@ html, err := engine.Render(code, kazari.Options{
 	tintedHTML := b.render(tintedEngine, `fmt.Println("Backgrounds tinted toward teal in OKLCH space")`, kazari.Options{Lang: "go", Title: "tinted-theme.go"})
 	scopedEngine := b.engine(kazari.WithThemeCSSRoot(".kazari-scoped"))
 	scopedHTML := b.render(scopedEngine, `fmt.Println("CSS vars scoped to .kazari-scoped")`, kazari.Options{Lang: "go", Title: "scoped.go"})
+	toggleEngine := b.engine(kazari.WithThemeToggle(true))
+	toggleHTML := joinHTML(
+		b.renderMeta(toggleEngine, `func main() {
+    fmt.Println("Toggle this block's theme!")
+}`, `go title="theme-toggle.go" theme="dracula,github-light"`),
+		b.renderMeta(toggleEngine, `const greeting = "Each block toggles independently";
+console.log(greeting);`, `javascript title="demo.js" theme="dracula,github-light"`),
+	)
 
 	themes := Category{
 		ID:          "themes",
@@ -861,6 +870,17 @@ engine := kazari.New(
 				WrapperClass: "kazari-scoped",
 				Recipes: []Recipe{recipe("Go", `engine := kazari.New(kazari.WithThemeCSSRoot(".kazari-scoped"))
 css := engine.CSS()`)},
+			},
+			{
+				ID:       "per-block-theme-toggle",
+				Title:    "Per-Block Theme Toggle",
+				NavTitle: "Theme toggle",
+				HTML:     toggleHTML,
+				Recipes: []Recipe{recipe("Go", `engine := kazari.New(
+    kazari.WithHighlighter(highlighter),
+    kazari.WithThemeToggle(true),
+)
+html, err := engine.Render(code, kazari.Options{Lang: "go", Title: "theme-toggle.go"})`)},
 			},
 		},
 	}
@@ -1011,6 +1031,7 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		customizerEngine.ThemeCSS(),
 		tintedEngine.ThemeCSS(),
 		scopedEngine.ThemeCSS(),
+		toggleEngine.ThemeCSS(),
 		`.kazari-block .kz-lang-icon { display:inline-block; width:var(--kz-lang-icon-size,1.25rem); height:var(--kz-lang-icon-size,1.25rem); margin:var(--kz-lang-icon-margin,0); opacity:var(--kz-lang-icon-opacity,0.8); vertical-align:middle; flex-shrink:0; }`,
 		`.kazari-block .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
 	}, "\n")
@@ -1019,7 +1040,8 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 	if svgCategory != nil {
 		categories = append(categories, *svgCategory)
 	}
-	return categories, css, collapseEngine.JS(), nil
+	jsOut := collapseEngine.JS() + toggleEngine.JS()
+	return categories, css, jsOut, nil
 }
 
 func metaGoExample(b *catalogBuilder, engine *kazari.Engine, id, title, navTitle, code, meta, goRecipe string) Example {

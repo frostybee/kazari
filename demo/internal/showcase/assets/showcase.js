@@ -70,7 +70,7 @@
   if (saved === 'dark') applyTheme(true);
 
   var themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
+  if (themeToggle && themeToggle.tagName === 'BUTTON') {
     if (saved === 'dark') {
       themeToggle.setAttribute('aria-pressed', 'true');
       themeToggle.textContent = 'Light mode';

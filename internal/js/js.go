@@ -38,6 +38,9 @@ func Generate(cfg *config.Config) string {
 	if cfg.CodeGroups {
 		sb.WriteString(readJS("codegroup.js"))
 	}
+	if cfg.ThemeToggle && cfg.DarkTheme != "" {
+		sb.WriteString(readJS("theme-toggle.js"))
+	}
 
 	content := sb.String()
 	if content == "" {

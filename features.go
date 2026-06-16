@@ -18,6 +18,10 @@ func WithWrapButton(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.WrapButton = enabled }
 }
 
+func WithThemeToggle(enabled bool) Option {
+	return func(b *engineBuilder) { b.cfg.ThemeToggle = enabled }
+}
+
 func WithLineNumbers(enabled bool) Option {
 	return func(b *engineBuilder) {
 		b.cfg.Defaults.LineNumbers = enabled

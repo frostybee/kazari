@@ -2,6 +2,7 @@ package render
 
 import (
 	"fmt"
+	"hash/fnv"
 	"html"
 	"strings"
 
@@ -38,6 +39,10 @@ const wrapSVG = `<svg class="kz-wrap-icon" aria-hidden="true" fill="none" stroke
 
 const wrapOffSVG = `<svg class="kz-wrap-off-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg>`
 
+const themeToggleLightSVG = `<svg class="kz-theme-toggle-light-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`
+
+const themeToggleDarkSVG = `<svg class="kz-theme-toggle-dark-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`
+
 // RenderBlock produces the full HTML for a code block.
 func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.Config) string {
 	var sb strings.Builder
@@ -53,6 +58,9 @@ func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.
 	attrs := fmt.Sprintf(" class=\"%s\"", wrapperClass)
 	if cfg.DataLineCount {
 		attrs += fmt.Sprintf(" data-lines=\"%d\"", len(lines))
+	}
+	if cfg.ThemeToggle && cfg.DarkTheme != "" {
+		attrs += fmt.Sprintf(" data-kz-id=\"%s\"", blockID(resolved.RawCode))
 	}
 	if resolved.ThemeOverrideStyle != "" {
 		attrs += fmt.Sprintf(" style=\"%s\"", html.EscapeString(resolved.ThemeOverrideStyle))
@@ -112,13 +120,16 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	} else {
 		sb.WriteString(fmt.Sprintf("<span class=\"sr-only\">%s</span>", html.EscapeString(cfg.UIStrings.TerminalWindowLabel)))
 	}
-	if cfg.CopyButton || cfg.WrapButton || cfg.FullscreenButton {
+	if cfg.CopyButton || cfg.WrapButton || cfg.FullscreenButton || (cfg.ThemeToggle && cfg.DarkTheme != "") {
 		sb.WriteString("<div class=\"kz-terminal-actions\">")
 		if cfg.CopyButton {
 			renderCopyButton(sb, resolved.RawCode, cfg)
 		}
 		if cfg.WrapButton {
 			renderWrapButton(sb, resolved, cfg)
+		}
+		if cfg.ThemeToggle && cfg.DarkTheme != "" {
+			renderThemeToggleButton(sb, cfg)
 		}
 		if cfg.FullscreenButton {
 			renderFontControls(sb, cfg)
@@ -170,6 +181,9 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 	}
 	if cfg.WrapButton {
 		renderWrapButton(sb, resolved, cfg)
+	}
+	if cfg.ThemeToggle && cfg.DarkTheme != "" {
+		renderThemeToggleButton(sb, cfg)
 	}
 	if cfg.FullscreenButton {
 		renderFontControls(sb, cfg)
@@ -255,6 +269,35 @@ func renderFontControls(sb *strings.Builder, cfg *config.Config) {
 	sb.WriteString(fontIncreaseSVG)
 	sb.WriteString("</button>")
 	sb.WriteString("</div>")
+}
+
+func renderThemeToggleButton(sb *strings.Builder, cfg *config.Config) {
+	darkModeStr := "selector"
+	switch cfg.DarkMode.Kind {
+	case config.DarkModeMediaQueryKind:
+		darkModeStr = "media"
+	case config.DarkModeBothKind:
+		darkModeStr = "both"
+	}
+	sb.WriteString(fmt.Sprintf(
+		"<button class=\"kz-theme-toggle-btn\" aria-pressed=\"false\" aria-label=\"%s\" data-tooltip=\"%s\" data-label=\"%s\" data-toggled=\"%s\" data-announcement=\"%s\" data-kz-dark-selector=\"%s\" data-kz-dark-mode=\"%s\">",
+		html.EscapeString(cfg.UIStrings.ThemeToggleLabel),
+		html.EscapeString(cfg.UIStrings.ThemeToggleLabel),
+		html.EscapeString(cfg.UIStrings.ThemeToggleLabel),
+		html.EscapeString(cfg.UIStrings.ThemeToggleLabel),
+		html.EscapeString(cfg.UIStrings.ThemeToggleAnnouncement),
+		html.EscapeString(cfg.DarkMode.Selector),
+		darkModeStr,
+	))
+	sb.WriteString(themeToggleLightSVG)
+	sb.WriteString(themeToggleDarkSVG)
+	sb.WriteString("</button>")
+}
+
+func blockID(code string) string {
+	h := fnv.New32a()
+	h.Write([]byte(code))
+	return fmt.Sprintf("%08x", h.Sum32())
 }
 
 func renderFullscreenHint(sb *strings.Builder, cfg *config.Config) {

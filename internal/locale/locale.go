@@ -19,8 +19,10 @@ type UIStrings struct {
 	CollapsedAnnouncement string
 	CollapsedLineSingular string
 	CollapsedLinePlural   string
-	CodeGroupFallback     string
-	TerminalWindowLabel   string
+	CodeGroupFallback        string
+	TerminalWindowLabel      string
+	ThemeToggleLabel         string
+	ThemeToggleAnnouncement  string
 }
 
 var locales = map[string]UIStrings{
@@ -41,8 +43,10 @@ var locales = map[string]UIStrings{
 		CollapsedAnnouncement: "Code block collapsed",
 		CollapsedLineSingular: "1 collapsed line",
 		CollapsedLinePlural:   "%d collapsed lines",
-		CodeGroupFallback:     "Code",
-		TerminalWindowLabel:   "Terminal window",
+		CodeGroupFallback:        "Code",
+		TerminalWindowLabel:      "Terminal window",
+		ThemeToggleLabel:         "Toggle theme",
+		ThemeToggleAnnouncement:  "Theme toggled",
 	},
 	"fr-FR": {
 		CopyLabel:             "Copier",
@@ -61,8 +65,10 @@ var locales = map[string]UIStrings{
 		CollapsedAnnouncement: "Bloc de code réduit",
 		CollapsedLineSingular: "1 ligne masquée",
 		CollapsedLinePlural:   "%d lignes masquées",
-		CodeGroupFallback:     "Code",
-		TerminalWindowLabel:   "Fenêtre de terminal",
+		CodeGroupFallback:        "Code",
+		TerminalWindowLabel:      "Fenêtre de terminal",
+		ThemeToggleLabel:         "Basculer le thème",
+		ThemeToggleAnnouncement:  "Thème basculé",
 	},
 	"ja-JP": {
 		CopyLabel:             "コピー",
@@ -81,8 +87,10 @@ var locales = map[string]UIStrings{
 		CollapsedAnnouncement: "コードブロックを折りたたみました",
 		CollapsedLineSingular: "1 行を折りたたみ",
 		CollapsedLinePlural:   "%d 行を折りたたみ",
-		CodeGroupFallback:     "コード",
-		TerminalWindowLabel:   "ターミナルウィンドウ",
+		CodeGroupFallback:        "コード",
+		TerminalWindowLabel:      "ターミナルウィンドウ",
+		ThemeToggleLabel:         "テーマ切替",
+		ThemeToggleAnnouncement:  "テーマを切り替えました",
 	},
 }
 
@@ -138,6 +146,10 @@ func applyOverride(s *UIStrings, key, val string) {
 		s.CodeGroupFallback = val
 	case "terminal.label":
 		s.TerminalWindowLabel = val
+	case "theme.toggle":
+		s.ThemeToggleLabel = val
+	case "theme.toggle.announcement":
+		s.ThemeToggleAnnouncement = val
 	}
 }
 

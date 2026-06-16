@@ -60,8 +60,8 @@ func TestBuildCatalogParityAndCompleteness(t *testing.T) {
 	if len(nuri.Page.Categories) != 8 {
 		t.Fatalf("category count = %d, want 8", len(nuri.Page.Categories))
 	}
-	if len(nuriIDs) != 45 {
-		t.Fatalf("example count = %d, want 45", len(nuriIDs))
+	if len(nuriIDs) != 46 {
+		t.Fatalf("example count = %d, want 46", len(nuriIDs))
 	}
 
 	seen := make(map[string]bool, len(nuriIDs))

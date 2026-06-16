@@ -203,6 +203,7 @@ type Config struct {
 	CopyButton         bool
 	FullscreenButton   bool
 	WrapButton         bool
+	ThemeToggle        bool
 	FrameDetection     bool
 	FileNameExtraction bool
 	LanguageBadge      bool

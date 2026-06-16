@@ -679,3 +679,124 @@ func TestBuildTokenStyle_PrefersResolvedMarkerBGs(t *testing.T) {
 		t.Errorf("contrast adjustment should differ between page and override marker backgrounds, both produced %q", pageStyle)
 	}
 }
+
+// --- Theme toggle button ---
+
+func TestRenderBlock_ThemeToggleButton(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = true
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, "kz-theme-toggle-btn") {
+		t.Error("expected theme toggle button when ThemeToggle is enabled")
+	}
+	if !strings.Contains(out, `data-kz-dark-selector=".dark"`) {
+		t.Error("expected data-kz-dark-selector attribute on toggle button")
+	}
+	if !strings.Contains(out, `data-kz-dark-mode="selector"`) {
+		t.Error("expected data-kz-dark-mode attribute on toggle button")
+	}
+	if !strings.Contains(out, "kz-theme-toggle-light-icon") {
+		t.Error("expected light icon SVG in toggle button")
+	}
+	if !strings.Contains(out, "kz-theme-toggle-dark-icon") {
+		t.Error("expected dark icon SVG in toggle button")
+	}
+}
+
+func TestRenderBlock_ThemeToggleButton_Disabled(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = false
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if strings.Contains(out, "kz-theme-toggle-btn") {
+		t.Error("should not contain theme toggle button when ThemeToggle is disabled")
+	}
+}
+
+func TestRenderBlock_ThemeToggleButton_NoDarkTheme(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = true
+	cfg.DarkTheme = ""
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if strings.Contains(out, "kz-theme-toggle-btn") {
+		t.Error("should not contain theme toggle button when no dark theme")
+	}
+}
+
+func TestRenderBlock_ThemeToggle_BlockID(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = true
+	r := resolved()
+	r.RawCode = "hello world"
+	lines := []TokenLine{simpleLine("hello world", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, "data-kz-id=") {
+		t.Error("expected data-kz-id attribute when ThemeToggle is enabled")
+	}
+}
+
+func TestRenderBlock_ThemeToggle_NoBlockID_WhenDisabled(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = false
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if strings.Contains(out, "data-kz-id=") {
+		t.Error("should not have data-kz-id when ThemeToggle is disabled")
+	}
+}
+
+func TestRenderBlock_ThemeToggle_MediaQueryMode(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = true
+	cfg.DarkMode.Kind = config.DarkModeMediaQueryKind
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, `data-kz-dark-mode="media"`) {
+		t.Error("expected data-kz-dark-mode=media for media query strategy")
+	}
+}
+
+func TestRenderBlock_ThemeToggle_TerminalFrame(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ThemeToggle = true
+	r := resolved()
+	r.Frame = config.FrameTerminal
+	lines := []TokenLine{simpleLine("$ echo hi", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, "kz-theme-toggle-btn") {
+		t.Error("expected theme toggle button in terminal frame")
+	}
+}
+
+func TestBlockID_Deterministic(t *testing.T) {
+	a := blockID("hello world")
+	b := blockID("hello world")
+	if a != b {
+		t.Error("blockID should be deterministic")
+	}
+	c := blockID("different code")
+	if a == c {
+		t.Error("blockID should differ for different content")
+	}
+}

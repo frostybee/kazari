@@ -523,6 +523,82 @@ func writeVarLines(sb *strings.Builder, vars []struct{ name, value string }) {
 	}
 }
 
+// ThemeToggleCSS generates CSS rules for per-block theme toggling.
+// These rules use data-kz-theme="dark"|"light" on .kazari-block to
+// override the page-level theme for individual blocks.
+func ThemeToggleCSS(cfg *config.Config, light, dark ThemeColors) string {
+	if cfg.DarkTheme == "" {
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Force-dark chrome variables on the block.
+	sb.WriteString(".kazari-block[data-kz-theme=\"dark\"] { ")
+	for _, v := range blockOverridableVars(dark, cfg) {
+		if v.value != "" {
+			sb.WriteString(fmt.Sprintf("%s: %s; ", v.name, v.value))
+		}
+	}
+	if cfg.Collapsible != nil {
+		sb.WriteString("--kz-collapse-gradient-end: var(--kz-editor-bg); ")
+	}
+	sb.WriteString("}\n")
+
+	// Force-light chrome variables on the block.
+	sb.WriteString(".kazari-block[data-kz-theme=\"light\"] { ")
+	for _, v := range blockOverridableVars(light, cfg) {
+		if v.value != "" {
+			sb.WriteString(fmt.Sprintf("%s: %s; ", v.name, v.value))
+		}
+	}
+	if cfg.Collapsible != nil {
+		sb.WriteString("--kz-collapse-gradient-end: var(--kz-editor-bg); ")
+	}
+	sb.WriteString("}\n")
+
+	// Force-dark token switching (overrides page-level light or dark rules).
+	sb.WriteString(".kazari-block[data-kz-theme=\"dark\"] .kz-line span[style^=\"--\"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n")
+
+	// Force-light token switching (overrides page-level dark rules).
+	sb.WriteString(".kazari-block[data-kz-theme=\"light\"] .kz-line span[style^=\"--\"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n")
+
+	// kz-themed + force-dark: remap override dark vars onto kz-* names.
+	sb.WriteString(themedToggleDarkRule(cfg))
+	// kz-themed + force-light: remap override light vars onto kz-* names.
+	sb.WriteString(themedToggleLightRule(cfg))
+
+	return sb.String()
+}
+
+func themedToggleDarkRule(cfg *config.Config) string {
+	var sb strings.Builder
+	sb.WriteString(".kazari-block.kz-themed[data-kz-theme=\"dark\"] { ")
+	for _, name := range overridableVarNames(cfg) {
+		suffix := strings.TrimPrefix(name, "--kz-")
+		sb.WriteString(fmt.Sprintf("%s: var(--kz-ovd-%s, var(--kz-ovl-%s)); ", name, suffix, suffix))
+	}
+	if cfg.Collapsible != nil {
+		sb.WriteString("--kz-collapse-gradient-end: var(--kz-editor-bg); ")
+	}
+	sb.WriteString("}\n")
+	return sb.String()
+}
+
+func themedToggleLightRule(cfg *config.Config) string {
+	var sb strings.Builder
+	sb.WriteString(".kazari-block.kz-themed[data-kz-theme=\"light\"] { ")
+	for _, name := range overridableVarNames(cfg) {
+		suffix := strings.TrimPrefix(name, "--kz-")
+		sb.WriteString(fmt.Sprintf("%s: var(--kz-ovl-%s); ", name, suffix))
+	}
+	if cfg.Collapsible != nil {
+		sb.WriteString("--kz-collapse-gradient-end: var(--kz-editor-bg); ")
+	}
+	sb.WriteString("}\n")
+	return sb.String()
+}
+
 func writeStyleOverrides(sb *strings.Builder, overrides map[string]config.StyleValue, isDark bool) {
 	if len(overrides) == 0 {
 		return

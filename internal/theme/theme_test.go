@@ -532,3 +532,100 @@ func TestGenerateVars_DifferentialEmission_IdenticalThemes(t *testing.T) {
 		t.Error("identical themes should produce no vars in dark block")
 	}
 }
+
+// --- Per-block theme toggle ---
+
+func TestThemeToggleCSS_NoDarkTheme(t *testing.T) {
+	cfg := testConfig()
+	cfg.DarkTheme = ""
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if css != "" {
+		t.Error("should return empty string when no dark theme configured")
+	}
+}
+
+func TestThemeToggleCSS_ForceDarkTokens(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, `[data-kz-theme="dark"] .kz-line span[style^="--"]`) {
+		t.Error("should contain force-dark token rule")
+	}
+	if !strings.Contains(css, "color: var(--sd, inherit)") {
+		t.Error("force-dark token rule should use --sd variable")
+	}
+}
+
+func TestThemeToggleCSS_ForceLightTokens(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, `[data-kz-theme="light"] .kz-line span[style^="--"]`) {
+		t.Error("should contain force-light token rule")
+	}
+	if !strings.Contains(css, "color: var(--sl, inherit)") {
+		t.Error("force-light token rule should use --sl variable")
+	}
+}
+
+func TestThemeToggleCSS_ForceDarkChromeVars(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, `[data-kz-theme="dark"] { --kz-editor-bg: #1e1e1e;`) {
+		t.Error("should emit dark editor-bg on force-dark block")
+	}
+}
+
+func TestThemeToggleCSS_ForceLightChromeVars(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, `[data-kz-theme="light"] { --kz-editor-bg: #ffffff;`) {
+		t.Error("should emit light editor-bg on force-light block")
+	}
+}
+
+func TestThemeToggleCSS_ThemedToggleDark(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, `.kz-themed[data-kz-theme="dark"]`) {
+		t.Error("should contain kz-themed + force-dark combo rule")
+	}
+	if !strings.Contains(css, "var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg))") {
+		t.Error("kz-themed + force-dark should remap ovd vars with ovl fallback")
+	}
+}
+
+func TestThemeToggleCSS_ThemedToggleLight(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	if !strings.Contains(css, `.kz-themed[data-kz-theme="light"]`) {
+		t.Error("should contain kz-themed + force-light combo rule")
+	}
+	if !strings.Contains(css, "var(--kz-ovl-editor-bg)") {
+		t.Error("kz-themed + force-light should remap ovl vars")
+	}
+}
+
+func TestThemeToggleCSS_CollapsibleGradient(t *testing.T) {
+	cfg := testConfig()
+	cfg.ThemeToggle = true
+	cfg.Collapsible = &config.CollapsibleConfig{LineThreshold: 10, PreviewLines: 3}
+	css := ThemeToggleCSS(cfg, lightColors, darkColors)
+
+	count := strings.Count(css, "--kz-collapse-gradient-end: var(--kz-editor-bg)")
+	if count < 4 {
+		t.Errorf("expected gradient-end redeclaration in all 4 toggle rules, got %d", count)
+	}
+}

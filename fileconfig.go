@@ -21,6 +21,7 @@ type FileConfig struct {
 	CopyButton               *bool                             `yaml:"copyButton" json:"copyButton"`
 	FullscreenButton         *bool                             `yaml:"fullscreenButton" json:"fullscreenButton"`
 	WrapButton               *bool                             `yaml:"wrapButton" json:"wrapButton"`
+	ThemeToggle              *bool                             `yaml:"themeToggle" json:"themeToggle"`
 	LineNumbers              *bool                             `yaml:"lineNumbers" json:"lineNumbers"`
 	FrameDetection           *bool                             `yaml:"frameDetection" json:"frameDetection"`
 	FileNameExtraction       *bool                             `yaml:"fileNameExtraction" json:"fileNameExtraction"`
@@ -264,6 +265,9 @@ func FileConfigToOptions(fc *FileConfig) ([]Option, error) {
 	}
 	if fc.WrapButton != nil {
 		opts = append(opts, WithWrapButton(*fc.WrapButton))
+	}
+	if fc.ThemeToggle != nil {
+		opts = append(opts, WithThemeToggle(*fc.ThemeToggle))
 	}
 	if fc.LineNumbers != nil {
 		opts = append(opts, WithLineNumbers(*fc.LineNumbers))

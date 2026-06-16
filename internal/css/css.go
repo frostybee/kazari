@@ -32,6 +32,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	// Dynamic: theme variables and token switching
 	sb.WriteString(theme.GenerateVars(cfg, light, dark))
 	sb.WriteString(theme.TokenSwitchingCSS(cfg))
+	if cfg.ThemeToggle && cfg.DarkTheme != "" {
+		sb.WriteString(theme.ThemeToggleCSS(cfg, light, dark))
+	}
 
 	// Static: always included
 	sb.WriteString(readCSS("base.css"))
@@ -80,6 +83,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	if cfg.CodeGroups {
 		sb.WriteString(readCSS("codegroup.css"))
 	}
+	if cfg.ThemeToggle {
+		sb.WriteString(readCSS("theme-toggle.css"))
+	}
 
 	content := sb.String()
 
@@ -100,6 +106,12 @@ func GenerateThemeOnly(cfg *config.Config, light, dark theme.ThemeColors) string
 	var sb strings.Builder
 	sb.WriteString(theme.GenerateVars(cfg, light, dark))
 	sb.WriteString(theme.TokenSwitchingCSS(cfg))
+	if cfg.ThemeToggle && cfg.DarkTheme != "" {
+		sb.WriteString(theme.ThemeToggleCSS(cfg, light, dark))
+	}
+	if cfg.ThemeToggle {
+		sb.WriteString(readCSS("theme-toggle.css"))
+	}
 
 	content := sb.String()
 	if cfg.CascadeLayer != "" {
