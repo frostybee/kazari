@@ -55,6 +55,9 @@ func RenderBlock(lines []TokenLine, resolved *config.ResolvedBlock, cfg *config.
 	if resolved.CollapseThreshold && (resolved.CollapseConfig == nil || resolved.CollapseConfig.DefaultCollapsed) {
 		wrapperClass += " kz-collapsed"
 	}
+	if cfg.ContentExclusion {
+		wrapperClass += " not-content"
+	}
 	attrs := fmt.Sprintf(" class=\"%s\"", wrapperClass)
 	if cfg.DataLineCount {
 		attrs += fmt.Sprintf(" data-lines=\"%d\"", len(lines))

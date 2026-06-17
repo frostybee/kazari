@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -317,7 +318,7 @@ func FileConfigToOptions(fc *FileConfig) ([]Option, error) {
 		opts = append(opts, WithTabWidth(*fc.TabWidth))
 	}
 	if fc.MinContrast != nil {
-		opts = append(opts, WithMinSyntaxHighlightingColorContrast(*fc.MinContrast))
+		opts = append(opts, WithMinContrast(*fc.MinContrast))
 	}
 	if fc.CascadeLayer != nil {
 		opts = append(opts, WithCascadeLayer(*fc.CascadeLayer))
@@ -542,8 +543,11 @@ func WithConfigDir(dir string) Option {
 			}
 			opts, err := LoadConfig(path)
 			if err != nil {
+				msg := fmt.Sprintf("kazari: loading config %s: %v", path, err)
 				if b.cfg.WarningHandler != nil {
-					b.cfg.WarningHandler(fmt.Sprintf("kazari: loading config %s: %v", path, err))
+					b.cfg.WarningHandler(msg)
+				} else {
+					log.Print(msg)
 				}
 				return
 			}

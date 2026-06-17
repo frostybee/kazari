@@ -629,3 +629,24 @@ func TestThemeToggleCSS_CollapsibleGradient(t *testing.T) {
 		t.Errorf("expected gradient-end redeclaration in all 4 toggle rules, got %d", count)
 	}
 }
+
+func TestGenerateVars_ANSIPaletteVars(t *testing.T) {
+	cfg := testConfig()
+	css := GenerateVars(cfg, lightColors, darkColors)
+
+	checks := []struct {
+		varName  string
+		expected string
+	}{
+		{"--kz-ansi-red", "#cc0000"},
+		{"--kz-ansi-green", "#4e9a06"},
+		{"--kz-ansi-bright-white", "#eeeeec"},
+		{"--kz-ansi-black", "#000000"},
+	}
+	for _, c := range checks {
+		needle := c.varName + ": " + c.expected
+		if !strings.Contains(css, needle) {
+			t.Errorf("CSS should contain %q", needle)
+		}
+	}
+}

@@ -30,11 +30,11 @@ func TestParse_SingleColor(t *testing.T) {
 	if tok.Content != "hello" {
 		t.Errorf("content = %q, want %q", tok.Content, "hello")
 	}
-	if tok.LightColor != "#cc0000" {
-		t.Errorf("light color = %q, want %q", tok.LightColor, "#cc0000")
+	if tok.LightColor != "var(--kz-ansi-red)" {
+		t.Errorf("light color = %q, want %q", tok.LightColor, "var(--kz-ansi-red)")
 	}
-	if tok.DarkColor != "#cc0000" {
-		t.Errorf("dark color = %q, want %q", tok.DarkColor, "#cc0000")
+	if tok.DarkColor != "var(--kz-ansi-red)" {
+		t.Errorf("dark color = %q, want %q", tok.DarkColor, "var(--kz-ansi-red)")
 	}
 }
 
@@ -47,10 +47,10 @@ func TestParse_MultiColorLine(t *testing.T) {
 	if len(tokens) != 2 {
 		t.Fatalf("expected 2 tokens, got %d", len(tokens))
 	}
-	if tokens[0].Content != "red" || tokens[0].LightColor != "#cc0000" {
+	if tokens[0].Content != "red" || tokens[0].LightColor != "var(--kz-ansi-red)" {
 		t.Errorf("token 0: content=%q color=%q", tokens[0].Content, tokens[0].LightColor)
 	}
-	if tokens[1].Content != "green" || tokens[1].LightColor != "#4e9a06" {
+	if tokens[1].Content != "green" || tokens[1].LightColor != "var(--kz-ansi-green)" {
 		t.Errorf("token 1: content=%q color=%q", tokens[1].Content, tokens[1].LightColor)
 	}
 }
@@ -61,7 +61,7 @@ func TestParse_BoldAndColorCombined(t *testing.T) {
 	if tok.Content != "warn" {
 		t.Errorf("content = %q, want %q", tok.Content, "warn")
 	}
-	if tok.LightColor != "#c4a000" {
+	if tok.LightColor != "var(--kz-ansi-yellow)" {
 		t.Errorf("color = %q, want yellow", tok.LightColor)
 	}
 	if tok.FontStyle&2 == 0 {
@@ -74,10 +74,10 @@ func TestParse_StateAcrossLines(t *testing.T) {
 	if len(lines) != 2 {
 		t.Fatalf("expected 2 lines, got %d", len(lines))
 	}
-	if lines[0].Tokens[0].LightColor != "#cc0000" {
+	if lines[0].Tokens[0].LightColor != "var(--kz-ansi-red)" {
 		t.Error("line 1 should be red")
 	}
-	if lines[1].Tokens[0].LightColor != "#cc0000" {
+	if lines[1].Tokens[0].LightColor != "var(--kz-ansi-red)" {
 		t.Error("line 2 should still be red (state carries over)")
 	}
 }
@@ -112,10 +112,10 @@ func TestParse_24BitRGB(t *testing.T) {
 func TestParse_BackgroundColor(t *testing.T) {
 	lines := Parse("\x1b[42mtext\x1b[0m")
 	tok := lines[0].Tokens[0]
-	if tok.LightBG != "#4e9a06" {
+	if tok.LightBG != "var(--kz-ansi-green)" {
 		t.Errorf("background = %q, want green", tok.LightBG)
 	}
-	if tok.DarkBG != "#4e9a06" {
+	if tok.DarkBG != "var(--kz-ansi-green)" {
 		t.Errorf("dark bg = %q, want green", tok.DarkBG)
 	}
 }
@@ -184,8 +184,8 @@ func TestParse_MalformedSequence(t *testing.T) {
 func TestParse_BrightColors(t *testing.T) {
 	lines := Parse("\x1b[90mtext\x1b[0m")
 	tok := lines[0].Tokens[0]
-	if tok.LightColor != "#555753" {
-		t.Errorf("bright black = %q, want #555753", tok.LightColor)
+	if tok.LightColor != "var(--kz-ansi-bright-black)" {
+		t.Errorf("bright black = %q, want var(--kz-ansi-bright-black)", tok.LightColor)
 	}
 }
 
@@ -211,7 +211,7 @@ func TestParse_NoEmptyTokens(t *testing.T) {
 	if len(tokens) != 1 {
 		t.Fatalf("expected 1 token (consecutive escapes merged), got %d", len(tokens))
 	}
-	if tokens[0].LightColor != "#cc0000" {
+	if tokens[0].LightColor != "var(--kz-ansi-red)" {
 		t.Errorf("color = %q, want red", tokens[0].LightColor)
 	}
 	if tokens[0].FontStyle&2 == 0 {
@@ -276,10 +276,10 @@ func TestParse_Color256_Grayscale(t *testing.T) {
 func TestParse_BrightBackground(t *testing.T) {
 	lines := Parse("\x1b[101mtext\x1b[0m")
 	tok := lines[0].Tokens[0]
-	if tok.LightBG != "#ef2929" {
-		t.Errorf("bright red bg = %q, want #ef2929", tok.LightBG)
+	if tok.LightBG != "var(--kz-ansi-bright-red)" {
+		t.Errorf("bright red bg = %q, want var(--kz-ansi-bright-red)", tok.LightBG)
 	}
-	if tok.DarkBG != "#ef2929" {
-		t.Errorf("dark bright red bg = %q, want #ef2929", tok.DarkBG)
+	if tok.DarkBG != "var(--kz-ansi-bright-red)" {
+		t.Errorf("dark bright red bg = %q, want var(--kz-ansi-bright-red)", tok.DarkBG)
 	}
 }

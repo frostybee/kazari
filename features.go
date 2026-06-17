@@ -80,7 +80,7 @@ func WithTerminalCommentStripping(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.TerminalCommentStripping = enabled }
 }
 
-func WithMinSyntaxHighlightingColorContrast(ratio float64) Option {
+func WithMinContrast(ratio float64) Option {
 	return func(b *engineBuilder) { b.cfg.MinContrast = ratio }
 }
 

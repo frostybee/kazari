@@ -1100,7 +1100,12 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 	if svgCategory != nil {
 		categories = append(categories, *svgCategory)
 	}
-	jsOut := collapseEngine.JS() + toggleEngine.JS()
+	jsEngine := b.engine(
+		kazari.WithCollapsible(kazari.CollapsibleConfig{LineThreshold: 1}),
+		kazari.WithThemeToggle(true),
+	)
+	jsEngine.EnableCodeGroups()
+	jsOut := jsEngine.JS()
 	return categories, css, jsOut, nil
 }
 

@@ -27,6 +27,18 @@ var standardColors = [16]string{
 	"#eeeeec", // 15 bright white
 }
 
+var ansiVarNames = [16]string{
+	"--kz-ansi-black", "--kz-ansi-red", "--kz-ansi-green", "--kz-ansi-yellow",
+	"--kz-ansi-blue", "--kz-ansi-magenta", "--kz-ansi-cyan", "--kz-ansi-white",
+	"--kz-ansi-bright-black", "--kz-ansi-bright-red", "--kz-ansi-bright-green",
+	"--kz-ansi-bright-yellow", "--kz-ansi-bright-blue", "--kz-ansi-bright-magenta",
+	"--kz-ansi-bright-cyan", "--kz-ansi-bright-white",
+}
+
+func standardColorVar(idx int) string {
+	return "var(" + ansiVarNames[idx] + ")"
+}
+
 type state struct {
 	fg        string
 	bg        string
@@ -142,21 +154,21 @@ func applyParams(params string, st *state) {
 		case code == 29:
 			st.fontStyle &^= 8
 		case code >= 30 && code <= 37:
-			st.fg = standardColors[code-30]
+			st.fg = standardColorVar(code - 30)
 		case code == 38:
 			i = applyExtendedColor(codes, i, &st.fg)
 		case code == 39:
 			st.fg = ""
 		case code >= 40 && code <= 47:
-			st.bg = standardColors[code-40]
+			st.bg = standardColorVar(code - 40)
 		case code == 48:
 			i = applyExtendedColor(codes, i, &st.bg)
 		case code == 49:
 			st.bg = ""
 		case code >= 90 && code <= 97:
-			st.fg = standardColors[code-82]
+			st.fg = standardColorVar(code - 82)
 		case code >= 100 && code <= 107:
-			st.bg = standardColors[code-92]
+			st.bg = standardColorVar(code - 92)
 		}
 	}
 }

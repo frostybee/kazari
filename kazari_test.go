@@ -69,7 +69,7 @@ func newTestEngine(hl *mockHighlighter, opts ...Option) *Engine {
 		WithHighlighter(hl),
 		WithThemes("light-theme", ""),
 		WithMinify(false),
-		WithMinSyntaxHighlightingColorContrast(0),
+		WithMinContrast(0),
 	}
 	return New(append(base, opts...)...)
 }
@@ -97,7 +97,7 @@ func TestRender_DualTheme(t *testing.T) {
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
 
-	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false), WithMinSyntaxHighlightingColorContrast(0))
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false), WithMinContrast(0))
 	html, err := engine.Render("func main", Options{Lang: "go"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
@@ -127,7 +127,7 @@ func TestRender_DualThemeCapability(t *testing.T) {
 		},
 	}
 
-	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false), WithMinSyntaxHighlightingColorContrast(0))
+	engine := New(WithHighlighter(hl), WithThemes("light-theme", "dark-theme"), WithMinify(false), WithMinContrast(0))
 	html, err := engine.Render("func main", Options{Lang: "go"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
@@ -1355,7 +1355,7 @@ func TestRender_ContrastAdjustment_MarkedLine(t *testing.T) {
 		},
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
-	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(4.5))
+	engine := newTestEngine(hl, WithMinContrast(4.5))
 	html, err := engine.RenderWithMeta("test", `go {1}`)
 	if err != nil {
 		t.Fatal(err)
@@ -1376,7 +1376,7 @@ func TestRender_ContrastAdjustment_UnmarkedLine(t *testing.T) {
 		},
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
-	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(4.5))
+	engine := newTestEngine(hl, WithMinContrast(4.5))
 	html, err := engine.RenderWithMeta("test", `go`)
 	if err != nil {
 		t.Fatal(err)
@@ -1402,7 +1402,7 @@ func TestRender_ContrastAdjustment_UnmarkedLine_DualTheme(t *testing.T) {
 		lightThemeName: "light",
 	}
 	engine := newTestEngine(hl,
-		WithMinSyntaxHighlightingColorContrast(4.5),
+		WithMinContrast(4.5),
 		WithThemes("light", "dark"),
 	)
 	html, err := engine.RenderWithMeta("test", `go`)
@@ -1424,7 +1424,7 @@ func TestRender_ContrastAdjustment_UnmarkedLine_AlreadyMeetsContrast(t *testing.
 		},
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
-	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(4.5))
+	engine := newTestEngine(hl, WithMinContrast(4.5))
 	html, err := engine.RenderWithMeta("test", `go`)
 	if err != nil {
 		t.Fatal(err)
@@ -1441,7 +1441,7 @@ func TestRender_ContrastAdjustment_Disabled(t *testing.T) {
 		},
 		themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"},
 	}
-	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(0))
+	engine := newTestEngine(hl, WithMinContrast(0))
 	html, err := engine.RenderWithMeta("test", `go {1}`)
 	if err != nil {
 		t.Fatal(err)
@@ -1466,7 +1466,7 @@ func TestRender_ContrastAdjustment_DualTheme(t *testing.T) {
 		lightThemeName: "light",
 	}
 	engine := newTestEngine(hl,
-		WithMinSyntaxHighlightingColorContrast(4.5),
+		WithMinContrast(4.5),
 		WithThemes("light", "dark"),
 	)
 	html, err := engine.RenderWithMeta("test", `go {1}`)
@@ -2703,8 +2703,8 @@ func TestRender_ANSI_BasicColor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, "--sl:#cc0000") {
-		t.Error("expected red color in --sl custom property")
+	if !strings.Contains(html, "--sl:var(--kz-ansi-red)") {
+		t.Error("expected red color CSS var in --sl custom property")
 	}
 	if !strings.Contains(html, "hello") {
 		t.Error("expected token content")
@@ -2730,7 +2730,7 @@ func TestRender_ANSI_NoHighlighter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, "--sl:#3465a4") {
+	if !strings.Contains(html, "--sl:var(--kz-ansi-blue)") {
 		t.Error("ANSI rendering should work without a highlighter")
 	}
 }
@@ -2785,7 +2785,7 @@ func TestRenderWithMeta_ANSI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RenderWithMeta() error: %v", err)
 	}
-	if !strings.Contains(html, "--sl:#c4a000") {
+	if !strings.Contains(html, "--sl:var(--kz-ansi-yellow)") {
 		t.Error("expected yellow color")
 	}
 	if !strings.Contains(html, "Output") {
@@ -2798,16 +2798,16 @@ func TestRender_ANSI_DualColorsSame(t *testing.T) {
 		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
 		WithThemes("light-theme", "dark-theme"),
 		WithMinify(false),
-		WithMinSyntaxHighlightingColorContrast(0),
+		WithMinContrast(0),
 	)
 	html, err := engine.Render("\x1b[31mred\x1b[0m", Options{Lang: "ansi"})
 	if err != nil {
 		t.Fatalf("Render() error: %v", err)
 	}
-	if !strings.Contains(html, "--sl:#cc0000") {
+	if !strings.Contains(html, "--sl:var(--kz-ansi-red)") {
 		t.Error("expected light color")
 	}
-	if !strings.Contains(html, "--sd:#cc0000") {
+	if !strings.Contains(html, "--sd:var(--kz-ansi-red)") {
 		t.Error("expected dark color to match light (ANSI colors are theme-independent)")
 	}
 }
@@ -4020,7 +4020,7 @@ func TestThemeOverride_UnknownThemeWarnsAndSkips(t *testing.T) {
 func TestThemeOverride_MarkerContrastUsesOverrideBG(t *testing.T) {
 	hl := overrideMock()
 	hl.lightTokens = [][]Token{{{Content: "x", Color: "#777777"}}}
-	engine := newTestEngine(hl, WithMinSyntaxHighlightingColorContrast(5.5))
+	engine := newTestEngine(hl, WithMinContrast(5.5))
 
 	extractSL := func(html string) string {
 		idx := strings.Index(html, "--sl:")

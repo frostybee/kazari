@@ -656,6 +656,47 @@ func TestRenderBlock_NoThemeOverride_NoThemedClass(t *testing.T) {
 	}
 }
 
+func TestRenderBlock_ContentExclusion_Enabled(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ContentExclusion = true
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, `class="kazari-block not-content"`) {
+		t.Error("wrapper should carry the not-content class when ContentExclusion is enabled")
+	}
+}
+
+func TestRenderBlock_ContentExclusion_Disabled(t *testing.T) {
+	cfg := defaultCfg()
+	r := resolved()
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if strings.Contains(out, "not-content") {
+		t.Error("wrapper should not carry not-content when ContentExclusion is disabled")
+	}
+}
+
+func TestRenderBlock_ContentExclusion_ComposesWithOtherClasses(t *testing.T) {
+	cfg := defaultCfg()
+	cfg.ContentExclusion = true
+	r := resolved()
+	r.ThemeOverrideStyle = "--kz-ovl-editor-bg:#282a36"
+	r.CollapseThreshold = true
+	r.CollapseConfig = &config.CollapsibleConfig{DefaultCollapsed: true}
+	lines := []TokenLine{simpleLine("hello", "#aaa")}
+
+	out := RenderBlock(lines, r, cfg)
+
+	if !strings.Contains(out, `class="kazari-block kz-themed kz-collapsed not-content"`) {
+		t.Errorf("wrapper classes should compose in order, got output start %q", out[:150])
+	}
+}
+
 func TestBuildTokenStyle_PrefersResolvedMarkerBGs(t *testing.T) {
 	cfg := defaultCfg()
 	cfg.MinContrast = 5.5

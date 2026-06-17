@@ -279,7 +279,7 @@ func generateColorContrast(outDir string, rawHL, correctedHL kazari.Highlighter)
 		rawEngine := kazari.New(
 			kazari.WithHighlighter(rawHL),
 			kazari.WithThemes(p.light, p.dark),
-			kazari.WithMinSyntaxHighlightingColorContrast(0),
+			kazari.WithMinContrast(0),
 			kazari.WithMinify(true),
 		)
 		correctedEngine := kazari.New(
@@ -359,7 +359,7 @@ const contrastPageTmpl = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 <title>Kazari: Color Contrast Correction</title>
 <style>%s</style>
 <style>%s</style>
@@ -418,7 +418,7 @@ const shikiPageTmpl = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 <title>Kazari: Nuri vs Shiki</title>
 <style>%s</style>
 <style>%s</style>
@@ -458,7 +458,7 @@ const chromaPageTmpl = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 <title>Kazari: Nuri vs Chroma</title>
 <style>%s</style>
 <style>%s</style>
