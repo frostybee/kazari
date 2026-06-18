@@ -3,6 +3,8 @@ package kazari
 import (
 	"fmt"
 	"hash/fnv"
+
+	"github.com/frostybee/kazari/internal/config"
 )
 
 // Highlighter abstracts syntax highlighting. The default implementation wraps Nuri,
@@ -60,11 +62,11 @@ type Token struct {
 
 // Font style bitmask constants.
 const (
-	FontStyleNone          = 0
-	FontStyleItalic        = 1
-	FontStyleBold          = 2
-	FontStyleUnderline     = 4
-	FontStyleStrikethrough = 8
+	FontStyleNone          = config.FontStyleNone
+	FontStyleItalic        = config.FontStyleItalic
+	FontStyleBold          = config.FontStyleBold
+	FontStyleUnderline     = config.FontStyleUnderline
+	FontStyleStrikethrough = config.FontStyleStrikethrough
 )
 
 // Frame determines the code block's visual frame type.

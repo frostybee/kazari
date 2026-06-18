@@ -55,13 +55,7 @@ func WithStyleReset(enabled bool) Option {
 
 func WithDefaults(d BlockDefaults) Option {
 	return func(b *engineBuilder) {
-		b.cfg.Defaults = config.BlockDefaults{
-			Wrap:           d.Wrap,
-			PreserveIndent: d.PreserveIndent,
-			HangingIndent:  d.HangingIndent,
-			LineNumbers:    d.LineNumbers,
-			Frame:          int(d.Frame),
-		}
+		b.cfg.Defaults = toConfigBlockDefaults(d)
 	}
 }
 
@@ -71,14 +65,18 @@ func WithLanguageDefaults(m map[string]BlockDefaults) Option {
 			b.cfg.LanguageDefaults = make(map[string]config.BlockDefaults)
 		}
 		for key, d := range m {
-			b.cfg.LanguageDefaults[key] = config.BlockDefaults{
-				Wrap:           d.Wrap,
-				PreserveIndent: d.PreserveIndent,
-				HangingIndent:  d.HangingIndent,
-				LineNumbers:    d.LineNumbers,
-				Frame:          int(d.Frame),
-			}
+			b.cfg.LanguageDefaults[key] = toConfigBlockDefaults(d)
 		}
+	}
+}
+
+func toConfigBlockDefaults(d BlockDefaults) config.BlockDefaults {
+	return config.BlockDefaults{
+		Wrap:           d.Wrap,
+		PreserveIndent: d.PreserveIndent,
+		HangingIndent:  d.HangingIndent,
+		LineNumbers:    d.LineNumbers,
+		Frame:          int(d.Frame),
 	}
 }
 

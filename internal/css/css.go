@@ -25,16 +25,19 @@ func readCSS(name string) string {
 	return string(data)
 }
 
-// Generate produces the complete CSS output for the engine configuration.
-func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
-	var sb strings.Builder
-
-	// Dynamic: theme variables and token switching
+func writeThemeCSS(sb *strings.Builder, cfg *config.Config, light, dark theme.ThemeColors) {
 	sb.WriteString(theme.GenerateVars(cfg, light, dark))
 	sb.WriteString(theme.TokenSwitchingCSS(cfg))
 	if cfg.ThemeToggle && cfg.DarkTheme != "" {
 		sb.WriteString(theme.ThemeToggleCSS(cfg, light, dark))
 	}
+}
+
+// Generate produces the complete CSS output for the engine configuration.
+func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
+	var sb strings.Builder
+
+	writeThemeCSS(&sb, cfg, light, dark)
 
 	// Static: always included
 	sb.WriteString(readCSS("base.css"))
@@ -107,11 +110,7 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 // pages where one primary engine provides the full CSS via Generate().
 func GenerateThemeOnly(cfg *config.Config, light, dark theme.ThemeColors) string {
 	var sb strings.Builder
-	sb.WriteString(theme.GenerateVars(cfg, light, dark))
-	sb.WriteString(theme.TokenSwitchingCSS(cfg))
-	if cfg.ThemeToggle && cfg.DarkTheme != "" {
-		sb.WriteString(theme.ThemeToggleCSS(cfg, light, dark))
-	}
+	writeThemeCSS(&sb, cfg, light, dark)
 	if cfg.ThemeToggle {
 		sb.WriteString(readCSS("theme-toggle.css"))
 	}

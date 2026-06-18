@@ -74,6 +74,22 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-ansi-black: #000000;
+  --kz-ansi-red: #cc0000;
+  --kz-ansi-green: #4e9a06;
+  --kz-ansi-yellow: #c4a000;
+  --kz-ansi-blue: #3465a4;
+  --kz-ansi-magenta: #75507b;
+  --kz-ansi-cyan: #06989a;
+  --kz-ansi-white: #d3d7cf;
+  --kz-ansi-bright-black: #555753;
+  --kz-ansi-bright-red: #ef2929;
+  --kz-ansi-bright-green: #8ae234;
+  --kz-ansi-bright-yellow: #fce94f;
+  --kz-ansi-bright-blue: #729fcf;
+  --kz-ansi-bright-magenta: #ad7fa8;
+  --kz-ansi-bright-cyan: #34e2e2;
+  --kz-ansi-bright-white: #eeeeec;
   --kz-collapse-btn-bg: rgba(255,255,255,0.08);
   --kz-collapse-btn-fg: rgba(255,255,255,0.7);
   --kz-collapse-btn-hover-bg: rgba(255,255,255,0.15);
@@ -152,7 +168,7 @@
   --kz-group-border: rgba(255,255,255,0.1);
 }
 .kazari-block .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
-.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); --kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); --kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); --kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); --kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-collapse-gradient-end: var(--kz-editor-bg); }
+.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-collapse-btn-fg: var(--kz-ovl-collapse-btn-fg); %!(EXTRA string=collapse-btn-fg)--kz-collapse-btn-bg: var(--kz-ovl-collapse-btn-bg); %!(EXTRA string=collapse-btn-bg)--kz-collapse-btn-hover-bg: var(--kz-ovl-collapse-btn-hover-bg); %!(EXTRA string=collapse-btn-hover-bg)--kz-collapse-btn-border: var(--kz-ovl-collapse-btn-border); %!(EXTRA string=collapse-btn-border)--kz-collapse-btn-border-hover: var(--kz-ovl-collapse-btn-border-hover); %!(EXTRA string=collapse-btn-border-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)--kz-collapse-gradient-end: var(--kz-editor-bg); }
 .dark .kazari-block .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-collapse-btn-fg: var(--kz-ovd-collapse-btn-fg, var(--kz-ovl-collapse-btn-fg)); --kz-collapse-btn-bg: var(--kz-ovd-collapse-btn-bg, var(--kz-ovl-collapse-btn-bg)); --kz-collapse-btn-hover-bg: var(--kz-ovd-collapse-btn-hover-bg, var(--kz-ovl-collapse-btn-hover-bg)); --kz-collapse-btn-border: var(--kz-ovd-collapse-btn-border, var(--kz-ovl-collapse-btn-border)); --kz-collapse-btn-border-hover: var(--kz-ovd-collapse-btn-border-hover, var(--kz-ovl-collapse-btn-border-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 .kazari-block {
@@ -1260,6 +1276,22 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-ansi-black: #000000;
+  --kz-ansi-red: #cc0000;
+  --kz-ansi-green: #4e9a06;
+  --kz-ansi-yellow: #c4a000;
+  --kz-ansi-blue: #3465a4;
+  --kz-ansi-magenta: #75507b;
+  --kz-ansi-cyan: #06989a;
+  --kz-ansi-white: #d3d7cf;
+  --kz-ansi-bright-black: #555753;
+  --kz-ansi-bright-red: #ef2929;
+  --kz-ansi-bright-green: #8ae234;
+  --kz-ansi-bright-yellow: #fce94f;
+  --kz-ansi-bright-blue: #729fcf;
+  --kz-ansi-bright-magenta: #ad7fa8;
+  --kz-ansi-bright-cyan: #34e2e2;
+  --kz-ansi-bright-white: #eeeeec;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1300,7 +1332,7 @@
   --kz-terminal-dots-fg: #e6edf3;
 }
 .kazari-block .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
-.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); --kz-terminal-dots-fg: var(--kz-ovl-terminal-dots-fg); }
+.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)--kz-terminal-dots-fg: var(--kz-ovl-terminal-dots-fg); %!(EXTRA string=terminal-dots-fg)}
 .dark .kazari-block .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); --kz-terminal-dots-fg: var(--kz-ovd-terminal-dots-fg, var(--kz-ovl-terminal-dots-fg)); }
 }
@@ -1381,6 +1413,22 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-ansi-black: #000000;
+  --kz-ansi-red: #cc0000;
+  --kz-ansi-green: #4e9a06;
+  --kz-ansi-yellow: #c4a000;
+  --kz-ansi-blue: #3465a4;
+  --kz-ansi-magenta: #75507b;
+  --kz-ansi-cyan: #06989a;
+  --kz-ansi-white: #d3d7cf;
+  --kz-ansi-bright-black: #555753;
+  --kz-ansi-bright-red: #ef2929;
+  --kz-ansi-bright-green: #8ae234;
+  --kz-ansi-bright-yellow: #fce94f;
+  --kz-ansi-bright-blue: #729fcf;
+  --kz-ansi-bright-magenta: #ad7fa8;
+  --kz-ansi-bright-cyan: #34e2e2;
+  --kz-ansi-bright-white: #eeeeec;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1417,7 +1465,7 @@
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 .kazari-block .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
-.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)}
 .dark .kazari-block .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 }
@@ -1498,6 +1546,22 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-ansi-black: #000000;
+  --kz-ansi-red: #cc0000;
+  --kz-ansi-green: #4e9a06;
+  --kz-ansi-yellow: #c4a000;
+  --kz-ansi-blue: #3465a4;
+  --kz-ansi-magenta: #75507b;
+  --kz-ansi-cyan: #06989a;
+  --kz-ansi-white: #d3d7cf;
+  --kz-ansi-bright-black: #555753;
+  --kz-ansi-bright-red: #ef2929;
+  --kz-ansi-bright-green: #8ae234;
+  --kz-ansi-bright-yellow: #fce94f;
+  --kz-ansi-bright-blue: #729fcf;
+  --kz-ansi-bright-magenta: #ad7fa8;
+  --kz-ansi-bright-cyan: #34e2e2;
+  --kz-ansi-bright-white: #eeeeec;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1534,7 +1598,7 @@
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 .kazari-block .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
-.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)}
 .dark .kazari-block .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 }
@@ -1615,6 +1679,22 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-ansi-black: #000000;
+  --kz-ansi-red: #cc0000;
+  --kz-ansi-green: #4e9a06;
+  --kz-ansi-yellow: #c4a000;
+  --kz-ansi-blue: #3465a4;
+  --kz-ansi-magenta: #75507b;
+  --kz-ansi-cyan: #06989a;
+  --kz-ansi-white: #d3d7cf;
+  --kz-ansi-bright-black: #555753;
+  --kz-ansi-bright-red: #ef2929;
+  --kz-ansi-bright-green: #8ae234;
+  --kz-ansi-bright-yellow: #fce94f;
+  --kz-ansi-bright-blue: #729fcf;
+  --kz-ansi-bright-magenta: #ad7fa8;
+  --kz-ansi-bright-cyan: #34e2e2;
+  --kz-ansi-bright-white: #eeeeec;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1651,7 +1731,7 @@
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 .kazari-block .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
-.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)}
 .dark .kazari-block .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 }
@@ -1732,6 +1812,22 @@
   --kz-ln-width: 2ch;
   --kz-ln-opacity: 0.9;
   --kz-ln-highlight-opacity: 0.8;
+  --kz-ansi-black: #000000;
+  --kz-ansi-red: #cc0000;
+  --kz-ansi-green: #4e9a06;
+  --kz-ansi-yellow: #c4a000;
+  --kz-ansi-blue: #3465a4;
+  --kz-ansi-magenta: #75507b;
+  --kz-ansi-cyan: #06989a;
+  --kz-ansi-white: #d3d7cf;
+  --kz-ansi-bright-black: #555753;
+  --kz-ansi-bright-red: #ef2929;
+  --kz-ansi-bright-green: #8ae234;
+  --kz-ansi-bright-yellow: #fce94f;
+  --kz-ansi-bright-blue: #729fcf;
+  --kz-ansi-bright-magenta: #ad7fa8;
+  --kz-ansi-bright-cyan: #34e2e2;
+  --kz-ansi-bright-white: #eeeeec;
   --kz-file-icon-size: 1rem;
   --kz-file-icon-margin: 0 0.4rem 0 0;
   --kz-file-icon-opacity: 0.8;
@@ -1768,7 +1864,7 @@
   --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 .kazari-block .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
-.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)}
 .dark .kazari-block .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .dark .kazari-block.kz-themed { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
 .kazari-block[data-kz-theme="dark"] { --kz-editor-bg: #0d1117; --kz-editor-fg: #e6edf3; --kz-ln-fg: #6e7681; --kz-ln-highlight-fg: #e6edf3; --kz-gutter-border-color: rgba(255,255,255,0.1); --kz-toolbar-bg: rgba(39, 39, 42, 0.6); --kz-toolbar-border: rgba(63, 63, 70, 0.4); --kz-lang-fg: #a1a1aa; --kz-copy-fg: #d4d4d8; --kz-copy-fg-hover: #ffffff; --kz-copy-bg-hover: rgba(63, 63, 70, 0.8); --kz-scrollbar-thumb: rgba(255, 255, 255, 0.15); --kz-scrollbar-thumb-hover: rgba(255, 255, 255, 0.3); }
@@ -1776,7 +1872,7 @@
 .kazari-block[data-kz-theme="dark"] .kz-line span[style^="--"] { color: var(--sd, inherit); background-color: var(--sdbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .kazari-block[data-kz-theme="light"] .kz-line span[style^="--"] { color: var(--sl, inherit); background-color: var(--slbg, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }
 .kazari-block.kz-themed[data-kz-theme="dark"] { --kz-editor-bg: var(--kz-ovd-editor-bg, var(--kz-ovl-editor-bg)); --kz-editor-fg: var(--kz-ovd-editor-fg, var(--kz-ovl-editor-fg)); --kz-ln-fg: var(--kz-ovd-ln-fg, var(--kz-ovl-ln-fg)); --kz-ln-highlight-fg: var(--kz-ovd-ln-highlight-fg, var(--kz-ovl-ln-highlight-fg)); --kz-gutter-border-color: var(--kz-ovd-gutter-border-color, var(--kz-ovl-gutter-border-color)); --kz-toolbar-bg: var(--kz-ovd-toolbar-bg, var(--kz-ovl-toolbar-bg)); --kz-toolbar-border: var(--kz-ovd-toolbar-border, var(--kz-ovl-toolbar-border)); --kz-lang-fg: var(--kz-ovd-lang-fg, var(--kz-ovl-lang-fg)); --kz-copy-fg: var(--kz-ovd-copy-fg, var(--kz-ovl-copy-fg)); --kz-copy-fg-hover: var(--kz-ovd-copy-fg-hover, var(--kz-ovl-copy-fg-hover)); --kz-copy-bg-hover: var(--kz-ovd-copy-bg-hover, var(--kz-ovl-copy-bg-hover)); --kz-scrollbar-thumb: var(--kz-ovd-scrollbar-thumb, var(--kz-ovl-scrollbar-thumb)); --kz-scrollbar-thumb-hover: var(--kz-ovd-scrollbar-thumb-hover, var(--kz-ovl-scrollbar-thumb-hover)); }
-.kazari-block.kz-themed[data-kz-theme="light"] { --kz-editor-bg: var(--kz-ovl-editor-bg); --kz-editor-fg: var(--kz-ovl-editor-fg); --kz-ln-fg: var(--kz-ovl-ln-fg); --kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); --kz-gutter-border-color: var(--kz-ovl-gutter-border-color); --kz-toolbar-bg: var(--kz-ovl-toolbar-bg); --kz-toolbar-border: var(--kz-ovl-toolbar-border); --kz-lang-fg: var(--kz-ovl-lang-fg); --kz-copy-fg: var(--kz-ovl-copy-fg); --kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); --kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); --kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); --kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); }
+.kazari-block.kz-themed[data-kz-theme="light"] { --kz-editor-bg: var(--kz-ovl-editor-bg); %!(EXTRA string=editor-bg)--kz-editor-fg: var(--kz-ovl-editor-fg); %!(EXTRA string=editor-fg)--kz-ln-fg: var(--kz-ovl-ln-fg); %!(EXTRA string=ln-fg)--kz-ln-highlight-fg: var(--kz-ovl-ln-highlight-fg); %!(EXTRA string=ln-highlight-fg)--kz-gutter-border-color: var(--kz-ovl-gutter-border-color); %!(EXTRA string=gutter-border-color)--kz-toolbar-bg: var(--kz-ovl-toolbar-bg); %!(EXTRA string=toolbar-bg)--kz-toolbar-border: var(--kz-ovl-toolbar-border); %!(EXTRA string=toolbar-border)--kz-lang-fg: var(--kz-ovl-lang-fg); %!(EXTRA string=lang-fg)--kz-copy-fg: var(--kz-ovl-copy-fg); %!(EXTRA string=copy-fg)--kz-copy-fg-hover: var(--kz-ovl-copy-fg-hover); %!(EXTRA string=copy-fg-hover)--kz-copy-bg-hover: var(--kz-ovl-copy-bg-hover); %!(EXTRA string=copy-bg-hover)--kz-scrollbar-thumb: var(--kz-ovl-scrollbar-thumb); %!(EXTRA string=scrollbar-thumb)--kz-scrollbar-thumb-hover: var(--kz-ovl-scrollbar-thumb-hover); %!(EXTRA string=scrollbar-thumb-hover)}
 .kazari-block .kz-theme-toggle-btn {
   display: flex;
   align-items: center;

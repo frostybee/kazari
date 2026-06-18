@@ -1,6 +1,7 @@
 package config
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/frostybee/kazari/internal/locale"
@@ -53,6 +54,14 @@ const (
 	MarkerMark MarkerType = iota // highlight (default, lowest priority)
 	MarkerDel                    // deleted
 	MarkerIns                    // inserted (highest priority)
+)
+
+const (
+	FontStyleNone          = 0
+	FontStyleItalic        = 1
+	FontStyleBold          = 2
+	FontStyleUnderline     = 4
+	FontStyleStrikethrough = 8
 )
 
 // LineRange is an inclusive 1-based line range.
@@ -353,9 +362,16 @@ func (c *Config) Resolve(lang string, blockOpts *BlockOptions) *ResolvedBlock {
 	}
 
 	// Apply language defaults (comma-separated key matching).
+	// Keys are sorted so the result is deterministic when multiple keys match.
 	if c.LanguageDefaults != nil {
-		for key, langDef := range c.LanguageDefaults {
+		keys := make([]string, 0, len(c.LanguageDefaults))
+		for k := range c.LanguageDefaults {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
 			if matchesLanguageKey(key, lang) {
+				langDef := c.LanguageDefaults[key]
 				resolved.Frame = langDef.Frame
 				resolved.LineNumbers = langDef.LineNumbers
 				resolved.Wrap = langDef.Wrap
