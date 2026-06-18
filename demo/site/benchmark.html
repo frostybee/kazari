@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+<title>Kazari: Performance Benchmark</title>
+<style>*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: hidden; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color: #24292e; }
+.dark body { background: #1a1a1b; color: #d7dadc; }
+
+.cmp-header {
+  max-width: 1400px; margin: 0 auto; padding: 1.5rem clamp(1rem,3vw,2.5rem) 1.5rem;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.cmp-page-title { margin: 0 0 .25rem; font-size: 1.4rem; font-weight: 700; color: #1a1a2e; }
+.dark .cmp-page-title { color: #d7dadc; }
+.cmp-header p { margin: 0; color: #57606a; font-size: 1rem; line-height: 1.6; }
+.cmp-header a { color: #4a55c5; text-decoration: underline; text-underline-offset: 2px; }
+.cmp-header a:hover { color: #3640a0; }
+.dark .cmp-header p { color: #b5b8ba; }
+.dark .cmp-header a { color: #4fbcff; }
+.dark .cmp-header a:hover { color: #79cdff; }
+.cmp-status { font-size: .85rem; color: #57606a; }
+.cmp-status.ready { color: #1a7f37; }
+.cmp-status.error { color: #cf222e; }
+.dark .cmp-status { color: #818384; }
+.dark .cmp-status.ready { color: #3fb950; }
+
+.cmp-row { max-width: 1400px; margin: 0 auto 3rem; padding: 0 clamp(1rem,3vw,2.5rem); position: relative; }
+
+.cmp-lang-heading {
+  margin: 0 0 .75rem; font-size: 1rem; font-weight: 600;
+  color: #57606a; text-transform: uppercase; letter-spacing: .06em;
+}
+.dark .cmp-lang-heading { color: #818384; }
+
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.cmp-grid > * { min-width: 0; }
+@media (max-width: 900px) { .cmp-grid { grid-template-columns: 1fr; } }
+.cmp-col-label { font-size: .8rem; font-weight: 600; color: #57606a; margin-bottom: .4rem; }
+.dark .cmp-col-label { color: #818384; }
+
+.shiki-target pre {
+  margin: 0; padding: 1rem 1.35rem;
+  border-radius: .5rem;
+  font-family: 'JetBrains Mono Variable', monospace;
+  font-size: .875rem; line-height: 1.6;
+  overflow-x: auto;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+.shiki-target pre code {
+  font-family: inherit;
+}
+
+@media (max-width: 768px) {
+  .cmp-header { padding: 1rem; }
+  .cmp-header p { font-size: .9rem; line-height: 1.5; }
+  .cmp-page-title { font-size: 1.2rem; }
+  .cmp-row { margin-bottom: 2rem; padding: 0 1rem; }
+  .cmp-lang-heading { font-size: .85rem; margin-bottom: .5rem; }
+  .cmp-grid { gap: .75rem; }
+  .cmp-col-label { font-size: .75rem; }
+}
+</style>
+<style>.bench-summary {
+  display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;
+}
+.bench-card {
+  flex: 1; min-width: 140px; padding: 1rem 1.25rem;
+  border-radius: 0.5rem; border: 1px solid #e1e4e8; background: #fff;
+}
+.bench-card-label {
+  font-size: 0.8rem; font-weight: 600; color: #57606a; margin-bottom: 0.25rem;
+}
+.bench-card-value {
+  font-size: 1.5rem; font-weight: 700;
+  font-family: 'JetBrains Mono Variable', monospace; color: #1a1a2e;
+}
+.bench-card--highlight { border-color: #4a55c5; background: #f0f1ff; }
+.bench-card--highlight .bench-card-value { color: #4a55c5; }
+
+.dark .bench-card { background: #272729; border-color: #343536; }
+.dark .bench-card-label { color: #818384; }
+.dark .bench-card-value { color: #d7dadc; }
+.dark .bench-card--highlight { border-color: #4fbcff; background: #1a2a33; }
+.dark .bench-card--highlight .bench-card-value { color: #4fbcff; }
+
+.bench-container {
+  max-width: 1400px; margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2.5rem); overflow-x: auto;
+}
+.bench-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.bench-table th {
+  text-align: left; padding: 0.75rem 1rem;
+  font-size: 0.8rem; font-weight: 600; color: #57606a;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 2px solid #e1e4e8;
+}
+.bench-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #e1e4e8; }
+.bench-table tbody tr:nth-child(even) { background: #f6f8fa; }
+.bench-table td:nth-child(n+2) {
+  font-family: 'JetBrains Mono Variable', monospace; font-size: 0.875rem;
+}
+
+.dark .bench-table th { color: #818384; border-bottom-color: #343536; }
+.dark .bench-table td { border-bottom-color: #343536; }
+.dark .bench-table tbody tr:nth-child(even) { background: #272729; }
+
+.bench-footer-row td {
+  font-weight: 700; border-top: 2px solid #e1e4e8; border-bottom: none;
+}
+.dark .bench-footer-row td { border-top-color: #343536; }
+
+.bench-bar-cell { width: 30%; }
+.bench-bars { display: flex; flex-direction: column; gap: 3px; }
+.bench-bar { height: 14px; border-radius: 3px; min-width: 4px; }
+.bench-bar--nuri { background: #6366f1; }
+.bench-bar--chroma { background: #10b981; }
+
+.bench-legend {
+  display: flex; gap: 1.5rem; margin-top: 1rem;
+  font-size: 0.85rem; color: #57606a;
+}
+.dark .bench-legend { color: #818384; }
+.bench-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+.bench-legend-swatch {
+  display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+}
+.bench-legend-swatch--nuri { background: #6366f1; }
+.bench-legend-swatch--chroma { background: #10b981; }
+
+@media (max-width: 768px) {
+  .bench-summary { gap: .75rem; }
+  .bench-card { min-width: calc(50% - .75rem); padding: .75rem 1rem; }
+  .bench-card-value { font-size: 1.25rem; }
+  .bench-table th, .bench-table td { padding: .6rem .65rem; }
+  .bench-table th:nth-child(2), .bench-table td:nth-child(2),
+  .bench-table th:nth-child(6), .bench-table td:nth-child(6) { display: none; }
+  .bench-legend { display: none; }
+}
+@media (max-width: 480px) {
+  .bench-card { min-width: 100%; }
+  .bench-table { font-size: .85rem; }
+  .bench-table td:nth-child(n+2) { font-size: .8rem; }
+}
+</style>
+<style>.site-nav { position: sticky; top: 0; z-index: 30; background: rgba(248,249,250,.96); border-bottom: 1px solid #dfe3e8; backdrop-filter: blur(12px); }
+.site-nav-inner { display: flex; align-items: center; gap: 1.25rem; max-width: 1400px; margin: 0 auto; padding: .65rem clamp(1rem,3vw,2.5rem); }
+.site-brand { font-size: 1.15rem; font-weight: 700; color: inherit; text-decoration: none; }
+.site-nav-links { display: flex; gap: .25rem; }
+.site-nav-links a { padding: .4rem .75rem .55rem; border-radius: .25rem .25rem 0 0; color: #5b6470; text-decoration: none; font-size: .88rem; font-weight: 500; transition: background .15s, color .15s; border-bottom: 2px solid transparent; }
+.site-nav-links a:hover { background: #f5f6f7; color: #1a1a2e; }
+.site-nav-links a.active { background: transparent; color: #1a1a2e; font-weight: 600; border-bottom: 2px solid #4a55c5; }
+.site-theme-toggle { margin-left: auto; cursor: pointer; user-select: none; display: flex; align-items: center; }
+.site-theme-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle-track { position: relative; display: inline-flex; align-items: center; width: 2.75rem; height: 1.5rem; border-radius: .75rem; background: #d1d5db; transition: background .2s ease; }
+.toggle-track::before,
+.toggle-track::after { content: ""; position: absolute; width: .8rem; height: .8rem; background: #6b7280; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.toggle-track::before { left: .3rem; -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cpath d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cpath d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/%3E%3C/svg%3E"); }
+.toggle-track::after { right: .3rem; -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E"); }
+.site-theme-toggle input:checked ~ .toggle-track { background: #4f46e5; }
+.site-theme-toggle input:checked ~ .toggle-track::before,
+.site-theme-toggle input:checked ~ .toggle-track::after { background: rgba(255,255,255,.7); }
+.site-theme-toggle input:checked ~ .toggle-track .toggle-thumb { transform: translateX(1.25rem); }
+.site-theme-toggle input:focus-visible ~ .toggle-track { outline: 2px solid #5965d8; outline-offset: 2px; }
+.toggle-thumb { position: absolute; left: .2rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s ease; }
+.dark .site-nav { background: rgba(26,26,27,.96); border-color: #343536; }
+.dark .site-brand { color: #d7dadc; }
+.dark .site-nav-links a { color: #d7dadc; }
+.dark .site-nav-links a:hover { background: #272729; color: #fff; }
+.dark .site-nav-links a.active { background: transparent; color: #fff; border-bottom-color: #4fbcff; }
+.nav-toggle-input { display: none; }
+.nav-toggle-label { display: none; cursor: pointer; flex-direction: column; justify-content: center; gap: 5px; padding: 6px; margin-left: auto; }
+.nav-toggle-label span { display: block; width: 22px; height: 2px; background: #57606a; border-radius: 1px; transition: transform .2s, opacity .2s; }
+.dark .nav-toggle-label span { background: #d7dadc; }
+@media (max-width: 768px) {
+  .site-nav-inner { flex-wrap: wrap; }
+  .nav-toggle-label { display: flex; }
+  .site-theme-toggle { margin-left: .75rem; }
+  .site-nav-links { display: none; flex-direction: column; width: 100%; gap: 0; padding: .5rem 0; border-top: 1px solid #e1e4e8; margin-top: .5rem; }
+  .site-nav-links a { border-radius: .25rem; border-bottom: none; padding: .6rem .75rem; }
+  .site-nav-links a.active { border-bottom: none; background: #f0f1ff; }
+  .nav-toggle-input:checked ~ .site-nav-links { display: flex; }
+  .nav-toggle-input:checked ~ .nav-toggle-label span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .nav-toggle-input:checked ~ .nav-toggle-label span:nth-child(2) { opacity: 0; }
+  .nav-toggle-input:checked ~ .nav-toggle-label span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+  .dark .site-nav-links { border-top-color: #343536; }
+  .dark .site-nav-links a.active { background: #272729; }
+  .backend-switcher { display: none; }
+  .nav-toggle-input:checked ~ .backend-switcher { display: flex; width: 100%; }
+}
+.site-footer { margin-top: 4rem; border-top: 1px solid #e0e3e8; background: #f8f9fb; }
+.site-footer-inner { max-width: 1400px; margin: 0 auto; padding: 2rem clamp(1rem,3vw,2.5rem); display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
+.site-footer-brand { font-size: 1.05rem; font-weight: 700; margin: 0 0 .35rem; }
+.site-footer-kanji { font-weight: 400; color: #888; margin-left: .15em; }
+.site-footer-about { max-width: 540px; }
+.site-footer-about p { margin: 0; font-size: .85rem; color: #5b6470; line-height: 1.55; }
+.site-footer-about a { color: #4a55c5; text-decoration: none; }
+.site-footer-about a:hover { text-decoration: underline; }
+.site-footer-links { display: flex; align-items: center; gap: .75rem; font-size: .82rem; }
+.site-footer-links a { color: #5b6470; text-decoration: none; }
+.site-footer-links a:hover { color: #4a55c5; }
+.site-footer-sep { width: 3px; height: 3px; border-radius: 50%; background: #ccc; }
+.dark .site-footer { border-color: #343536; background: #131314; }
+.dark .site-footer-kanji { color: #818384; }
+.dark .site-footer-about p { color: #818384; }
+.dark .site-footer-about a { color: #4fbcff; }
+.dark .site-footer-links a { color: #818384; }
+.dark .site-footer-links a:hover { color: #4fbcff; }
+.dark .site-footer-sep { background: #343536; }
+</style>
+</head>
+<body>
+<nav class="site-nav"><div class="site-nav-inner"><a class="site-brand" href="showcase.html">Kazari</a><input type="checkbox" id="nav-toggle" class="nav-toggle-input"><label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation"><span></span><span></span><span></span></label><div class="site-nav-links"><a href="showcase.html">Showcase</a><a href="nuri-vs-shiki.html">Nuri vs Shiki</a><a href="nuri-vs-chroma.html">Nuri vs Chroma</a><a href="color-contrast.html">Color Contrast</a><a href="benchmark.html" class="active" aria-current="page">Benchmark</a></div><label class="site-theme-toggle" title="Toggle dark mode"><input type="checkbox" id="dark-toggle"><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div></nav>
+<header class="cmp-header">
+  <h1 class="cmp-page-title">Performance Benchmark</h1>
+  <p>Nuri (TextMate grammars) vs Chroma (Pygments-based lexers) rendering performance. All measurements taken at build time, averaged over 50 iterations per snippet.</p>
+  <div class="bench-summary">
+    <div class="bench-card">
+      <div class="bench-card-label">Nuri Init</div>
+      <div class="bench-card-value">100.02ms</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-card-label">Chroma Init</div>
+      <div class="bench-card-value">0µs</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-card-label">Total (Nuri)</div>
+      <div class="bench-card-value">207.27ms</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-card-label">Total (Chroma)</div>
+      <div class="bench-card-value">7.67ms</div>
+    </div>
+    <div class="bench-card bench-card--highlight">
+      <div class="bench-card-label">Avg Speedup</div>
+      <div class="bench-card-value">27.0x</div>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="bench-container">
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Lines</th>
+          <th>Nuri (avg)</th>
+          <th>Chroma (avg)</th>
+          <th>Speedup</th>
+          <th>Comparison</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Go</td>
+          <td>11</td>
+          <td>6.77ms</td>
+          <td>630µs</td>
+          <td>10.7x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:6.8%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>JavaScript</td>
+          <td>7</td>
+          <td>16.39ms</td>
+          <td>670µs</td>
+          <td>24.5x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:16.4%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>TypeScript</td>
+          <td>15</td>
+          <td>38.33ms</td>
+          <td>1.06ms</td>
+          <td>36.2x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:38.4%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.1%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Python</td>
+          <td>15</td>
+          <td>9.96ms</td>
+          <td>1.57ms</td>
+          <td>6.3x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:10.0%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.6%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Bash</td>
+          <td>14</td>
+          <td>11.45ms</td>
+          <td>660µs</td>
+          <td>17.3x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:11.5%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>PHP</td>
+          <td>20</td>
+          <td>15.63ms</td>
+          <td>679µs</td>
+          <td>23.0x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:15.7%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>CSS</td>
+          <td>18</td>
+          <td>99.78ms</td>
+          <td>1.84ms</td>
+          <td>54.2x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:100.0%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.8%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>HTML</td>
+          <td>22</td>
+          <td>8.95ms</td>
+          <td>557µs</td>
+          <td>16.0x</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:9.0%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+      <tfoot>
+        <tr class="bench-footer-row">
+          <td>Total</td>
+          <td></td>
+          <td>207.27ms</td>
+          <td>7.67ms</td>
+          <td>27.0x</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="bench-legend">
+      <span class="bench-legend-item"><span class="bench-legend-swatch bench-legend-swatch--nuri"></span> Nuri</span>
+      <span class="bench-legend-item"><span class="bench-legend-swatch bench-legend-swatch--chroma"></span> Chroma</span>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-about">
+      <p class="site-footer-brand">Kazari <span class="site-footer-kanji">飾り</span></p>
+      <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://github.com/frostybee">@frostybee</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari">GitHub</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/nuri">Nuri</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+<script>var toggle = document.getElementById("dark-toggle");
+var saved; try { saved = localStorage.getItem("kz-demo-theme"); } catch (e) {}
+if (saved === "dark") {
+  document.body.classList.add("dark");
+  document.documentElement.classList.add("dark");
+  toggle.checked = true;
+}
+toggle.addEventListener("change", function () {
+  var dark = this.checked;
+  document.body.classList.toggle("dark", dark);
+  document.documentElement.classList.toggle("dark", dark);
+  try { localStorage.setItem("kz-demo-theme", dark ? "dark" : "light"); } catch (e) {}
+});
+</script>
+</body>
+</html>

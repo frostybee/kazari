@@ -15,11 +15,14 @@
 <nav class="site-nav">
   <div class="site-nav-inner">
     <a class="site-brand" href="showcase.html">Kazari</a>
+    <input type="checkbox" id="nav-toggle" class="nav-toggle-input">
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation"><span></span><span></span><span></span></label>
     <div class="site-nav-links">
       <a href="showcase.html" class="active" aria-current="page">Showcase</a>
       <a href="nuri-vs-shiki.html">Nuri vs Shiki</a>
       <a href="nuri-vs-chroma.html">Nuri vs Chroma</a>
       <a href="color-contrast.html">Color Contrast</a>
+      <a href="benchmark.html">Benchmark</a>
 
     </div>
     <nav class="backend-switcher" aria-label="Syntax highlighter backend">
@@ -2626,6 +2629,8 @@ html, err := engine.Render(code, kazari.Options{Lang: &#34;go&#34;, Title: &#34;
       <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
     </div>
     <div class="site-footer-links">
+      <a href="https://github.com/frostybee">@frostybee</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/kazari">GitHub</a>
       <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/nuri">Nuri</a>

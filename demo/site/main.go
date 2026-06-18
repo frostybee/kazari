@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/frostybee/kazari"
 	kazarichroma "github.com/frostybee/kazari/chroma"
@@ -24,7 +25,7 @@ func sourceDir() string {
 	return filepath.Dir(file)
 }
 
-//go:embed assets/nav.css assets/comparison.css assets/shiki.js assets/dark-toggle.js
+//go:embed assets/nav.css assets/comparison.css assets/benchmark.css assets/shiki.js assets/dark-toggle.js
 var assets embed.FS
 
 func mustRead(name string) string {
@@ -40,6 +41,7 @@ var navLinks = []showcase.NavLink{
 	{Label: "Nuri vs Shiki", Href: "nuri-vs-shiki.html"},
 	{Label: "Nuri vs Chroma", Href: "nuri-vs-chroma.html"},
 	{Label: "Color Contrast", Href: "color-contrast.html"},
+	{Label: "Benchmark", Href: "benchmark.html"},
 }
 
 func navLinksWithActive(active string) []showcase.NavLink {
@@ -55,17 +57,21 @@ func navLinksWithActive(active string) []showcase.NavLink {
 
 func main() {
 	ctx := context.Background()
+	nuriStart := time.Now()
 	hl, err := nuri.New(ctx, nuri.WithFS(core.FS()))
+	nuriInitDur := time.Since(nuriStart)
 	if err != nil {
 		log.Fatalf("nuri.New: %v", err)
 	}
 	defer hl.Close(ctx)
 
 	nuriHL := kazarinuri.New(ctx, hl)
+	chromaStart := time.Now()
 	chromaHL := kazarichroma.New(kazarichroma.WithStyleMap(map[string]string{
 		"github-light": "github",
 		"github-dark":  "github-dark",
 	}))
+	chromaInitDur := time.Since(chromaStart)
 
 	rawHL, err := nuri.New(ctx, nuri.WithFS(core.FS()), nuri.WithMinContrast(0))
 	if err != nil {
@@ -80,6 +86,7 @@ func main() {
 	generateNuriVsShiki(outDir, nuriHL)
 	generateNuriVsChroma(outDir, nuriHL, chromaHL)
 	generateColorContrast(outDir, rawNuriHL, nuriHL)
+	generateBenchmark(outDir, nuriHL, chromaHL, nuriInitDur, chromaInitDur)
 
 	log.Printf("All pages written to %s/", outDir)
 }
@@ -220,6 +227,8 @@ func navHTML(active string) string {
 	var b strings.Builder
 	b.WriteString(`<nav class="site-nav"><div class="site-nav-inner">`)
 	b.WriteString(`<a class="site-brand" href="showcase.html">Kazari</a>`)
+	b.WriteString(`<input type="checkbox" id="nav-toggle" class="nav-toggle-input">`)
+	b.WriteString(`<label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation"><span></span><span></span><span></span></label>`)
 	b.WriteString(`<div class="site-nav-links">`)
 	for _, l := range navLinksWithActive(active) {
 		if l.Active {
@@ -384,6 +393,8 @@ const contrastPageTmpl = `<!DOCTYPE html>
       <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
     </div>
     <div class="site-footer-links">
+      <a href="https://github.com/frostybee">@frostybee</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/kazari">GitHub</a>
       <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/nuri">Nuri</a>
@@ -438,6 +449,8 @@ const shikiPageTmpl = `<!DOCTYPE html>
       <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
     </div>
     <div class="site-footer-links">
+      <a href="https://github.com/frostybee">@frostybee</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/kazari">GitHub</a>
       <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/nuri">Nuri</a>
@@ -448,6 +461,218 @@ const shikiPageTmpl = `<!DOCTYPE html>
 </footer>
 <script>%s</script>
 <script type="module">%s</script>
+</body>
+</html>`
+
+const benchmarkIterations = 50
+
+func fmtDur(d time.Duration) string {
+	us := float64(d.Microseconds())
+	if us < 1000 {
+		return fmt.Sprintf("%.0fµs", us)
+	}
+	return fmt.Sprintf("%.2fms", us/1000)
+}
+
+func generateBenchmark(outDir string, nuriHL, chromaHL kazari.Highlighter, nuriInit, chromaInit time.Duration) {
+	nuriEngine := kazari.New(
+		kazari.WithConfigDir(sourceDir()),
+		kazari.WithHighlighter(nuriHL),
+	)
+	chromaEngine := kazari.New(
+		kazari.WithConfigDir(sourceDir()),
+		kazari.WithHighlighter(chromaHL),
+	)
+
+	noFrame := kazari.FrameNone
+	type benchResult struct {
+		label     string
+		lines     int
+		nuriAvg   time.Duration
+		chromaAvg time.Duration
+	}
+	var results []benchResult
+	var maxNuri time.Duration
+
+	for _, s := range snippets.All {
+		lines := strings.Count(s.Code, "\n") + 1
+		opts := kazari.Options{Lang: s.Lang, Frame: &noFrame}
+
+		var nuriTotal time.Duration
+		for i := 0; i < benchmarkIterations; i++ {
+			t0 := time.Now()
+			nuriEngine.Render(s.Code, opts)
+			nuriTotal += time.Since(t0)
+		}
+		nuriAvg := nuriTotal / benchmarkIterations
+
+		var chromaTotal time.Duration
+		for i := 0; i < benchmarkIterations; i++ {
+			t0 := time.Now()
+			chromaEngine.Render(s.Code, opts)
+			chromaTotal += time.Since(t0)
+		}
+		chromaAvg := chromaTotal / benchmarkIterations
+
+		results = append(results, benchResult{
+			label: s.Label, lines: lines,
+			nuriAvg: nuriAvg, chromaAvg: chromaAvg,
+		})
+		if nuriAvg > maxNuri {
+			maxNuri = nuriAvg
+		}
+	}
+
+	var totalNuri, totalChroma time.Duration
+	for _, r := range results {
+		totalNuri += r.nuriAvg
+		totalChroma += r.chromaAvg
+	}
+	totalSpeedup := float64(totalNuri) / float64(totalChroma)
+
+	var rows strings.Builder
+	for _, r := range results {
+		speedup := float64(r.nuriAvg) / float64(r.chromaAvg)
+		nuriPct := float64(r.nuriAvg) / float64(maxNuri) * 100
+		chromaPct := float64(r.chromaAvg) / float64(maxNuri) * 100
+		if chromaPct < 1 {
+			chromaPct = 1
+		}
+		rows.WriteString(fmt.Sprintf(benchmarkRowTmpl,
+			r.label, r.lines,
+			fmtDur(r.nuriAvg), fmtDur(r.chromaAvg),
+			speedup, nuriPct, chromaPct,
+		))
+	}
+
+	speedupStr := fmt.Sprintf("%.1fx", totalSpeedup)
+
+	page := fmt.Sprintf(benchmarkPageTmpl,
+		mustRead("comparison.css"),
+		mustRead("benchmark.css"),
+		mustRead("nav.css"),
+		navHTML("Benchmark"),
+		benchmarkIterations,
+		fmtDur(nuriInit), fmtDur(chromaInit),
+		fmtDur(totalNuri), fmtDur(totalChroma),
+		speedupStr,
+		rows.String(),
+		mustRead("dark-toggle.js"),
+	)
+
+	if err := os.WriteFile(outDir+"/benchmark.html", []byte(page), 0644); err != nil {
+		log.Fatalf("write: %v", err)
+	}
+	log.Println("Written: benchmark.html")
+}
+
+const benchmarkRowTmpl = `        <tr>
+          <td>%s</td>
+          <td>%d</td>
+          <td>%s</td>
+          <td>%s</td>
+          <td>%.1fx</td>
+          <td class="bench-bar-cell">
+            <div class="bench-bars">
+              <div class="bench-bar bench-bar--nuri" style="width:%.1f%%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:%.1f%%"></div>
+            </div>
+          </td>
+        </tr>
+`
+
+const benchmarkPageTmpl = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+<title>Kazari: Performance Benchmark</title>
+<style>%[1]s</style>
+<style>%[2]s</style>
+<style>%[3]s</style>
+</head>
+<body>
+%[4]s
+<header class="cmp-header">
+  <h1 class="cmp-page-title">Performance Benchmark</h1>
+  <p>Nuri (TextMate grammars) vs Chroma (Pygments-based lexers) rendering performance. All measurements taken at build time, averaged over %[5]d iterations per snippet.</p>
+  <div class="bench-summary">
+    <div class="bench-card">
+      <div class="bench-card-label">Nuri Init</div>
+      <div class="bench-card-value">%[6]s</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-card-label">Chroma Init</div>
+      <div class="bench-card-value">%[7]s</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-card-label">Total (Nuri)</div>
+      <div class="bench-card-value">%[8]s</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-card-label">Total (Chroma)</div>
+      <div class="bench-card-value">%[9]s</div>
+    </div>
+    <div class="bench-card bench-card--highlight">
+      <div class="bench-card-label">Avg Speedup</div>
+      <div class="bench-card-value">%[10]s</div>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="bench-container">
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Lines</th>
+          <th>Nuri (avg)</th>
+          <th>Chroma (avg)</th>
+          <th>Speedup</th>
+          <th>Comparison</th>
+        </tr>
+      </thead>
+      <tbody>
+%[11]s
+      </tbody>
+      <tfoot>
+        <tr class="bench-footer-row">
+          <td>Total</td>
+          <td></td>
+          <td>%[8]s</td>
+          <td>%[9]s</td>
+          <td>%[10]s</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="bench-legend">
+      <span class="bench-legend-item"><span class="bench-legend-swatch bench-legend-swatch--nuri"></span> Nuri</span>
+      <span class="bench-legend-item"><span class="bench-legend-swatch bench-legend-swatch--chroma"></span> Chroma</span>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-about">
+      <p class="site-footer-brand">Kazari <span class="site-footer-kanji">飾り</span></p>
+      <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://github.com/frostybee">@frostybee</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari">GitHub</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/nuri">Nuri</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
+      <a href="https://github.com/frostybee/kazari/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+<script>%[12]s</script>
 </body>
 </html>`
 
@@ -477,6 +702,8 @@ const chromaPageTmpl = `<!DOCTYPE html>
       <p>A Go library for rendering framed, syntax-highlighted code blocks with full CSS customization. Powered by <a href="https://github.com/frostybee/nuri">Nuri</a>, a pure Go port of Shiki.</p>
     </div>
     <div class="site-footer-links">
+      <a href="https://github.com/frostybee">@frostybee</a>
+      <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/kazari">GitHub</a>
       <span class="site-footer-sep" aria-hidden="true"></span>
       <a href="https://github.com/frostybee/nuri">Nuri</a>
