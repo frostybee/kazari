@@ -117,7 +117,7 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 			struct{ name, value string }{"--kz-collapse-open-bg-collapsible", "rgb(84 174 255 / 10%)"},
 			struct{ name, value string }{"--kz-collapse-open-border", "transparent"},
 			struct{ name, value string }{"--kz-collapse-open-border-width", "1px"},
-			struct{ name, value string }{"--kz-collapse-closed-fg", "inherit"},
+			struct{ name, value string }{"--kz-collapse-closed-fg", "currentColor"},
 			struct{ name, value string }{"--kz-collapse-closed-font-family", "inherit"},
 			struct{ name, value string }{"--kz-collapse-closed-font-size", "inherit"},
 			struct{ name, value string }{"--kz-collapse-closed-line-height", "inherit"},

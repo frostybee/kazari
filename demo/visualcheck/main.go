@@ -22,7 +22,7 @@ func main() {
 
 	engine := kazari.New(
 		kazari.WithHighlighter(kazarinuri.New(ctx, hl)),
-		kazari.WithThemes("github-light", "github-dark"),
+		kazari.WithThemes("github-light", "github-dark-default"),
 		kazari.WithCollapsible(kazari.CollapsibleConfig{LineThreshold: 15, PreviewLines: 8}),
 	)
 

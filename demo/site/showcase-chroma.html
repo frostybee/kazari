@@ -395,8 +395,8 @@ html, err := engine.Render(code, kazari.Options{Lang: &#34;bash&#34;, Title: &#3
     </article>
 
 
-    <article class="demo-example" id="no-frame" data-example="no-frame" data-search="frames no frame removes the surrounding window chrome while preserving syntax highlighting and code structure. meta text frame=&#34;none&#34; go frame := kazari.framenone
-html, err := engine.render(code, kazari.options{lang: &#34;text&#34;, frame: &amp;frame})">
+    <article class="demo-example" id="no-frame" data-example="no-frame" data-search="frames no frame removes the surrounding window chrome while preserving syntax highlighting and code structure. meta go frame=&#34;none&#34; go frame := kazari.framenone
+html, err := engine.render(code, kazari.options{lang: &#34;go&#34;, frame: &amp;frame})">
       <div class="example-heading">
         <h3>No Frame</h3>
         <button class="copy-action copy-link" type="button" data-copy-link="no-frame" aria-label="Copy link to No Frame">
@@ -405,8 +405,8 @@ html, err := engine.render(code, kazari.options{lang: &#34;text&#34;, frame: &am
         </button>
       </div>
       <p class="example-description">Removes the surrounding window chrome while preserving syntax highlighting and code structure.</p>
-      <div class="example-output"><div class="kazari-block" data-lines="2">
-<pre data-language="text"><code><div class="kz-line"><div class="kz-code"><span style="--sd:#e6edf3">Just some plain text</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sd:#e6edf3">with no frame wrapper.</span></div></div></code></pre><button class="kz-copy-btn" aria-label="Copy" data-tooltip="Copy" data-copied="Copied!" data-code="Just some plain textwith no frame wrapper."><svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button><span class="kz-sr-announce" aria-live="polite"></span></div></div>
+      <div class="example-output"><div class="kazari-block" data-lines="11">
+<pre data-language="go"><code><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">package</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">main</span></div></div><div class="kz-line"><div class="kz-code"></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">import</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;fmt&#34;</span></div></div><div class="kz-line"><div class="kz-code"></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">func</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#6639ba;--sd:#d2a8ff">main</span><span style="--sl:#1f2328;--sd:#e6edf3">()</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">{</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">name</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0550ae;--sd:#ff7b72">:=</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;world&#34;</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">fmt</span><span style="--sl:#1f2328;--sd:#e6edf3">.</span><span style="--sl:#6639ba;--sd:#d2a8ff">Printf</span><span style="--sl:#1f2328;--sd:#e6edf3">(</span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;Hello, %s!\n&#34;</span><span style="--sl:#1f2328;--sd:#e6edf3">,</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">name</span><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#ba1f29;--sd:#ff7b72">for</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">i</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0550ae;--sd:#ff7b72">:=</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0550ae;--sd:#a5d6ff">0</span><span style="--sl:#1f2328;--sd:#e6edf3">;</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">i</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">&lt;</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0550ae;--sd:#a5d6ff">3</span><span style="--sl:#1f2328;--sd:#e6edf3">;</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">i</span><span style="--sl:#0550ae;--sd:#ff7b72">++</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">{</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">    </span><span style="--sl:#1f2328;--sd:#e6edf3">fmt</span><span style="--sl:#1f2328;--sd:#e6edf3">.</span><span style="--sl:#6639ba;--sd:#d2a8ff">Println</span><span style="--sl:#1f2328;--sd:#e6edf3">(</span><span style="--sl:#1f2328;--sd:#e6edf3">i</span><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">}</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#1f2328;--sd:#e6edf3">}</span></div></div></code></pre><button class="kz-copy-btn" aria-label="Copy" data-tooltip="Copy" data-copied="Copied!" data-code="package mainimport &#34;fmt&#34;func main() {	name := &#34;world&#34;	fmt.Printf(&#34;Hello, %s!\n&#34;, name)	for i := 0; i &lt; 3; i++ {		fmt.Println(i)	}}"><svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button><span class="kz-sr-announce" aria-live="polite"></span></div></div>
       <details class="recipe-disclosure">
         <summary>How to build this</summary>
         <div class="recipe-content" data-recipe-group>
@@ -422,7 +422,7 @@ html, err := engine.render(code, kazari.options{lang: &#34;text&#34;, frame: &am
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
               <span>Copy Meta</span>
             </button>
-            <pre><code>text frame=&#34;none&#34;</code></pre>
+            <pre><code>go frame=&#34;none&#34;</code></pre>
           </section>
 
           <section class="recipe-panel" data-recipe-panel hidden>
@@ -432,7 +432,7 @@ html, err := engine.render(code, kazari.options{lang: &#34;text&#34;, frame: &am
               <span>Copy Go</span>
             </button>
             <pre><code>frame := kazari.FrameNone
-html, err := engine.Render(code, kazari.Options{Lang: &#34;text&#34;, Frame: &amp;frame})</code></pre>
+html, err := engine.Render(code, kazari.Options{Lang: &#34;go&#34;, Frame: &amp;frame})</code></pre>
           </section>
 
         </div>

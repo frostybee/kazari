@@ -168,8 +168,17 @@ const greet = (name) => {
 go build ./...
 echo "Done!"`
 	psCode := `Get-ChildItem -Path ./dist -Recurse | Measure-Object -Property Length -Sum`
-	plainCode := `Just some plain text
-with no frame wrapper.`
+	noFrameCode := `package main
+
+import "fmt"
+
+func main() {
+	name := "world"
+	fmt.Printf("Hello, %s!\n", name)
+	for i := 0; i < 3; i++ {
+		fmt.Println(i)
+	}
+}`
 
 	dotsEngine := b.engine(kazari.WithTerminalDotStyle(kazari.DotsMinimal))
 	frameNone := kazari.FrameNone
@@ -242,11 +251,11 @@ html, err := engine.Render(code, kazari.Options{Lang: "bash", Title: "Minimal do
 				ID:       "no-frame",
 				Title:    "No Frame",
 				NavTitle: "No frame",
-				HTML:     b.render(engine, plainCode, kazari.Options{Lang: "text", Frame: &frameNone}),
+				HTML:     b.render(engine, noFrameCode, kazari.Options{Lang: "go", Frame: &frameNone}),
 				Recipes: []Recipe{
-					recipe("Meta", `text frame="none"`),
+					recipe("Meta", `go frame="none"`),
 					recipe("Go", `frame := kazari.FrameNone
-html, err := engine.Render(code, kazari.Options{Lang: "text", Frame: &frame})`),
+html, err := engine.Render(code, kazari.Options{Lang: "go", Frame: &frame})`),
 				},
 			},
 		},

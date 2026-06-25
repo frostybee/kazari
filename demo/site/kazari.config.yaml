@@ -1,6 +1,6 @@
 themes:
   light: github-light
-  dark: github-dark
+  dark: github-dark-default
 #darkMode:
 #  kind: selector
 #  selector: ".dark"

@@ -68,8 +68,8 @@ func main() {
 	nuriHL := kazarinuri.New(ctx, hl)
 	chromaStart := time.Now()
 	chromaHL := kazarichroma.New(kazarichroma.WithStyleMap(map[string]string{
-		"github-light": "github",
-		"github-dark":  "github-dark",
+		"github-light":         "github",
+		"github-dark-default":  "github-dark",
 	}))
 	chromaInitDur := time.Since(chromaStart)
 
