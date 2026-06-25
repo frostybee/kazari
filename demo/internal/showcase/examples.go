@@ -81,6 +81,8 @@ func recipe(label, code string) Recipe {
 	return Recipe{Label: label, Code: code}
 }
 
+func boolPtr(v bool) *bool { return &v }
+
 var exampleDescriptions = map[string]string{
 	"editor-explicit-title": "Adds familiar editor chrome and an explicit file name above the highlighted code.",
 	"editor-comment-title":  "Extracts the file name from a leading source comment when no title is provided.",
@@ -181,12 +183,13 @@ with no frame wrapper.`
 				ID:       "editor-explicit-title",
 				Title:    "Editor Frame (explicit title)",
 				NavTitle: "Editor title",
-				HTML:     b.render(engine, goCode, kazari.Options{Lang: "go", Title: "main.go"}),
+				HTML:     b.render(engine, goCode, kazari.Options{Lang: "go", Title: "main.go", LineNumbers: boolPtr(true)}),
 				Recipes: []Recipe{
-					recipe("Meta", `go title="main.go"`),
+					recipe("Meta", `go title="main.go" showLineNumbers`),
 					recipe("Go", `html, err := engine.Render(code, kazari.Options{
-	Lang:  "go",
-	Title: "main.go",
+	Lang:        "go",
+	Title:       "main.go",
+	LineNumbers: boolPtr(true),
 })`),
 				},
 			},

@@ -74,8 +74,8 @@ func TestStripTerminalComments(t *testing.T) {
 func TestIsTerminalLanguage(t *testing.T) {
 	terminals := []string{"bash", "sh", "zsh", "powershell", "fish", "console", "ansi", "nu"}
 	for _, lang := range terminals {
-		if !IsTerminalLanguage(lang) {
-			t.Errorf("IsTerminalLanguage(%q) = false, want true", lang)
+		if !isTerminalLanguage(lang) {
+			t.Errorf("isTerminalLanguage(%q) = false, want true", lang)
 		}
 	}
 }
@@ -83,16 +83,16 @@ func TestIsTerminalLanguage(t *testing.T) {
 func TestIsTerminalLanguage_NonTerminal(t *testing.T) {
 	nonTerminals := []string{"go", "python", "javascript", "rust", ""}
 	for _, lang := range nonTerminals {
-		if IsTerminalLanguage(lang) {
-			t.Errorf("IsTerminalLanguage(%q) = true, want false", lang)
+		if isTerminalLanguage(lang) {
+			t.Errorf("isTerminalLanguage(%q) = true, want false", lang)
 		}
 	}
 }
 
 func TestIsTerminalLanguage_CaseInsensitive(t *testing.T) {
 	for _, lang := range []string{"BASH", "Bash", "BaSh"} {
-		if !IsTerminalLanguage(lang) {
-			t.Errorf("IsTerminalLanguage(%q) = false, want true (case-insensitive)", lang)
+		if !isTerminalLanguage(lang) {
+			t.Errorf("isTerminalLanguage(%q) = false, want true (case-insensitive)", lang)
 		}
 	}
 }

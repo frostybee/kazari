@@ -3,11 +3,9 @@ package kazari
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/frostybee/kazari/internal/config"
-	"github.com/frostybee/kazari/internal/theme"
 )
 
 // --- Enum parsers ---
@@ -584,39 +582,6 @@ func TestSplitCommaKey(t *testing.T) {
 			}
 		}
 	}
-}
-
-// --- KnownVarNames ---
-
-func TestKnownVarNames(t *testing.T) {
-	cfg := config.DefaultConfig()
-	names := knownVarNamesFromConfig(cfg)
-
-	if len(names) == 0 {
-		t.Fatal("should return var names")
-	}
-
-	nameSet := make(map[string]bool, len(names))
-	for _, n := range names {
-		nameSet[n] = true
-	}
-
-	required := []string{"--kz-radius", "--kz-editor-bg", "--kz-editor-fg"}
-	for _, r := range required {
-		if !nameSet[r] {
-			t.Errorf("should contain %q", r)
-		}
-	}
-
-	for _, n := range names {
-		if !strings.HasPrefix(n, "--kz-") {
-			t.Errorf("unexpected var name without --kz- prefix: %q", n)
-		}
-	}
-}
-
-func knownVarNamesFromConfig(cfg *config.Config) []string {
-	return theme.KnownVarNames(cfg)
 }
 
 // --- Composition tests (file config + programmatic options) ---

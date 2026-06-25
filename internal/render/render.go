@@ -90,19 +90,7 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 	}
 	if cfg.CopyButton || cfg.WrapButton || cfg.FullscreenButton || (cfg.ThemeToggle && cfg.DarkTheme != "") {
 		sb.WriteString("<div class=\"kz-terminal-actions\">")
-		if cfg.CopyButton {
-			renderCopyButton(sb, resolved.RawCode, cfg)
-		}
-		if cfg.WrapButton {
-			renderWrapButton(sb, resolved, cfg)
-		}
-		if cfg.ThemeToggle && cfg.DarkTheme != "" {
-			renderThemeToggleButton(sb, cfg)
-		}
-		if cfg.FullscreenButton {
-			renderFontControls(sb, cfg)
-			renderFullscreenButton(sb, cfg)
-		}
+		renderActionButtons(sb, resolved, cfg)
 		sb.WriteString("</div>")
 	}
 	sb.WriteString("</div>")

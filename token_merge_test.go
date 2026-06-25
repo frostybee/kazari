@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/frostybee/kazari/internal/render"
+	"github.com/frostybee/kazari/internal/text"
 )
 
 func TestMergeTokens_FastPath_MatchingBoundaries(t *testing.T) {
@@ -272,21 +273,21 @@ func TestPlaintextLines_TrailingNewline(t *testing.T) {
 }
 
 func TestSplitLines_NoTrailingNewline(t *testing.T) {
-	lines := splitLines("a\nb")
+	lines := text.SplitLines("a\nb")
 	if len(lines) != 2 {
 		t.Fatalf("got %d, want 2", len(lines))
 	}
 }
 
 func TestSplitLines_TrailingNewline(t *testing.T) {
-	lines := splitLines("a\nb\n")
+	lines := text.SplitLines("a\nb\n")
 	if len(lines) != 2 {
 		t.Fatalf("got %d, want 2 (trailing empty stripped)", len(lines))
 	}
 }
 
 func TestSplitLines_Empty(t *testing.T) {
-	lines := splitLines("")
+	lines := text.SplitLines("")
 	if len(lines) != 1 {
 		t.Fatalf("got %d, want 1", len(lines))
 	}

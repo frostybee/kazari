@@ -36,9 +36,9 @@ func TestShouldThresholdCollapse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ShouldThresholdCollapse(tt.lineCount, tt.spec, tt.cfg)
+			got := shouldThresholdCollapse(tt.lineCount, tt.spec, tt.cfg)
 			if got != tt.want {
-				t.Errorf("ShouldThresholdCollapse(%d) = %v, want %v", tt.lineCount, got, tt.want)
+				t.Errorf("shouldThresholdCollapse(%d) = %v, want %v", tt.lineCount, got, tt.want)
 			}
 		})
 	}
@@ -103,9 +103,9 @@ func TestValidateRanges(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ValidateRanges(tt.ranges, tt.lineCount)
+			got := validateRanges(tt.ranges, tt.lineCount)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ValidateRanges() = %v, want %v", got, tt.want)
+				t.Errorf("validateRanges() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -129,9 +129,9 @@ func TestComputeMinIndent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ComputeMinIndent(code, tt.start, tt.end)
+			got := computeMinIndent(code, tt.start, tt.end)
 			if got != tt.want {
-				t.Errorf("ComputeMinIndent(%d, %d) = %d, want %d", tt.start, tt.end, got, tt.want)
+				t.Errorf("computeMinIndent(%d, %d) = %d, want %d", tt.start, tt.end, got, tt.want)
 			}
 		})
 	}
@@ -192,7 +192,7 @@ func TestComputePreviewSegments_FurthestVisibleLine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			segments, _ := ComputePreviewSegments(tt.previewLines, tt.lineCount, tt.markers, tt.focusLines)
+			segments, _ := computePreviewSegments(tt.previewLines, tt.lineCount, tt.markers, tt.focusLines)
 			if len(segments) == 0 {
 				t.Fatal("expected at least one preview segment")
 			}
@@ -262,7 +262,7 @@ func TestResolveCollapse(t *testing.T) {
 }
 
 func TestComputePreviewSegments_NoMarkers(t *testing.T) {
-	segments, beyond := ComputePreviewSegments(8, 50, nil, nil)
+	segments, beyond := computePreviewSegments(8, 50, nil, nil)
 	if len(segments) != 1 || segments[0].Start != 1 || segments[0].End != 8 {
 		t.Errorf("got %v, want [{1 8}]", segments)
 	}
@@ -275,7 +275,7 @@ func TestComputePreviewSegments_MarkerWithinCap(t *testing.T) {
 	markers := []config.LineMarker{
 		{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 12, End: 12}}},
 	}
-	segments, beyond := ComputePreviewSegments(8, 50, markers, nil)
+	segments, beyond := computePreviewSegments(8, 50, markers, nil)
 
 	if len(segments) != 2 {
 		t.Fatalf("got %d segments, want 2: %v", len(segments), segments)
@@ -296,7 +296,7 @@ func TestComputePreviewSegments_MarkerBeyondCap(t *testing.T) {
 	markers := []config.LineMarker{
 		{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 30, End: 32}}},
 	}
-	segments, beyond := ComputePreviewSegments(8, 50, markers, nil)
+	segments, beyond := computePreviewSegments(8, 50, markers, nil)
 
 	if len(segments) != 1 {
 		t.Fatalf("got %d segments, want 1: %v", len(segments), segments)
@@ -315,7 +315,7 @@ func TestComputePreviewSegments_AdjacentMerge(t *testing.T) {
 	markers := []config.LineMarker{
 		{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 10, End: 10}, {Start: 12, End: 12}}},
 	}
-	segments, _ := ComputePreviewSegments(8, 50, markers, nil)
+	segments, _ := computePreviewSegments(8, 50, markers, nil)
 
 	if len(segments) != 1 {
 		t.Fatalf("got %d segments, want 1: %v", len(segments), segments)
@@ -330,7 +330,7 @@ func TestComputePreviewSegments_DisjointSegments(t *testing.T) {
 	markers := []config.LineMarker{
 		{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 14, End: 14}}},
 	}
-	segments, _ := ComputePreviewSegments(8, 50, markers, nil)
+	segments, _ := computePreviewSegments(8, 50, markers, nil)
 
 	if len(segments) != 2 {
 		t.Fatalf("got %d segments, want 2: %v", len(segments), segments)
@@ -347,7 +347,7 @@ func TestComputePreviewSegments_MarkerInBasePreview(t *testing.T) {
 	markers := []config.LineMarker{
 		{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 3, End: 5}}},
 	}
-	segments, beyond := ComputePreviewSegments(8, 50, markers, nil)
+	segments, beyond := computePreviewSegments(8, 50, markers, nil)
 
 	// All markers within base preview — single segment, no extras
 	if len(segments) != 1 {
@@ -363,7 +363,7 @@ func TestComputePreviewSegments_MarkerInBasePreview(t *testing.T) {
 
 func TestComputePreviewSegments_FocusLinesWithinCap(t *testing.T) {
 	focus := []config.LineRange{{Start: 14, End: 14}}
-	segments, _ := ComputePreviewSegments(8, 50, nil, focus)
+	segments, _ := computePreviewSegments(8, 50, nil, focus)
 
 	if len(segments) != 2 {
 		t.Fatalf("got %d segments, want 2: %v", len(segments), segments)
@@ -380,7 +380,7 @@ func TestComputePreviewSegments_MixedWithinAndBeyond(t *testing.T) {
 			{Start: 25, End: 25}, // beyond 2× cap
 		}},
 	}
-	segments, beyond := ComputePreviewSegments(8, 50, markers, nil)
+	segments, beyond := computePreviewSegments(8, 50, markers, nil)
 
 	if len(segments) != 2 {
 		t.Fatalf("got %d segments, want 2: %v", len(segments), segments)
@@ -407,9 +407,9 @@ func TestResolveCollapseStyle(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ResolveCollapseStyle(tt.style, tt.rangeEnd, tt.lineCount)
+			got := resolveCollapseStyle(tt.style, tt.rangeEnd, tt.lineCount)
 			if got != tt.want {
-				t.Errorf("ResolveCollapseStyle() = %d, want %d", got, tt.want)
+				t.Errorf("resolveCollapseStyle() = %d, want %d", got, tt.want)
 			}
 		})
 	}

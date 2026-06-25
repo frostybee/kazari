@@ -35,8 +35,7 @@ var knownExtensions = map[string]bool{
 	".makefile": true, ".mk": true,
 }
 
-// IsTerminalLanguage returns true if the language defaults to a terminal frame.
-func IsTerminalLanguage(lang string) bool {
+func isTerminalLanguage(lang string) bool {
 	return terminalLanguages[strings.ToLower(lang)]
 }
 
@@ -45,7 +44,7 @@ func DetectFrameType(code, lang string, frameDefault int) int {
 	if frameDefault != config.FrameAuto {
 		return frameDefault
 	}
-	if !IsTerminalLanguage(lang) {
+	if !isTerminalLanguage(lang) {
 		return config.FrameCode
 	}
 	if hasFileIndicator(code) {

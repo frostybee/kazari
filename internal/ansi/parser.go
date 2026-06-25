@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/frostybee/kazari/internal/config"
+	"github.com/frostybee/kazari/internal/text"
 )
 
 var standardColors = [16]string{
@@ -55,7 +56,7 @@ func (s *state) reset() {
 // SGR escape codes are parsed into colors and font styles; the escape
 // sequences themselves are stripped from the output tokens.
 func Parse(code string) []config.TokenLine {
-	rawLines := splitLines(code)
+	rawLines := text.SplitLines(code)
 	lines := make([]config.TokenLine, len(rawLines))
 	var st state
 
@@ -241,13 +242,3 @@ func clamp(v int) int {
 	return v
 }
 
-func splitLines(code string) []string {
-	if code == "" {
-		return []string{""}
-	}
-	lines := strings.Split(code, "\n")
-	if strings.HasSuffix(code, "\n") && len(lines) > 0 && lines[len(lines)-1] == "" {
-		lines = lines[:len(lines)-1]
-	}
-	return lines
-}

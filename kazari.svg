@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Kazari icon</title>
+  <desc id="desc">Decorative braces frame syntax highlighted code in an editor window</desc>
+  <defs>
+    <linearGradient id="title-bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#52525b"/>
+      <stop offset="1" stop-color="#3f3f46"/>
+    </linearGradient>
+    <linearGradient id="braces" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a5b4fc"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#3a3a40"/>
+  <rect x="12" y="18" width="104" height="92" rx="8" fill="#232326" stroke="#43434a"/>
+  <path d="M20 18h88a8 8 0 0 1 8 8v8H12v-8a8 8 0 0 1 8-8Z" fill="url(#title-bar)"/>
+  <circle cx="24" cy="26" r="2.5" fill="#fb7185"/>
+  <circle cx="33" cy="26" r="2.5" fill="#fb923c"/>
+  <circle cx="42" cy="26" r="2.5" fill="#4ade80"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M36 42c-8 0-11 6-11 12v6c0 3-3 5-3 5s3 2 3 5v6c0 6 3 12 11 12" stroke="url(#braces)" stroke-width="3.5"/>
+    <path d="M92 42c8 0 11 6 11 12v6c0 3 3 5 3 5s-3 2-3 5v6c0 6-3 12-11 12" stroke="url(#braces)" stroke-width="3.5"/>
+  </g>
+  <g opacity=".9">
+    <rect x="47" y="52" width="16" height="4" rx="2" fill="#fb7185"/>
+    <rect x="66" y="52" width="10" height="4" rx="2" fill="#38bdf8"/>
+    <rect x="50" y="59" width="22" height="4" rx="2" fill="#4ade80"/>
+    <rect x="47" y="66" width="8" height="4" rx="2" fill="#c4b5fd"/>
+    <rect x="58" y="66" width="18" height="4" rx="2" fill="#fb923c"/>
+    <rect x="50" y="73" width="14" height="4" rx="2" fill="#38bdf8"/>
+    <rect x="67" y="73" width="8" height="4" rx="2" fill="#fbbf24"/>
+  </g>
+</svg>

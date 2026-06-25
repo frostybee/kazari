@@ -63,9 +63,7 @@ func buildThresholdVisibleSet(segments []config.PreviewSegment) map[int]bool {
 func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange, cfg *config.Config) {
 	sb.WriteString("<summary>")
 	sb.WriteString("<div class=\"kz-line\">")
-	if resolved.LineNumbers {
-		sb.WriteString("<div class=\"kz-gutter\"><div class=\"kz-ln\"></div></div>")
-	}
+	renderEmptyGutter(sb, resolved)
 
 	indentStyle := ""
 	if cr.MinIndent > 0 && resolved.CollapseConfig != nil && resolved.CollapseConfig.PreserveIndent {
@@ -83,19 +81,16 @@ func renderSummaryLine(sb *strings.Builder, resolved *config.ResolvedBlock, cr c
 
 func renderCollapseRangeOpen(sb *strings.Builder, resolved *config.ResolvedBlock, cr config.CollapseRange, cfg *config.Config) {
 	switch cr.Style {
-	case config.CollapseCollapsibleStart:
-		sb.WriteString("<div class=\"kz-section collapsible-start\">")
+	case config.CollapseCollapsibleStart, config.CollapseCollapsibleEnd:
+		className := "collapsible-start"
+		if cr.Style == config.CollapseCollapsibleEnd {
+			className = "collapsible-end"
+		}
+		sb.WriteString(fmt.Sprintf(`<div class="kz-section %s">`, className))
 		sb.WriteString("<details>")
 		renderSummaryLine(sb, resolved, cr, cfg)
 		sb.WriteString("</details>")
-		sb.WriteString("<div class=\"content-lines\">")
-
-	case config.CollapseCollapsibleEnd:
-		sb.WriteString("<div class=\"kz-section collapsible-end\">")
-		sb.WriteString("<details>")
-		renderSummaryLine(sb, resolved, cr, cfg)
-		sb.WriteString("</details>")
-		sb.WriteString("<div class=\"content-lines\">")
+		sb.WriteString(`<div class="content-lines">`)
 
 	default:
 		sb.WriteString("<details class=\"kz-section\">")
@@ -112,11 +107,15 @@ func renderCollapseRangeClose(sb *strings.Builder, cr config.CollapseRange) {
 	}
 }
 
+func renderEmptyGutter(sb *strings.Builder, resolved *config.ResolvedBlock) {
+	if resolved.LineNumbers {
+		sb.WriteString(`<div class="kz-gutter"><div class="kz-ln"></div></div>`)
+	}
+}
+
 func renderGapIndicator(sb *strings.Builder, resolved *config.ResolvedBlock) {
 	sb.WriteString("<div class=\"kz-line kz-gap\">")
-	if resolved.LineNumbers {
-		sb.WriteString("<div class=\"kz-gutter\"><div class=\"kz-ln\"></div></div>")
-	}
+	renderEmptyGutter(sb, resolved)
 	sb.WriteString("<div class=\"kz-code\"><span class=\"kz-gap-indicator\" aria-hidden=\"true\">⋮</span><span class=\"sr-only\">Lines hidden</span></div>")
 	sb.WriteString("</div>")
 }

@@ -93,16 +93,7 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 		sb.WriteString(readCSS("theme-toggle.css"))
 	}
 
-	content := sb.String()
-
-	if cfg.CascadeLayer != "" {
-		content = fmt.Sprintf("@layer %s {\n%s}\n", cfg.CascadeLayer, content)
-	}
-
-	if cfg.Minify {
-		return minify.CSS(content)
-	}
-	return content
+	return finalizeCSS(sb.String(), cfg)
 }
 
 // GenerateThemeOnly produces only theme variables and token switching CSS,
@@ -115,7 +106,10 @@ func GenerateThemeOnly(cfg *config.Config, light, dark theme.ThemeColors) string
 		sb.WriteString(readCSS("theme-toggle.css"))
 	}
 
-	content := sb.String()
+	return finalizeCSS(sb.String(), cfg)
+}
+
+func finalizeCSS(content string, cfg *config.Config) string {
 	if cfg.CascadeLayer != "" {
 		content = fmt.Sprintf("@layer %s {\n%s}\n", cfg.CascadeLayer, content)
 	}

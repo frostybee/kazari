@@ -18,23 +18,6 @@ type ThemeColors struct {
 	FoldBG       string
 }
 
-// KnownVarNames returns the deduplicated list of all CSS variable names
-// that Kazari can emit for the given config. Used for style override validation.
-func KnownVarNames(cfg *config.Config) []string {
-	seen := make(map[string]struct{})
-	for _, v := range buildStaticVars(cfg) {
-		seen[v.name] = struct{}{}
-	}
-	for _, name := range overridableVarNames(cfg) {
-		seen[name] = struct{}{}
-	}
-	names := make([]string, 0, len(seen))
-	for name := range seen {
-		names = append(names, name)
-	}
-	return names
-}
-
 func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 	var sb strings.Builder
 
@@ -63,7 +46,7 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 	switch cfg.DarkMode.Kind {
 	case config.DarkModeSelectorKind:
 		sb.WriteString(fmt.Sprintf("%s {\n", root))
-		writeVars(&sb, staticVars)
+		writeVarLines(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
 		writeStyleOverrides(&sb, cfg.StyleOverrides, false)
 		sb.WriteString("}\n")
@@ -74,7 +57,7 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 
 	case config.DarkModeMediaQueryKind:
 		sb.WriteString(fmt.Sprintf("%s {\n", root))
-		writeVars(&sb, staticVars)
+		writeVarLines(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
 		writeStyleOverrides(&sb, cfg.StyleOverrides, false)
 		sb.WriteString("}\n")
@@ -85,7 +68,7 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 
 	case config.DarkModeBothKind:
 		sb.WriteString(fmt.Sprintf("%s {\n", root))
-		writeVars(&sb, staticVars)
+		writeVarLines(&sb, staticVars)
 		writeVarLines(&sb, lightVars)
 		writeStyleOverrides(&sb, cfg.StyleOverrides, false)
 		sb.WriteString("}\n")
@@ -100,46 +83,6 @@ func GenerateVars(cfg *config.Config, light, dark ThemeColors) string {
 	}
 
 	return sb.String()
-}
-
-// TokenSwitchingCSS generates the color switching rules for token spans.
-func TokenSwitchingCSS(cfg *config.Config) string {
-	var sb strings.Builder
-
-	sb.WriteString(tokenSwitchRule(".kazari-block", "--sl", "--slbg"))
-	sb.WriteString(themedLightRule(cfg))
-
-	if cfg.DarkTheme == "" {
-		return sb.String()
-	}
-
-	darkRules := tokenSwitchRule(".kazari-block", "--sd", "--sdbg") +
-		themedDarkRule(cfg)
-
-	switch cfg.DarkMode.Kind {
-	case config.DarkModeSelectorKind:
-		writeScopedRules(&sb, cfg.DarkMode.Selector, darkRules)
-
-	case config.DarkModeMediaQueryKind:
-		sb.WriteString("@media (prefers-color-scheme: dark) {\n")
-		sb.WriteString(darkRules)
-		sb.WriteString("}\n")
-
-	case config.DarkModeBothKind:
-		sb.WriteString("@media (prefers-color-scheme: dark) {\n")
-		sb.WriteString(darkRules)
-		sb.WriteString("}\n")
-		writeScopedRules(&sb, cfg.DarkMode.Selector, darkRules)
-	}
-
-	return sb.String()
-}
-
-// writeScopedRules prefixes each rule line with the dark mode selector.
-func writeScopedRules(sb *strings.Builder, selector, rules string) {
-	for _, line := range strings.Split(strings.TrimRight(rules, "\n"), "\n") {
-		sb.WriteString(selector + " " + line + "\n")
-	}
 }
 
 func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value string } {
@@ -313,47 +256,8 @@ const (
 	darkVarTemplate  = "%s: var(--kz-ovd-%s, var(--kz-ovl-%s)); "
 )
 
-func writeThemedRule(selector, varTemplate string, includeGradient bool, cfg *config.Config) string {
-	var sb strings.Builder
-	sb.WriteString(selector)
-	sb.WriteString(" { ")
-	for _, name := range overridableVarNames(cfg) {
-		suffix := strings.TrimPrefix(name, "--kz-")
-		sb.WriteString(fmt.Sprintf(varTemplate, name, suffix, suffix))
-	}
-	if includeGradient && cfg.Collapsible != nil {
-		sb.WriteString(collapseGradientDecl)
-	}
-	sb.WriteString("}\n")
-	return sb.String()
-}
-
-func tokenSwitchRule(selector, colorVar, bgVar string) string {
-	return fmt.Sprintf(
-		"%s .kz-line span[style^=\"--\"] { color: var(%s, inherit); background-color: var(%s, transparent); font-style: var(--sfs, inherit); font-weight: var(--sfw, inherit); text-decoration: var(--std, inherit); }\n",
-		selector, colorVar, bgVar,
-	)
-}
-
-func themedLightRule(cfg *config.Config) string {
-	return writeThemedRule(".kazari-block.kz-themed", lightVarTemplate, true, cfg)
-}
-
-// themedDarkRule must stay on a single line because writeScopedRules prefixes
-// each line with the dark mode selector. No gradient re-declaration here
-// because it is emitted inside the scoped wrapper.
-func themedDarkRule(cfg *config.Config) string {
-	return writeThemedRule(".kazari-block.kz-themed", darkVarTemplate, false, cfg)
-}
-
 func nv(name, value string) struct{ name, value string } {
 	return struct{ name, value string }{name, value}
-}
-
-func writeVars(sb *strings.Builder, vars []struct{ name, value string }) {
-	for _, v := range vars {
-		sb.WriteString(fmt.Sprintf("  %s: %s;\n", v.name, v.value))
-	}
 }
 
 func writeVarLines(sb *strings.Builder, vars []struct{ name, value string }) {
@@ -362,52 +266,6 @@ func writeVarLines(sb *strings.Builder, vars []struct{ name, value string }) {
 			sb.WriteString(fmt.Sprintf("  %s: %s;\n", v.name, v.value))
 		}
 	}
-}
-
-// ThemeToggleCSS generates CSS rules for per-block theme toggling.
-// These rules use data-kz-theme="dark"|"light" on .kazari-block to
-// override the page-level theme for individual blocks.
-func ThemeToggleCSS(cfg *config.Config, light, dark ThemeColors) string {
-	if cfg.DarkTheme == "" {
-		return ""
-	}
-
-	var sb strings.Builder
-
-	writeToggleVars(&sb, ".kazari-block[data-kz-theme=\"dark\"]", blockOverridableVars(dark, cfg), cfg)
-	writeToggleVars(&sb, ".kazari-block[data-kz-theme=\"light\"]", blockOverridableVars(light, cfg), cfg)
-
-	sb.WriteString(tokenSwitchRule(".kazari-block[data-kz-theme=\"dark\"]", "--sd", "--sdbg"))
-	sb.WriteString(tokenSwitchRule(".kazari-block[data-kz-theme=\"light\"]", "--sl", "--slbg"))
-
-	// kz-themed + force-dark: remap override dark vars onto kz-* names.
-	sb.WriteString(themedToggleDarkRule(cfg))
-	// kz-themed + force-light: remap override light vars onto kz-* names.
-	sb.WriteString(themedToggleLightRule(cfg))
-
-	return sb.String()
-}
-
-func themedToggleDarkRule(cfg *config.Config) string {
-	return writeThemedRule(".kazari-block.kz-themed[data-kz-theme=\"dark\"]", darkVarTemplate, true, cfg)
-}
-
-func themedToggleLightRule(cfg *config.Config) string {
-	return writeThemedRule(".kazari-block.kz-themed[data-kz-theme=\"light\"]", lightVarTemplate, true, cfg)
-}
-
-func writeToggleVars(sb *strings.Builder, selector string, vars []struct{ name, value string }, cfg *config.Config) {
-	sb.WriteString(selector)
-	sb.WriteString(" { ")
-	for _, v := range vars {
-		if v.value != "" {
-			sb.WriteString(fmt.Sprintf("%s: %s; ", v.name, v.value))
-		}
-	}
-	if cfg.Collapsible != nil {
-		sb.WriteString(collapseGradientDecl)
-	}
-	sb.WriteString("}\n")
 }
 
 func writeStyleOverrides(sb *strings.Builder, overrides map[string]config.StyleValue, isDark bool) {
@@ -422,23 +280,14 @@ func writeStyleOverrides(sb *strings.Builder, overrides map[string]config.StyleV
 
 	for _, k := range keys {
 		sv := overrides[k]
+		var v string
 		if isDark {
-			if !sv.IsThemed() {
-				continue
-			}
-			if v := sv.DarkValue(); v != "" {
-				sb.WriteString(fmt.Sprintf("  %s: %s;\n", k, v))
-			}
+			v = sv.DarkValue()
 		} else {
-			var v string
-			if sv.IsThemed() {
-				v = sv.LightValue()
-			} else {
-				v = sv.Value
-			}
-			if v != "" {
-				sb.WriteString(fmt.Sprintf("  %s: %s;\n", k, v))
-			}
+			v = sv.LightValue()
+		}
+		if v != "" {
+			sb.WriteString(fmt.Sprintf("  %s: %s;\n", k, v))
 		}
 	}
 }

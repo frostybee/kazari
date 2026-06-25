@@ -51,19 +51,7 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 	sb.WriteString("</div>")
 
 	sb.WriteString("<div class=\"kz-toolbar-right\">")
-	if cfg.CopyButton {
-		renderCopyButton(sb, resolved.RawCode, cfg)
-	}
-	if cfg.WrapButton {
-		renderWrapButton(sb, resolved, cfg)
-	}
-	if cfg.ThemeToggle && cfg.DarkTheme != "" {
-		renderThemeToggleButton(sb, cfg)
-	}
-	if cfg.FullscreenButton {
-		renderFontControls(sb, cfg)
-		renderFullscreenButton(sb, cfg)
-	}
+	renderActionButtons(sb, resolved, cfg)
 	if resolved.CollapseThreshold {
 		initiallyCollapsed := resolved.CollapseConfig == nil || resolved.CollapseConfig.DefaultCollapsed
 		expanded := "false"
@@ -86,6 +74,22 @@ func renderToolbar(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *con
 	sb.WriteString("</div>")
 
 	sb.WriteString("</div>")
+}
+
+func renderActionButtons(sb *strings.Builder, resolved *config.ResolvedBlock, cfg *config.Config) {
+	if cfg.CopyButton {
+		renderCopyButton(sb, resolved.RawCode, cfg)
+	}
+	if cfg.WrapButton {
+		renderWrapButton(sb, resolved, cfg)
+	}
+	if cfg.ThemeToggle && cfg.DarkTheme != "" {
+		renderThemeToggleButton(sb, cfg)
+	}
+	if cfg.FullscreenButton {
+		renderFontControls(sb, cfg)
+		renderFullscreenButton(sb, cfg)
+	}
 }
 
 func renderCopyButton(sb *strings.Builder, rawCode string, cfg *config.Config) {

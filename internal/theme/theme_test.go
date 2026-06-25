@@ -357,8 +357,8 @@ func TestGenerateVars_StyleOverrides_Universal(t *testing.T) {
 	if !strings.Contains(rootBlock, "  --kz-radius: 1rem;\n") {
 		t.Error("universal override should appear in :root block")
 	}
-	if strings.Contains(darkBlock, "--kz-radius") {
-		t.Error("universal override should not appear in dark block")
+	if !strings.Contains(darkBlock, "  --kz-radius: 1rem;\n") {
+		t.Error("universal override should also appear in dark block to override theme vars")
 	}
 }
 
@@ -414,8 +414,8 @@ func TestGenerateVars_StyleOverrides_MediaQuery(t *testing.T) {
 	if !strings.Contains(rootBlock, "  --kz-shadow: 0 1px 4px rgba(0,0,0,0.1);\n") {
 		t.Error("themed light value should appear in :root block")
 	}
-	if strings.Contains(darkBlock, "--kz-radius") {
-		t.Error("universal override should not appear in dark media query block")
+	if !strings.Contains(darkBlock, "  --kz-radius: 0.5rem;\n") {
+		t.Error("universal override should also appear in dark media query block to override theme vars")
 	}
 	if !strings.Contains(darkBlock, "  --kz-shadow: none;\n") {
 		t.Error("themed dark value should appear in media query block")

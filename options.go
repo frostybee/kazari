@@ -135,29 +135,4 @@ func WithWarningHandler(f func(string)) Option {
 	return func(b *engineBuilder) { b.cfg.WarningHandler = f }
 }
 
-func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {
-	bo := &config.BlockOptions{
-		Lang:            opts.Lang,
-		Title:           opts.Title,
-		Theme:           opts.Theme,
-		StartLineNumber: opts.StartLineNumber,
-	}
-	if opts.Frame != nil {
-		f := int(*opts.Frame)
-		bo.Frame = &f
-	}
-	if opts.LineNumbers != nil {
-		bo.LineNumbers = opts.LineNumbers
-	}
-	if opts.Wrap != nil {
-		bo.Wrap = opts.Wrap
-	}
-	if opts.PreserveIndent != nil {
-		bo.PreserveIndent = opts.PreserveIndent
-	}
-	if opts.HangingIndent != nil {
-		bo.HangingIndent = opts.HangingIndent
-	}
-	return bo
-}
 

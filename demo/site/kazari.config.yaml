@@ -1,0 +1,15 @@
+themes:
+  light: github-light
+  dark: github-dark
+#darkMode:
+#  kind: selector
+#  selector: ".dark"
+copyButton: true
+fullscreenButton: true
+wrapButton: true
+lineNumbers: false
+collapsible:
+  lineThreshold: 15
+  previewLines: 5
+#styleOverrides:
+#  --kz-editor-bg: "red"

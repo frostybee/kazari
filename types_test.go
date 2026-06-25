@@ -1,6 +1,10 @@
 package kazari
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/frostybee/kazari/internal/config"
+)
 
 func TestStyleValue(t *testing.T) {
 	tests := map[string]struct {
@@ -53,5 +57,28 @@ func TestStyleValue(t *testing.T) {
 				t.Errorf("DarkValue() = %q, want %q", got, tc.darkVal)
 			}
 		})
+	}
+}
+
+func TestEnumMirroring(t *testing.T) {
+	checks := []struct {
+		name     string
+		public   int
+		internal int
+	}{
+		{"FrameAuto", int(FrameAuto), config.FrameAuto},
+		{"FrameCode", int(FrameCode), config.FrameCode},
+		{"FrameTerminal", int(FrameTerminal), config.FrameTerminal},
+		{"FrameNone", int(FrameNone), config.FrameNone},
+		{"DotsColored", int(DotsColored), config.DotsColored},
+		{"DotsMinimal", int(DotsMinimal), config.DotsMinimal},
+		{"LangIconNone", int(LangIconNone), config.LangIconNone},
+		{"LangIconOnly", int(LangIconOnly), config.LangIconOnly},
+		{"LangIconAndText", int(LangIconAndText), config.LangIconAndText},
+	}
+	for _, c := range checks {
+		if c.public != c.internal {
+			t.Errorf("%s: public=%d != internal=%d", c.name, c.public, c.internal)
+		}
 	}
 }

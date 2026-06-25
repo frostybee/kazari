@@ -28,20 +28,20 @@ func ResolveCollapse(
 	result := CollapseResult{}
 
 	// Threshold-based collapse
-	if ShouldThresholdCollapse(lineCount, spec, cfg) {
+	if shouldThresholdCollapse(lineCount, spec, cfg) {
 		result.Threshold = true
 		preview := cfg.PreviewLines
 		if preview <= 0 {
 			preview = 8
 		}
-		segments, beyondCap := ComputePreviewSegments(preview, lineCount, markers, focusLines)
+		segments, beyondCap := computePreviewSegments(preview, lineCount, markers, focusLines)
 		result.PreviewSegments = segments
 		result.BeyondCapCount = beyondCap
 	}
 
 	// Range-based collapse
 	if spec != nil && len(spec.Ranges) > 0 {
-		validated := ValidateRanges(spec.Ranges, lineCount)
+		validated := validateRanges(spec.Ranges, lineCount)
 
 		// Resolve style: per-block meta > engine config > github default
 		baseStyle := config.CollapseGithub
@@ -53,8 +53,8 @@ func ResolveCollapse(
 		}
 
 		for _, r := range validated {
-			indent := ComputeMinIndent(code, r.Start, r.End)
-			style := ResolveCollapseStyle(baseStyle, r.End, lineCount)
+			indent := computeMinIndent(code, r.Start, r.End)
+			style := resolveCollapseStyle(baseStyle, r.End, lineCount)
 			result.Ranges = append(result.Ranges, config.CollapseRange{
 				Start:     r.Start,
 				End:       r.End,
@@ -69,7 +69,7 @@ func ResolveCollapse(
 }
 
 // ShouldThresholdCollapse determines if threshold-based collapse applies.
-func ShouldThresholdCollapse(lineCount int, spec *config.CollapseSpec, cfg *config.CollapsibleConfig) bool {
+func shouldThresholdCollapse(lineCount int, spec *config.CollapseSpec, cfg *config.CollapsibleConfig) bool {
 	if cfg == nil {
 		return false
 	}
@@ -92,7 +92,7 @@ func ShouldThresholdCollapse(lineCount int, spec *config.CollapseSpec, cfg *conf
 // ValidateRanges filters and normalizes collapse ranges.
 // Drops reversed ranges, out-of-bounds ranges, and overlapping ranges (first wins).
 // Returns sorted by Start.
-func ValidateRanges(ranges []config.LineRange, lineCount int) []config.LineRange {
+func validateRanges(ranges []config.LineRange, lineCount int) []config.LineRange {
 	var valid []config.LineRange
 	for _, r := range ranges {
 		if r.Start > r.End {
@@ -129,7 +129,7 @@ func ValidateRanges(ranges []config.LineRange, lineCount int) []config.LineRange
 
 // ComputePreviewSegments computes non-contiguous visible segments for threshold preview.
 // Returns the segments to show and the count of marked lines beyond the 2× cap (for badge).
-func ComputePreviewSegments(previewLines int, lineCount int, markers []config.LineMarker, focusLines []config.LineRange) ([]config.PreviewSegment, int) {
+func computePreviewSegments(previewLines int, lineCount int, markers []config.LineMarker, focusLines []config.LineRange) ([]config.PreviewSegment, int) {
 	base := previewLines
 	if base >= lineCount {
 		return []config.PreviewSegment{{Start: 1, End: lineCount}}, 0
@@ -212,7 +212,7 @@ func buildMarkedSet(markers []config.LineMarker, focusLines []config.LineRange) 
 
 // ComputeMinIndent calculates the minimum indentation (in spaces) of lines
 // in the range [startLine, endLine] (1-based), ignoring blank lines.
-func ComputeMinIndent(code string, startLine, endLine int) int {
+func computeMinIndent(code string, startLine, endLine int) int {
 	lines := strings.Split(code, "\n")
 	minIndent := -1
 
@@ -236,7 +236,7 @@ func ComputeMinIndent(code string, startLine, endLine int) int {
 
 // ResolveCollapseStyle resolves CollapseCollapsibleAuto to start or end
 // based on whether the range ends at the last line of the block.
-func ResolveCollapseStyle(style config.CollapseStyle, rangeEnd, lineCount int) config.CollapseStyle {
+func resolveCollapseStyle(style config.CollapseStyle, rangeEnd, lineCount int) config.CollapseStyle {
 	if style != config.CollapseCollapsibleAuto {
 		return style
 	}

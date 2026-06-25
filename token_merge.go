@@ -1,10 +1,6 @@
 package kazari
 
-import (
-	"strings"
-
-	"github.com/frostybee/kazari/internal/render"
-)
+import "github.com/frostybee/kazari/internal/render"
 
 // mergeTokens pairs light and dark tokens into MergedToken lines.
 func mergeTokens(light, dark [][]Token) []render.TokenLine {
@@ -95,36 +91,4 @@ func alignTokens(lightLine, darkLine []Token) []render.MergedToken {
 	}
 
 	return result
-}
-
-// plaintextLines returns single-token lines for code with no highlighter.
-func plaintextLines(code string) []render.TokenLine {
-	rawLines := splitLines(code)
-	lines := make([]render.TokenLine, len(rawLines))
-	for i, content := range rawLines {
-		lines[i] = render.TokenLine{
-			Tokens: []render.MergedToken{{Content: content}},
-		}
-	}
-	return lines
-}
-
-// splitLines splits code into lines, handling the trailing newline correctly.
-func splitLines(code string) []string {
-	if code == "" {
-		return []string{""}
-	}
-	lines := strings.Split(code, "\n")
-	if strings.HasSuffix(code, "\n") && len(lines) > 0 && lines[len(lines)-1] == "" {
-		lines = lines[:len(lines)-1]
-	}
-	return lines
-}
-
-func expandTabs(code string, tabWidth int) string {
-	if !strings.Contains(code, "\t") {
-		return code
-	}
-	spaces := strings.Repeat(" ", tabWidth)
-	return strings.ReplaceAll(code, "\t", spaces)
 }
