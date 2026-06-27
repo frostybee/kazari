@@ -2,6 +2,7 @@ package collapsible
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/frostybee/kazari/internal/config"
@@ -257,6 +258,52 @@ func TestResolveCollapse(t *testing.T) {
 		}
 		if len(result.Ranges) != 1 {
 			t.Fatalf("got %d ranges, want 1", len(result.Ranges))
+		}
+	})
+
+	t.Run("threshold skipped with labeled markers", func(t *testing.T) {
+		code := strings.Repeat("line\n", 23) + "line"
+		markers := []config.LineMarker{
+			{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 5, End: 12}}, Label: "Step 1"},
+		}
+		result := ResolveCollapse(24, nil, cfg, code, markers, nil)
+		if result.Threshold {
+			t.Error("threshold collapse should be skipped when labeled markers are present")
+		}
+	})
+
+	t.Run("threshold preserved with unlabeled markers", func(t *testing.T) {
+		code := strings.Repeat("line\n", 23) + "line"
+		markers := []config.LineMarker{
+			{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 5, End: 12}}},
+		}
+		result := ResolveCollapse(24, nil, cfg, code, markers, nil)
+		if !result.Threshold {
+			t.Error("threshold collapse should still apply for unlabeled markers")
+		}
+	})
+
+	t.Run("explicit collapse not blocked by labeled markers", func(t *testing.T) {
+		code := strings.Repeat("line\n", 4) + "line"
+		markers := []config.LineMarker{
+			{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 2, End: 4}}, Label: "Step 1"},
+		}
+		spec := &config.CollapseSpec{Enabled: true}
+		result := ResolveCollapse(5, spec, cfg, code, markers, nil)
+		if !result.Threshold {
+			t.Error("explicit collapse should override labeled markers guard")
+		}
+	})
+
+	t.Run("nocollapse with labeled markers stays disabled", func(t *testing.T) {
+		code := strings.Repeat("line\n", 23) + "line"
+		markers := []config.LineMarker{
+			{Type: config.MarkerMark, Lines: []config.LineRange{{Start: 5, End: 12}}, Label: "Step 1"},
+		}
+		spec := &config.CollapseSpec{Disabled: true}
+		result := ResolveCollapse(24, spec, cfg, code, markers, nil)
+		if result.Threshold {
+			t.Error("nocollapse should still disable threshold even with labeled markers")
 		}
 	})
 }

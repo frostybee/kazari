@@ -13,7 +13,7 @@ toggle.addEventListener("change", function () {
   document.body.classList.toggle("dark", dark);
   document.documentElement.classList.toggle("dark", dark);
   try { localStorage.setItem("kz-demo-theme", dark ? "dark" : "light"); } catch (e) {}
-  if (window.__shikiHL) renderAll(window.__shikiHL, dark ? "github-dark" : "github-light");
+  if (window.__shikiHL) renderAll(window.__shikiHL, dark ? "github-dark-default" : "github-light");
 });
 
 function renderAll(hl, theme) {
@@ -31,11 +31,11 @@ async function init() {
   try {
     var m = await import("https://esm.sh/shiki@3");
     var hl = await m.createHighlighter({
-      themes: ["github-light", "github-dark"],
+      themes: ["github-light", "github-dark-default"],
       langs: ["go", "javascript", "typescript", "python", "bash", "php", "css", "html"],
     });
     window.__shikiHL = hl;
-    renderAll(hl, toggle.checked ? "github-dark" : "github-light");
+    renderAll(hl, toggle.checked ? "github-dark-default" : "github-light");
     status.textContent = "Shiki ready.";
     status.className = "cmp-status ready";
   } catch (err) {

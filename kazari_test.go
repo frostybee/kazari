@@ -1643,6 +1643,57 @@ func TestRenderWithMeta_Collapsible_Nocollapse(t *testing.T) {
 	}
 }
 
+func TestRenderWithMeta_Collapsible_LabeledRangesSkipThreshold(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(24),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    15,
+			PreviewLines:     5,
+			DefaultCollapsed: true,
+		}),
+	)
+
+	code := strings.Repeat("line\n", 23) + "line"
+	html, err := engine.RenderWithMeta(code, `go {"A":5-12} del={"B":16-20} ins={"C":21-22}`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if strings.Contains(html, "kz-collapsed") {
+		t.Error("labeled ranges should prevent auto-threshold collapse")
+	}
+	if strings.Contains(html, "kz-collapse-btn") {
+		t.Error("collapse button should not appear when labeled ranges prevent threshold")
+	}
+}
+
+func TestRenderWithMeta_Collapsible_ExplicitCollapseWithLabels(t *testing.T) {
+	hl := &mockHighlighter{
+		lightTokens: makeMultiLineTokens(24),
+		themeInfo:   ThemeInfo{FG: "#24292f", BG: "#ffffff"},
+	}
+	engine := newTestEngine(hl,
+		WithCollapsible(CollapsibleConfig{
+			LineThreshold:    15,
+			PreviewLines:     5,
+			DefaultCollapsed: true,
+		}),
+	)
+
+	code := strings.Repeat("line\n", 23) + "line"
+	html, err := engine.RenderWithMeta(code, `go collapse {"A":5-12}`)
+	if err != nil {
+		t.Fatalf("RenderWithMeta() error: %v", err)
+	}
+
+	if !strings.Contains(html, "kz-collapse-btn") {
+		t.Error("explicit collapse should still work even with labeled ranges")
+	}
+}
+
 func TestRenderWithMeta_Collapsible_PerBlockThreshold_PreventsCollapse(t *testing.T) {
 	hl := &mockHighlighter{
 		lightTokens: makeMultiLineTokens(16),

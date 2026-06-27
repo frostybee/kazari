@@ -1,0 +1,57 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "demo/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Generate demo pages
+        run: |
+          cd demo/site
+          go run .
+
+      - name: Copy demo output to docs
+        run: |
+          mkdir -p docs/static/demo/assets
+          cp demo/site/*.html docs/static/demo/
+          cp demo/site/showcase.css docs/static/demo/
+          cp demo/site/showcase.js docs/static/demo/
+          cp demo/site/assets/* docs/static/demo/assets/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: getsarde/action@v1
+        with:
+          path: docs
+          build-args: "--baseURL /kazari"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

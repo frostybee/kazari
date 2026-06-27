@@ -71,7 +71,7 @@ summary {
 .site-nav-links a {
   padding: .4rem .75rem .55rem;
   border-radius: .25rem .25rem 0 0;
-  color: #5b6470;
+  color: #3d4550;
   text-decoration: none;
   font-size: .88rem;
   font-weight: 500;
@@ -213,7 +213,7 @@ summary {
 
 .demo-brand p {
   margin: .2rem 0 0;
-  color: #5b6470;
+  color: #3d4550;
   font-size: .9rem;
 }
 
@@ -321,7 +321,7 @@ summary {
   padding: .3rem .55rem;
   border-left: 2px solid transparent;
   border-radius: 0 .35rem .35rem 0;
-  color: #5b6470;
+  color: #3d4550;
   font-size: .84rem;
   line-height: 1.3;
   text-decoration: none;
@@ -403,7 +403,7 @@ summary {
 .result-count {
   grid-column: 1 / -1;
   margin: 0;
-  color: #68717d;
+  color: #4a5260;
   font-size: .85rem;
 }
 
@@ -437,7 +437,7 @@ summary {
 
 .category-description {
   margin: .5rem 0 2rem;
-  color: #68717d;
+  color: #4a5260;
 }
 
 .demo-example {
@@ -461,7 +461,7 @@ summary {
 
 .example-description {
   margin: -.25rem 0 .75rem;
-  color: #5b6470;
+  color: #3d4550;
 }
 
 .copy-action {
@@ -556,7 +556,7 @@ summary {
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: #68717d;
+  color: #4a5260;
   cursor: pointer;
 }
 
@@ -680,7 +680,7 @@ summary {
 .site-footer-about p {
   margin: 0;
   font-size: .85rem;
-  color: #5b6470;
+  color: #3d4550;
   line-height: 1.55;
 }
 .site-footer-about a {
@@ -697,7 +697,7 @@ summary {
   font-size: .82rem;
 }
 .site-footer-links a {
-  color: #5b6470;
+  color: #3d4550;
   text-decoration: none;
 }
 .site-footer-links a:hover {
@@ -734,7 +734,7 @@ summary {
   --dk-border-hover: #4f5052;
   --dk-border-bright: #5a5b5d;
   --dk-text: #d7dadc;
-  --dk-text-muted: #818384;
+  --dk-text-muted: #c8d0d4;
   --dk-text-secondary: #a3a5a7;
   --dk-text-heading: #d7dadc;
   --dk-accent: #4fbcff;

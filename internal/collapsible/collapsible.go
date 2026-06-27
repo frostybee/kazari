@@ -27,16 +27,21 @@ func ResolveCollapse(
 ) CollapseResult {
 	result := CollapseResult{}
 
-	// Threshold-based collapse
+	// Threshold-based collapse.
+	// Skip auto-threshold when labeled ranges are present: labels guide readers
+	// through specific code sections, and collapsing hides the annotated content.
 	if shouldThresholdCollapse(lineCount, spec, cfg) {
-		result.Threshold = true
-		preview := cfg.PreviewLines
-		if preview <= 0 {
-			preview = 8
+		explicitlyForced := spec != nil && spec.Enabled
+		if explicitlyForced || !hasLabeledMarkers(markers) {
+			result.Threshold = true
+			preview := cfg.PreviewLines
+			if preview <= 0 {
+				preview = 8
+			}
+			segments, beyondCap := computePreviewSegments(preview, lineCount, markers, focusLines)
+			result.PreviewSegments = segments
+			result.BeyondCapCount = beyondCap
 		}
-		segments, beyondCap := computePreviewSegments(preview, lineCount, markers, focusLines)
-		result.PreviewSegments = segments
-		result.BeyondCapCount = beyondCap
 	}
 
 	// Range-based collapse
@@ -191,6 +196,15 @@ func computePreviewSegments(previewLines int, lineCount int, markers []config.Li
 	}
 
 	return segments, beyondCap
+}
+
+func hasLabeledMarkers(markers []config.LineMarker) bool {
+	for _, m := range markers {
+		if m.Label != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func buildMarkedSet(markers []config.LineMarker, focusLines []config.LineRange) map[int]bool {

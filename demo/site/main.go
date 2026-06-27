@@ -42,6 +42,7 @@ var navLinks = []showcase.NavLink{
 	{Label: "Nuri vs Chroma", Href: "nuri-vs-chroma.html"},
 	{Label: "Color Contrast", Href: "color-contrast.html"},
 	{Label: "Benchmark", Href: "benchmark.html"},
+	{Label: "Docs", Href: "/kazari/"},
 }
 
 func navLinksWithActive(active string) []showcase.NavLink {

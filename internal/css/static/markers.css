@@ -20,11 +20,6 @@
   box-shadow: inset var(--kz-mark-border-width) 0 0 0 var(--kz-del-border);
 }
 
-/* Line number opacity bump on highlighted lines */
-.kazari-block .kz-line.highlight .kz-ln {
-  opacity: 0.6;
-}
-
 /* Diff indicators via ::before on .kz-code */
 .kazari-block .kz-line.ins .kz-code,
 .kazari-block .kz-line.del .kz-code {
