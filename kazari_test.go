@@ -4389,11 +4389,11 @@ func TestRender_Links_BasicLink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(result, `<a class="kz-link" href="https://pkg.go.dev/fmt" rel="noopener noreferrer">`) {
+	if !strings.Contains(result, `<a class="kz-link" href="https://pkg.go.dev/fmt" target="_blank" rel="noopener noreferrer">`) {
 		t.Errorf("expected kz-link anchor, got: %s", result)
 	}
-	if !strings.Contains(result, "fmt</a>") && !strings.Contains(result, "fmt</span></a>") {
-		t.Errorf("expected link text 'fmt' inside anchor, got: %s", result)
+	if !strings.Contains(result, `class="kz-link-icon"`) {
+		t.Errorf("expected external link icon, got: %s", result)
 	}
 }
 

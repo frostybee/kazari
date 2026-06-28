@@ -216,14 +216,14 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
 </style>
 </head>
 <body>
-<nav class="site-nav"><div class="site-nav-inner"><a class="site-brand" href="showcase.html">Kazari</a><input type="checkbox" id="nav-toggle" class="nav-toggle-input"><label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation"><span></span><span></span><span></span></label><div class="site-nav-links"><a href="showcase.html">Showcase</a><a href="nuri-vs-shiki.html">Nuri vs Shiki</a><a href="nuri-vs-chroma.html">Nuri vs Chroma</a><a href="color-contrast.html">Color Contrast</a><a href="benchmark.html" class="active" aria-current="page">Benchmark</a><a href="../">Docs</a></div><label class="site-theme-toggle" title="Toggle dark mode"><input type="checkbox" id="dark-toggle"><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div></nav>
+<nav class="site-nav"><div class="site-nav-inner"><a class="site-brand" href="showcase.html">Kazari</a><input type="checkbox" id="nav-toggle" class="nav-toggle-input"><label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation"><span></span><span></span><span></span></label><div class="site-nav-links"><a href="showcase.html">Showcase</a><a href="nuri-vs-shiki.html">Nuri vs Shiki</a><a href="nuri-vs-chroma.html">Nuri vs Chroma</a><a href="color-contrast.html">Color Contrast</a><a href="benchmark.html" class="active" aria-current="page">Benchmark</a><a href="/kazari/">Docs</a></div><label class="site-theme-toggle" title="Toggle dark mode"><input type="checkbox" id="dark-toggle"><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div></nav>
 <header class="cmp-header">
   <h1 class="cmp-page-title">Performance Benchmark</h1>
   <p>Nuri (TextMate grammars) vs Chroma (Pygments-based lexers) rendering performance. All measurements taken at build time, averaged over 50 iterations per snippet.</p>
   <div class="bench-summary">
     <div class="bench-card">
       <div class="bench-card-label">Nuri Init</div>
-      <div class="bench-card-value">100.42ms</div>
+      <div class="bench-card-value">88.79ms</div>
     </div>
     <div class="bench-card">
       <div class="bench-card-label">Chroma Init</div>
@@ -231,15 +231,15 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
     </div>
     <div class="bench-card">
       <div class="bench-card-label">Total (Nuri)</div>
-      <div class="bench-card-value">223.52ms</div>
+      <div class="bench-card-value">204.96ms</div>
     </div>
     <div class="bench-card">
       <div class="bench-card-label">Total (Chroma)</div>
-      <div class="bench-card-value">7.63ms</div>
+      <div class="bench-card-value">7.53ms</div>
     </div>
     <div class="bench-card bench-card--highlight">
       <div class="bench-card-label">Avg Speedup</div>
-      <div class="bench-card-value">29.3x</div>
+      <div class="bench-card-value">27.2x</div>
     </div>
   </div>
 </header>
@@ -260,12 +260,12 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
         <tr>
           <td>Go</td>
           <td>11</td>
-          <td>6.93ms</td>
-          <td>644µs</td>
-          <td>10.7x</td>
+          <td>6.72ms</td>
+          <td>669µs</td>
+          <td>10.0x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:6.1%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:6.9%"></div>
               <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
             </div>
           </td>
@@ -273,12 +273,12 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
         <tr>
           <td>JavaScript</td>
           <td>7</td>
-          <td>17.33ms</td>
-          <td>780µs</td>
-          <td>22.2x</td>
+          <td>18.16ms</td>
+          <td>736µs</td>
+          <td>24.7x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:15.2%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:18.7%"></div>
               <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
             </div>
           </td>
@@ -286,38 +286,38 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
         <tr>
           <td>TypeScript</td>
           <td>15</td>
-          <td>39.53ms</td>
-          <td>1.09ms</td>
-          <td>36.1x</td>
+          <td>38.07ms</td>
+          <td>1.08ms</td>
+          <td>35.2x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:34.7%"></div>
-              <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:39.2%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.1%"></div>
             </div>
           </td>
         </tr>
         <tr>
           <td>Python</td>
           <td>15</td>
-          <td>9.86ms</td>
+          <td>9.73ms</td>
           <td>1.40ms</td>
           <td>7.0x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:8.7%"></div>
-              <div class="bench-bar bench-bar--chroma" style="width:1.2%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:10.0%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.4%"></div>
             </div>
           </td>
         </tr>
         <tr>
           <td>Bash</td>
           <td>14</td>
-          <td>11.10ms</td>
-          <td>661µs</td>
-          <td>16.8x</td>
+          <td>10.95ms</td>
+          <td>600µs</td>
+          <td>18.2x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:9.8%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:11.3%"></div>
               <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
             </div>
           </td>
@@ -325,12 +325,12 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
         <tr>
           <td>PHP</td>
           <td>20</td>
-          <td>15.94ms</td>
-          <td>680µs</td>
-          <td>23.4x</td>
+          <td>15.28ms</td>
+          <td>655µs</td>
+          <td>23.3x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:14.0%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:15.7%"></div>
               <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
             </div>
           </td>
@@ -338,25 +338,25 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
         <tr>
           <td>CSS</td>
           <td>18</td>
-          <td>113.86ms</td>
-          <td>1.82ms</td>
-          <td>62.6x</td>
+          <td>97.19ms</td>
+          <td>1.81ms</td>
+          <td>53.6x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
               <div class="bench-bar bench-bar--nuri" style="width:100.0%"></div>
-              <div class="bench-bar bench-bar--chroma" style="width:1.6%"></div>
+              <div class="bench-bar bench-bar--chroma" style="width:1.9%"></div>
             </div>
           </td>
         </tr>
         <tr>
           <td>HTML</td>
           <td>22</td>
-          <td>8.96ms</td>
-          <td>550µs</td>
-          <td>16.3x</td>
+          <td>8.85ms</td>
+          <td>583µs</td>
+          <td>15.2x</td>
           <td class="bench-bar-cell">
             <div class="bench-bars">
-              <div class="bench-bar bench-bar--nuri" style="width:7.9%"></div>
+              <div class="bench-bar bench-bar--nuri" style="width:9.1%"></div>
               <div class="bench-bar bench-bar--chroma" style="width:1.0%"></div>
             </div>
           </td>
@@ -367,9 +367,9 @@ body { margin: 0; font-family: system-ui, sans-serif; background: #f6f8fa; color
         <tr class="bench-footer-row">
           <td>Total</td>
           <td></td>
-          <td>223.52ms</td>
-          <td>7.63ms</td>
-          <td>29.3x</td>
+          <td>204.96ms</td>
+          <td>7.53ms</td>
+          <td>27.2x</td>
           <td></td>
         </tr>
       </tfoot>

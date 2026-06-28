@@ -15,7 +15,8 @@
 }
 /* Themed blocks need their own backdrop: the translucent toolbar colors
    composite over the frame, which otherwise shows the page background. */
-.kazari-block.kz-themed .frame {
+.kazari-block.kz-themed .frame,
+.kazari-block[data-kz-theme] .frame {
   background: var(--kz-editor-bg);
 }
 .kazari-block .sr-only {

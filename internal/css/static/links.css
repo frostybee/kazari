@@ -10,3 +10,14 @@
 .kazari-block .kz-link:hover {
   text-decoration-style: solid;
 }
+.kazari-block .kz-link-icon {
+  display: inline;
+  width: 0.75em;
+  height: 0.75em;
+  margin-inline-start: 0.15em;
+  vertical-align: -0.05em;
+  opacity: 0.5;
+}
+.kazari-block .kz-link:hover .kz-link-icon {
+  opacity: 0.8;
+}

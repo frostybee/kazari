@@ -252,8 +252,8 @@ func writeOverridePrefixed(sb *strings.Builder, prefix string, vars []struct{ na
 const collapseGradientDecl = "--kz-collapse-gradient-end: var(--kz-editor-bg); "
 
 const (
-	lightVarTemplate = "%s: var(--kz-ovl-%s); "
-	darkVarTemplate  = "%s: var(--kz-ovd-%s, var(--kz-ovl-%s)); "
+	lightVarTemplate = "%[1]s: var(--kz-ovl-%[2]s); "
+	darkVarTemplate  = "%[1]s: var(--kz-ovd-%[2]s, var(--kz-ovl-%[3]s)); "
 )
 
 func nv(name, value string) struct{ name, value string } {

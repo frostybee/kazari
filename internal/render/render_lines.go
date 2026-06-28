@@ -13,6 +13,8 @@ import (
 type MergedToken = config.MergedToken
 type TokenLine = config.TokenLine
 
+const externalLinkSVG = `<svg class="kz-link-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>`
+
 type lineContext struct {
 	resolved         *config.ResolvedBlock
 	cfg              *config.Config
@@ -232,7 +234,8 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 		seg := at.Segments[0]
 		isLinkOnly := seg.Marker.Link != "" && seg.Marker.Type == config.MarkerNone
 		if isLinkOnly {
-			sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+			escapedLink := html.EscapeString(seg.Marker.Link)
+			sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">", escapedLink))
 			style := buildTokenStyle(at.Token, lctx, markerType)
 			if style != "" {
 				sb.WriteString(fmt.Sprintf("<span style=\"%s\">", style))
@@ -240,7 +243,11 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 				sb.WriteString("<span>")
 			}
 			sb.WriteString(html.EscapeString(seg.Content))
-			sb.WriteString("</span></a>")
+			sb.WriteString("</span>")
+			if !seg.Marker.OpenEnd {
+				sb.WriteString(externalLinkSVG)
+			}
+			sb.WriteString("</a>")
 			return
 		}
 		elem := markerElement(seg.Marker.Type)
@@ -252,7 +259,8 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 			classes = append(classes, "open-end")
 		}
 		if seg.Marker.Link != "" {
-			sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+			escapedLink := html.EscapeString(seg.Marker.Link)
+			sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">", escapedLink))
 		}
 		sb.WriteString(fmt.Sprintf("<%s class=\"%s\">", elem, strings.Join(classes, " ")))
 		style := buildTokenStyle(at.Token, lctx, markerType)
@@ -265,6 +273,9 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 		sb.WriteString("</span>")
 		sb.WriteString(fmt.Sprintf("</%s>", elem))
 		if seg.Marker.Link != "" {
+			if !seg.Marker.OpenEnd {
+				sb.WriteString(externalLinkSVG)
+			}
 			sb.WriteString("</a>")
 		}
 		return
@@ -279,18 +290,22 @@ func renderAnnotatedToken(sb *strings.Builder, at marker.TokenWithSegments, lctx
 	for _, seg := range at.Segments {
 		if seg.Marker != nil {
 			if seg.Marker.Link != "" && seg.Marker.Type == config.MarkerNone {
-				sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+				escapedLink := html.EscapeString(seg.Marker.Link)
+				sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">", escapedLink))
 				sb.WriteString(html.EscapeString(seg.Content))
+				sb.WriteString(externalLinkSVG)
 				sb.WriteString("</a>")
 			} else {
 				elem := markerElement(seg.Marker.Type)
 				if seg.Marker.Link != "" {
-					sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" rel=\"noopener noreferrer\">", html.EscapeString(seg.Marker.Link)))
+					escapedLink := html.EscapeString(seg.Marker.Link)
+					sb.WriteString(fmt.Sprintf("<a class=\"kz-link\" href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">", escapedLink))
 				}
 				sb.WriteString(fmt.Sprintf("<%s>", elem))
 				sb.WriteString(html.EscapeString(seg.Content))
 				sb.WriteString(fmt.Sprintf("</%s>", elem))
 				if seg.Marker.Link != "" {
+					sb.WriteString(externalLinkSVG)
 					sb.WriteString("</a>")
 				}
 			}
