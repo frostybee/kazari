@@ -23,6 +23,7 @@ type UIStrings struct {
 	TerminalWindowLabel      string
 	ThemeToggleLabel         string
 	ThemeToggleAnnouncement  string
+	OutputLabel              string
 }
 
 var locales = map[string]UIStrings{
@@ -47,6 +48,7 @@ var locales = map[string]UIStrings{
 		TerminalWindowLabel:      "Terminal window",
 		ThemeToggleLabel:         "Toggle theme",
 		ThemeToggleAnnouncement:  "Theme toggled",
+		OutputLabel:              "Output",
 	},
 	"fr-FR": {
 		CopyLabel:             "Copier",
@@ -69,6 +71,7 @@ var locales = map[string]UIStrings{
 		TerminalWindowLabel:      "Fenêtre de terminal",
 		ThemeToggleLabel:         "Basculer le thème",
 		ThemeToggleAnnouncement:  "Thème basculé",
+		OutputLabel:              "Sortie",
 	},
 	"ja-JP": {
 		CopyLabel:             "コピー",
@@ -91,6 +94,7 @@ var locales = map[string]UIStrings{
 		TerminalWindowLabel:      "ターミナルウィンドウ",
 		ThemeToggleLabel:         "テーマ切替",
 		ThemeToggleAnnouncement:  "テーマを切り替えました",
+		OutputLabel:              "出力",
 	},
 }
 
@@ -150,6 +154,8 @@ func applyOverride(s *UIStrings, key, val string) {
 		s.ThemeToggleLabel = val
 	case "theme.toggle.announcement":
 		s.ThemeToggleAnnouncement = val
+	case "output.label":
+		s.OutputLabel = val
 	}
 }
 

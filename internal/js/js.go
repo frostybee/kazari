@@ -41,6 +41,9 @@ func Generate(cfg *config.Config) string {
 	if cfg.ThemeToggle && cfg.DarkTheme != "" {
 		sb.WriteString(readJS("theme-toggle.js"))
 	}
+	if cfg.OutputPanel {
+		sb.WriteString(readJS("output.js"))
+	}
 
 	content := sb.String()
 	if content == "" {

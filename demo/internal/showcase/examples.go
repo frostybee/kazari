@@ -137,6 +137,10 @@ var exampleDescriptions = map[string]string{
 	"svg-custom-font":       "Increases the font size to 18px to produce a larger, more readable SVG image.",
 	"svg-no-background":     "Strips the background rectangle and corner radius for transparent SVG output suitable for embedding.",
 	"svg-dual-theme":        "Renders the same snippet with both a light and dark theme, displayed side by side.",
+	"output-basic":          "Separates terminal commands from their output in a linked panel below the highlighted code.",
+	"output-editor":         "Attaches program output beneath an editor-framed source block with an explicit file title.",
+	"output-collapsed":      "Starts the output panel hidden so readers can focus on the code and reveal output on demand.",
+	"output-label":          "Replaces the default toggle label with a descriptive name that fits the example context.",
 }
 
 func joinHTML(parts ...template.HTML) template.HTML {
@@ -486,6 +490,7 @@ function getOrSet<T>(cache: Map<string, CacheEntry<T>>, key: string, factory: ()
 			PreserveIndent:   true,
 		}),
 		kazari.WithLinks(true),
+		kazari.WithOutputPanel(true),
 	)
 	thresholdCode := `package main
 
@@ -1093,6 +1098,53 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		}
 	}
 
+	// --- Output Panel ---
+
+	outputEngine := b.engine(kazari.WithOutputPanel(true))
+
+	bashOutputCode := "pwd\nls -la\n---output---\n/usr/home/boba-tan\ntotal 24\ndrwxr-xr-x  3 boba boba 4096 Jun 28 14:30 ."
+	goOutputCode := "// main.go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, Kazari!\")\n\tfmt.Println(\"Output panels are here.\")\n}\n---output---\nHello, Kazari!\nOutput panels are here."
+	bashCollapsedCode := "echo \"Build complete\"\n---output---\nBuild complete"
+	bashLabelCode := "node index.js\n---output---\nServer listening on port 3000"
+
+	outputPanel := Category{
+		ID:          "output-panel",
+		Title:       "Output Panel",
+		Description: "Separate command output from highlighted source code.",
+		Examples: []Example{
+			metaGoExample(b, outputEngine, "output-basic",
+				"Basic Output Panel", "Basic output",
+				bashOutputCode, `bash withOutput`,
+				`html, err := engine.Render(code, kazari.Options{
+	Lang:       "bash",
+	WithOutput: boolPtr(true),
+})`),
+			metaGoExample(b, outputEngine, "output-editor",
+				"Editor Frame Output", "Editor output",
+				goOutputCode, `go withOutput`,
+				`html, err := engine.Render(code, kazari.Options{
+	Lang:       "go",
+	WithOutput: boolPtr(true),
+})`),
+			metaGoExample(b, outputEngine, "output-collapsed",
+				"Collapsed Output", "Collapsed",
+				bashCollapsedCode, `bash withOutput outputCollapsed`,
+				`html, err := engine.Render(code, kazari.Options{
+	Lang:            "bash",
+	WithOutput:      boolPtr(true),
+	OutputCollapsed: boolPtr(true),
+})`),
+			metaGoExample(b, outputEngine, "output-label",
+				"Custom Label", "Custom label",
+				bashLabelCode, `bash withOutput outputLabel="Run result"`,
+				`html, err := engine.Render(code, kazari.Options{
+	Lang:        "bash",
+	WithOutput:  boolPtr(true),
+	OutputLabel: "Run result",
+})`),
+		},
+	}
+
 	if b.err != nil {
 		return nil, "", "", fmt.Errorf("render showcase example: %w", b.err)
 	}
@@ -1108,13 +1160,14 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		`.kazari-block .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
 	}, "\n")
 
-	categories := []Category{frames, layout, markers, links, collapsible, formats, ansi, themes, localization}
+	categories := []Category{frames, layout, markers, links, collapsible, formats, ansi, themes, localization, outputPanel}
 	if svgCategory != nil {
 		categories = append(categories, *svgCategory)
 	}
 	jsEngine := b.engine(
 		kazari.WithCollapsible(kazari.CollapsibleConfig{LineThreshold: 1}),
 		kazari.WithThemeToggle(true),
+		kazari.WithOutputPanel(true),
 	)
 	jsEngine.EnableCodeGroups()
 	jsOut := jsEngine.JS()

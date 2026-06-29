@@ -136,3 +136,15 @@ func WithThemedStyleOverrides(overrides map[string]StyleValue) Option {
 		}
 	}
 }
+
+func WithOutputPanel(enabled bool) Option {
+	return func(b *engineBuilder) { b.cfg.OutputPanel = enabled }
+}
+
+func WithOutputCollapsed(collapsed bool) Option {
+	return func(b *engineBuilder) { b.cfg.OutputDefaultCollapsed = collapsed }
+}
+
+func WithOutputSeparator(sep string) Option {
+	return func(b *engineBuilder) { b.cfg.OutputSeparator = sep }
+}

@@ -57,6 +57,21 @@ func Parse(meta string) *ParseResult {
 				result.BlockOptions.HangingIndent = &n
 			}
 
+		case tok == "withOutput":
+			v := true
+			result.BlockOptions.WithOutput = &v
+
+		case tok == "outputCollapsed":
+			v := true
+			result.BlockOptions.OutputCollapsed = &v
+
+		case tok == "outputCollapsed=false":
+			v := false
+			result.BlockOptions.OutputCollapsed = &v
+
+		case strings.HasPrefix(tok, "outputLabel="):
+			result.BlockOptions.OutputLabel = unquote(strings.TrimPrefix(tok, "outputLabel="))
+
 		case tok == "collapse":
 			if result.Collapse == nil {
 				result.Collapse = &config.CollapseSpec{}

@@ -67,6 +67,10 @@ func renderFramedBlock(sb *strings.Builder, lines []TokenLine, resolved *config.
 		renderCollapseBar(sb, resolved, cfg)
 	}
 
+	if resolved.OutputText != "" {
+		renderOutputPanel(sb, resolved, cfg)
+	}
+
 	sb.WriteString("</figure>\n")
 }
 
@@ -103,6 +107,10 @@ func renderTerminalFrame(sb *strings.Builder, lines []TokenLine, resolved *confi
 		renderCollapseBar(sb, resolved, cfg)
 	}
 
+	if resolved.OutputText != "" {
+		renderOutputPanel(sb, resolved, cfg)
+	}
+
 	sb.WriteString("</figure>\n")
 }
 
@@ -113,6 +121,10 @@ func renderNoFrame(sb *strings.Builder, lines []TokenLine, resolved *config.Reso
 
 	if resolved.CollapseThreshold {
 		renderCollapseBar(sb, resolved, cfg)
+	}
+
+	if resolved.OutputText != "" {
+		renderOutputPanel(sb, resolved, cfg)
 	}
 
 	if cfg.CopyButton {

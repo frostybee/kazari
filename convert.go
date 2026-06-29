@@ -74,5 +74,14 @@ func mapOptionsToBlockOpts(opts Options) *config.BlockOptions {
 	if opts.HangingIndent != nil {
 		bo.HangingIndent = opts.HangingIndent
 	}
+	if opts.WithOutput != nil {
+		bo.WithOutput = opts.WithOutput
+	}
+	if opts.OutputCollapsed != nil {
+		bo.OutputCollapsed = opts.OutputCollapsed
+	}
+	if opts.OutputLabel != "" {
+		bo.OutputLabel = opts.OutputLabel
+	}
 	return bo
 }

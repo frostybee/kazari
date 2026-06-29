@@ -138,6 +138,9 @@ type Options struct {
 	PreserveIndent  *bool  // nil = use default
 	HangingIndent   *int   // nil = use default
 	DiffLang        string // original language for diff+syntax hybrid (e.g., "go")
+	WithOutput      *bool  // nil = not specified; true = enable output panel
+	OutputCollapsed *bool  // nil = use engine default
+	OutputLabel     string // empty = use locale default
 	LineMarkers     []LineMarker
 	InlineMarkers   []InlineMarker
 	FocusLines      []Range

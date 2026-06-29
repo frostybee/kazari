@@ -92,6 +92,9 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	if cfg.ThemeToggle {
 		sb.WriteString(readCSS("theme-toggle.css"))
 	}
+	if cfg.OutputPanel {
+		sb.WriteString(readCSS("output.css"))
+	}
 
 	return finalizeCSS(sb.String(), cfg)
 }

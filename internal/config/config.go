@@ -259,6 +259,9 @@ type Config struct {
 	FileIcons                  bool
 	FileIconResolver           func(string) string
 	WarningHandler             func(string)
+	OutputPanel                bool
+	OutputDefaultCollapsed     bool
+	OutputSeparator            string
 }
 
 // DefaultConfig returns the engine configuration with all documented defaults.
@@ -313,8 +316,11 @@ type BlockOptions struct {
 	LineNumbers     *bool // nil = use default
 	StartLineNumber *int  // nil = use default (1)
 	Wrap            *bool // nil = use default
-	PreserveIndent  *bool // nil = use default
-	HangingIndent   *int  // nil = use default
+	PreserveIndent  *bool  // nil = use default
+	HangingIndent   *int   // nil = use default
+	WithOutput      *bool  // nil = not specified
+	OutputCollapsed *bool  // nil = use engine default
+	OutputLabel     string // empty = use locale default
 }
 
 // ResolvedBlock is the final merged config for rendering a single code block.
@@ -346,6 +352,11 @@ type ResolvedBlock struct {
 	CollapseSegments   []PreviewSegment
 	CollapseBeyondCap  int // marked lines beyond 2× preview cap (for badge)
 	CollapseConfig     *CollapsibleConfig
+	// Output panel state (populated by preprocess when withOutput is active)
+	WithOutput      bool
+	OutputCollapsed bool
+	OutputLabel     string
+	OutputText      string
 }
 
 // Resolve applies the config cascade for a specific block:
@@ -410,6 +421,17 @@ func (c *Config) Resolve(lang string, blockOpts *BlockOptions) *ResolvedBlock {
 		}
 		if blockOpts.HangingIndent != nil {
 			resolved.HangingIndent = *blockOpts.HangingIndent
+		}
+		if blockOpts.WithOutput != nil {
+			resolved.WithOutput = *blockOpts.WithOutput
+		}
+		if blockOpts.OutputCollapsed != nil {
+			resolved.OutputCollapsed = *blockOpts.OutputCollapsed
+		} else {
+			resolved.OutputCollapsed = c.OutputDefaultCollapsed
+		}
+		if blockOpts.OutputLabel != "" {
+			resolved.OutputLabel = blockOpts.OutputLabel
 		}
 	}
 

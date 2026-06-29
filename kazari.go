@@ -248,9 +248,28 @@ func (e *Engine) preprocess(code string, resolved *config.ResolvedBlock) string 
 		}
 	}
 
+	if resolved.WithOutput && e.cfg.OutputPanel {
+		code = e.splitOutputSection(code, resolved)
+	}
+
 	resolved.RawCode = code
 	if resolved.Frame == config.FrameTerminal && e.cfg.TerminalCommentStripping {
 		resolved.RawCode = frame.StripTerminalComments(resolved.RawCode)
+	}
+	return code
+}
+
+func (e *Engine) splitOutputSection(code string, resolved *config.ResolvedBlock) string {
+	sep := e.cfg.OutputSeparator
+	if sep == "" {
+		sep = "---output---"
+	}
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		if strings.TrimSpace(line) == sep {
+			resolved.OutputText = strings.Join(lines[i+1:], "\n")
+			return strings.Join(lines[:i], "\n")
+		}
 	}
 	return code
 }
