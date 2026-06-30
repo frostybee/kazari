@@ -12,7 +12,7 @@ import (
 )
 
 func (e *Engine) tokenize(code, lang, themeOverride string) ([]render.TokenLine, error) {
-	if e.hl == nil {
+	if e.hl == nil || lang == "" {
 		return plaintextLines(code), nil
 	}
 

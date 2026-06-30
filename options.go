@@ -11,6 +11,7 @@ type engineBuilder struct {
 	hl               Highlighter
 	themeCustomizer  func(string, ThemeInfo) ThemeInfo
 	themeAdjustments *ThemeAdjustments
+	postRenders      []func(string, BlockInfo) string
 }
 
 func WithHighlighter(hl Highlighter) Option {
@@ -111,6 +112,12 @@ func WithThemeCustomizer(f func(themeName string, colors ThemeInfo) ThemeInfo) O
 // applied to both themes before the theme customizer runs.
 func WithThemeAdjustments(adj ThemeAdjustments) Option {
 	return func(b *engineBuilder) { b.themeAdjustments = &adj }
+}
+
+func WithPostRender(f func(html string, info BlockInfo) string) Option {
+	return func(b *engineBuilder) {
+		b.postRenders = append(b.postRenders, f)
+	}
 }
 
 func WithLocale(loc string) Option {

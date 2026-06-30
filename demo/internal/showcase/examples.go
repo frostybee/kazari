@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"regexp"
 	"strings"
 
 	"github.com/frostybee/kazari"
@@ -141,6 +142,8 @@ var exampleDescriptions = map[string]string{
 	"output-editor":         "Attaches program output beneath an editor-framed source block with an explicit file title.",
 	"output-collapsed":      "Starts the output panel hidden so readers can focus on the code and reveal output on demand.",
 	"output-label":          "Replaces the default toggle label with a descriptive name that fits the example context.",
+	"postrender-todo":       "Injects warning badges next to TODO and FIXME comments using a WithPostRender callback.",
+	"postrender-figcaption": "Wraps the code block in a figure element with a caption derived from the block title.",
 }
 
 func joinHTML(parts ...template.HTML) template.HTML {
@@ -1149,6 +1152,8 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		return nil, "", "", fmt.Errorf("render showcase example: %w", b.err)
 	}
 
+	todoBadgeCSS := `.kz-todo-badge,.kz-fixme-badge{display:inline-block;font-size:0.7em;font-weight:700;font-family:var(--kz-ui-font-family,system-ui,sans-serif);padding:0.1em 0.45em;border-radius:3px;margin-left:0.5em;vertical-align:middle;line-height:1.4}.kz-todo-badge{background:rgba(234,179,8,0.2);color:#b45309}.kz-fixme-badge{background:rgba(239,68,68,0.2);color:#dc2626}`
+
 	css := strings.Join([]string{
 		collapseEngine.CSS(),
 		dotsEngine.ThemeCSS(),
@@ -1158,9 +1163,100 @@ darkSVG, _ := highlighter.CodeToSVG(ctx, code, nuri.CodeToSVGOptions{
 		toggleEngine.ThemeCSS(),
 		`.kazari-block .kz-lang-icon { display:inline-block; width:var(--kz-lang-icon-size,1.25rem); height:var(--kz-lang-icon-size,1.25rem); margin:var(--kz-lang-icon-margin,0); opacity:var(--kz-lang-icon-opacity,0.8); vertical-align:middle; flex-shrink:0; }`,
 		`.kazari-block .kz-file-icon { font-size: 1rem; margin-right: .4rem; }`,
+		todoBadgeCSS,
 	}, "\n")
 
-	categories := []Category{frames, layout, markers, links, collapsible, formats, ansi, themes, localization, outputPanel}
+	// --- Post-Render Callbacks ---
+
+	todoCode := `package main
+
+import "net/http"
+
+func main() {
+	// TODO: add TLS configuration
+	http.HandleFunc("/", handler)
+	// FIXME: this ignores the returned error
+	http.ListenAndServe(":8080", nil)
+}`
+
+	todoRe := regexp.MustCompile(`(>[^<]*?)(TODO:)`)
+	fixmeRe := regexp.MustCompile(`(>[^<]*?)(FIXME:)`)
+	todoCallback := func(html string, info kazari.BlockInfo) string {
+		html = todoRe.ReplaceAllString(html, `${1}<span class="kz-todo-badge">TODO</span> `)
+		html = fixmeRe.ReplaceAllString(html, `${1}<span class="kz-fixme-badge">FIXME</span> `)
+		return html
+	}
+
+	figcaptionCallback := func(html string, info kazari.BlockInfo) string {
+		if info.Title == "" {
+			return html
+		}
+		return fmt.Sprintf("<figure class=\"kz-captioned\">%s<figcaption>%s</figcaption></figure>", html, info.Title)
+	}
+
+	todoEngine := b.engine(kazari.WithPostRender(todoCallback))
+	figcaptionEngine := b.engine(kazari.WithPostRender(figcaptionCallback))
+
+	figcaptionCode := `package config
+
+type Server struct {
+	Host string
+	Port int
+	TLS  bool
+}`
+
+	postRender := Category{
+		ID:          "post-render",
+		Title:       "Post-Render Callbacks",
+		Description: "Extend rendered output with WithPostRender callbacks.",
+		Examples: []Example{
+			{
+				ID:       "postrender-todo",
+				Title:    "TODO/FIXME Badges",
+				NavTitle: "TODO badges",
+				HTML: b.render(todoEngine, todoCode, kazari.Options{
+					Lang: "go", Title: "server.go",
+				}),
+				Recipes: []Recipe{recipe("Go", `todoRe := regexp.MustCompile(`+"`"+`(>[^<]*?)(TODO:)`+"`"+`)
+fixmeRe := regexp.MustCompile(`+"`"+`(>[^<]*?)(FIXME:)`+"`"+`)
+
+todoCallback := func(html string, info kazari.BlockInfo) string {
+	html = todoRe.ReplaceAllString(html,
+		`+"`"+`${1}<span class="kz-todo-badge">TODO</span> `+"`"+`)
+	html = fixmeRe.ReplaceAllString(html,
+		`+"`"+`${1}<span class="kz-fixme-badge">FIXME</span> `+"`"+`)
+	return html
+}
+
+engine := kazari.New(
+	kazari.WithHighlighter(hl),
+	kazari.WithPostRender(todoCallback),
+)`)},
+			},
+			{
+				ID:       "postrender-figcaption",
+				Title:    "Figure Caption",
+				NavTitle: "Figure caption",
+				HTML:     b.render(figcaptionEngine, figcaptionCode, kazari.Options{Lang: "go", Title: "config.go"}),
+				Recipes: []Recipe{recipe("Go", `figcaptionCallback := func(html string, info kazari.BlockInfo) string {
+	if info.Title == "" {
+		return html
+	}
+	return fmt.Sprintf(
+		"<figure>%s<figcaption>%s</figcaption></figure>",
+		html, info.Title,
+	)
+}
+
+engine := kazari.New(
+	kazari.WithHighlighter(hl),
+	kazari.WithPostRender(figcaptionCallback),
+)`)},
+			},
+		},
+	}
+
+	categories := []Category{frames, layout, markers, links, collapsible, formats, ansi, themes, localization, outputPanel, postRender}
 	if svgCategory != nil {
 		categories = append(categories, *svgCategory)
 	}

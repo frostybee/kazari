@@ -3616,6 +3616,29 @@ func TestRender_UnknownLanguage_WarningMessage(t *testing.T) {
 	}
 }
 
+func TestRender_EmptyLanguage_PlaintextNoWarning(t *testing.T) {
+	hl := &erroringHighlighter{
+		mockHighlighter: mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}},
+	}
+	var warnings []string
+	engine := New(
+		WithHighlighter(hl),
+		WithThemes("light-theme", ""),
+		WithMinify(false),
+		WithWarningHandler(func(msg string) { warnings = append(warnings, msg) }),
+	)
+	html, err := engine.Render("bare code", Options{Lang: ""})
+	if err != nil {
+		t.Fatalf("empty language should render as plaintext, got error: %v", err)
+	}
+	if !strings.Contains(html, "bare code") {
+		t.Error("plaintext fallback should contain the raw code")
+	}
+	if len(warnings) != 0 {
+		t.Errorf("empty language should not produce warnings, got %d: %v", len(warnings), warnings)
+	}
+}
+
 func TestRender_KnownLanguage_ErrorPropagates(t *testing.T) {
 	hl := &erroringHighlighter{
 		mockHighlighter: mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}},

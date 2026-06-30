@@ -147,6 +147,18 @@ type Options struct {
 	Collapse        *CollapseOptions
 }
 
+// BlockInfo carries metadata about a rendered code block.
+// It is passed to every WithPostRender callback after rendering completes.
+type BlockInfo struct {
+	Lang      string
+	Title     string
+	Frame     Frame
+	RawCode   string
+	LineCount int
+	Theme     string
+	Meta      string
+}
+
 // CollapseOptions holds per-block collapse configuration.
 type CollapseOptions struct {
 	Enabled   bool           // true = force threshold-based collapse

@@ -97,6 +97,11 @@
       <a href="#output-basic" data-example-link="output-basic">Basic output</a><a href="#output-editor" data-example-link="output-editor">Editor output</a><a href="#output-collapsed" data-example-link="output-collapsed">Collapsed</a><a href="#output-label" data-example-link="output-label">Custom label</a>
     </div>
 
+    <div class="nav-category" data-nav-category="post-render">
+      <a class="category-link" href="#post-render" data-category-link="post-render">Post-Render Callbacks</a>
+      <a href="#postrender-todo" data-example-link="postrender-todo">TODO badges</a><a href="#postrender-figcaption" data-example-link="postrender-figcaption">Figure caption</a>
+    </div>
+
   </nav>
 </aside>
 
@@ -146,6 +151,10 @@
         <option value="#output-basic" data-jump-example="output-basic">Basic output</option><option value="#output-editor" data-jump-example="output-editor">Editor output</option><option value="#output-collapsed" data-jump-example="output-collapsed">Collapsed</option><option value="#output-label" data-jump-example="output-label">Custom label</option>
       </optgroup>
 
+      <optgroup label="Post-Render Callbacks" data-jump-category="post-render">
+        <option value="#postrender-todo" data-jump-example="postrender-todo">TODO badges</option><option value="#postrender-figcaption" data-jump-example="postrender-figcaption">Figure caption</option>
+      </optgroup>
+
     </select>
   </div>
 
@@ -158,11 +167,11 @@
       <label for="category-filter">Category</label>
       <select id="category-filter">
         <option value="all">All categories</option>
-        <option value="frames">Frames</option><option value="layout">Layout</option><option value="markers">Markers and Focus</option><option value="links">Links</option><option value="collapsible">Collapsible Sections</option><option value="formats">Formats and Groups</option><option value="ansi">ANSI Terminal Output</option><option value="themes">Themes and Customization</option><option value="localization">Localization and Assets</option><option value="output-panel">Output Panel</option>
+        <option value="frames">Frames</option><option value="layout">Layout</option><option value="markers">Markers and Focus</option><option value="links">Links</option><option value="collapsible">Collapsible Sections</option><option value="formats">Formats and Groups</option><option value="ansi">ANSI Terminal Output</option><option value="themes">Themes and Customization</option><option value="localization">Localization and Assets</option><option value="output-panel">Output Panel</option><option value="post-render">Post-Render Callbacks</option>
       </select>
     </div>
     <button class="clear-filters" id="clear-filters" type="button">Clear</button>
-    <p class="result-count" id="result-count" role="status" aria-live="polite">53 examples</p>
+    <p class="result-count" id="result-count" role="status" aria-live="polite">55 examples</p>
   </section>
 
   <div class="no-results" id="no-results" hidden>
@@ -2836,6 +2845,128 @@ Output panels are here.</pre></div></figure>
 	WithOutput:  boolPtr(true),
 	OutputLabel: &#34;Run result&#34;,
 })</code></pre>
+          </section>
+
+        </div>
+      </details>
+    </article>
+
+  </section>
+
+  <section class="demo-category" id="post-render" data-category="post-render">
+    <h2>Post-Render Callbacks</h2>
+    <p class="category-description">Extend rendered output with WithPostRender callbacks.</p>
+
+
+    <article class="demo-example" id="postrender-todo" data-example="postrender-todo" data-search="post-render callbacks todo/fixme badges injects warning badges next to todo and fixme comments using a withpostrender callback. go todore := regexp.mustcompile(`(&gt;[^&lt;]*?)(todo:)`)
+fixmere := regexp.mustcompile(`(&gt;[^&lt;]*?)(fixme:)`)
+
+todocallback := func(html string, info kazari.blockinfo) string {
+	html = todore.replaceallstring(html,
+		`${1}&lt;span class=&#34;kz-todo-badge&#34;&gt;todo&lt;/span&gt; `)
+	html = fixmere.replaceallstring(html,
+		`${1}&lt;span class=&#34;kz-fixme-badge&#34;&gt;fixme&lt;/span&gt; `)
+	return html
+}
+
+engine := kazari.new(
+	kazari.withhighlighter(hl),
+	kazari.withpostrender(todocallback),
+)">
+      <div class="example-heading">
+        <h3>TODO/FIXME Badges</h3>
+        <button class="copy-action copy-link" type="button" data-copy-link="postrender-todo" aria-label="Copy link to TODO/FIXME Badges">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
+          <span>Copy link</span>
+        </button>
+      </div>
+      <p class="example-description">Injects warning badges next to TODO and FIXME comments using a WithPostRender callback.</p>
+      <div class="example-output"><div class="kazari-block" data-lines="10">
+<figure class="frame has-title" data-lang="go"><div class="kz-toolbar"><div class="kz-toolbar-left"><span class="kz-lang">Go</span><span class="kz-file-icon" data-ext="go"></span><span class="kz-title">server.go</span></div><div class="kz-toolbar-right"><button class="kz-copy-btn" aria-label="Copy" data-tooltip="Copy" data-copied="Copied!" data-code="package mainimport &#34;net/http&#34;func main() {	// TODO: add TLS configuration	http.HandleFunc(&#34;/&#34;, handler)	// FIXME: this ignores the returned error	http.ListenAndServe(&#34;:8080&#34;, nil)}"><svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button><span class="kz-sr-announce" aria-live="polite"></span><button class="kz-wrap-btn" aria-pressed="false" aria-label="Enable word wrap" data-tooltip="Enable word wrap" data-enable="Enable word wrap" data-disable="Disable word wrap"><svg class="kz-wrap-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg><svg class="kz-wrap-off-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="kz-font-controls"><button class="kz-font-dec" aria-label="Decrease font size" data-tooltip="Decrease font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg></button><button class="kz-font-inc" aria-label="Increase font size" data-tooltip="Increase font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg></button></div><button class="kz-fs-btn" aria-label="Fullscreen" data-tooltip="Fullscreen" aria-expanded="false"><svg class="kz-fs-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg><svg class="kz-fs-exit-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg></button></div></div><pre data-language="go"><code><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">package</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">main</span></div></div><div class="kz-line"><div class="kz-code"></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">import</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;net/http&#34;</span></div></div><div class="kz-line"><div class="kz-code"></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">func</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#6639ba;--sd:#d2a8ff">main</span><span style="--sl:#1f2328;--sd:#e6edf3">()</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">{</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#57606a;--sd:#8b949e">// <span class="kz-todo-badge">TODO</span>  add TLS configuration</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">http</span><span style="--sl:#1f2328;--sd:#e6edf3">.</span><span style="--sl:#6639ba;--sd:#d2a8ff">HandleFunc</span><span style="--sl:#1f2328;--sd:#e6edf3">(</span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;/&#34;</span><span style="--sl:#1f2328;--sd:#e6edf3">,</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">handler</span><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#57606a;--sd:#8b949e">// <span class="kz-fixme-badge">FIXME</span>  this ignores the returned error</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">http</span><span style="--sl:#1f2328;--sd:#e6edf3">.</span><span style="--sl:#6639ba;--sd:#d2a8ff">ListenAndServe</span><span style="--sl:#1f2328;--sd:#e6edf3">(</span><span style="--sl:#0a3069;--sd:#a5d6ff">&#34;:8080&#34;</span><span style="--sl:#1f2328;--sd:#e6edf3">,</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#ba1f29;--sd:#79c0ff">nil</span><span style="--sl:#1f2328;--sd:#e6edf3">)</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#1f2328;--sd:#e6edf3">}</span></div></div></code></pre></figure>
+</div></div>
+      <details class="recipe-disclosure">
+        <summary>How to build this</summary>
+        <div class="recipe-content" data-recipe-group>
+
+
+          <section class="recipe-panel" data-recipe-panel >
+            <h4>Go</h4>
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Go">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Go</span>
+            </button>
+            <pre><code>todoRe := regexp.MustCompile(`(&gt;[^&lt;]*?)(TODO:)`)
+fixmeRe := regexp.MustCompile(`(&gt;[^&lt;]*?)(FIXME:)`)
+
+todoCallback := func(html string, info kazari.BlockInfo) string {
+	html = todoRe.ReplaceAllString(html,
+		`${1}&lt;span class=&#34;kz-todo-badge&#34;&gt;TODO&lt;/span&gt; `)
+	html = fixmeRe.ReplaceAllString(html,
+		`${1}&lt;span class=&#34;kz-fixme-badge&#34;&gt;FIXME&lt;/span&gt; `)
+	return html
+}
+
+engine := kazari.New(
+	kazari.WithHighlighter(hl),
+	kazari.WithPostRender(todoCallback),
+)</code></pre>
+          </section>
+
+        </div>
+      </details>
+    </article>
+
+
+    <article class="demo-example" id="postrender-figcaption" data-example="postrender-figcaption" data-search="post-render callbacks figure caption wraps the code block in a figure element with a caption derived from the block title. go figcaptioncallback := func(html string, info kazari.blockinfo) string {
+	if info.title == &#34;&#34; {
+		return html
+	}
+	return fmt.sprintf(
+		&#34;&lt;figure&gt;%s&lt;figcaption&gt;%s&lt;/figcaption&gt;&lt;/figure&gt;&#34;,
+		html, info.title,
+	)
+}
+
+engine := kazari.new(
+	kazari.withhighlighter(hl),
+	kazari.withpostrender(figcaptioncallback),
+)">
+      <div class="example-heading">
+        <h3>Figure Caption</h3>
+        <button class="copy-action copy-link" type="button" data-copy-link="postrender-figcaption" aria-label="Copy link to Figure Caption">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
+          <span>Copy link</span>
+        </button>
+      </div>
+      <p class="example-description">Wraps the code block in a figure element with a caption derived from the block title.</p>
+      <div class="example-output"><figure class="kz-captioned"><div class="kazari-block" data-lines="7">
+<figure class="frame has-title" data-lang="go"><div class="kz-toolbar"><div class="kz-toolbar-left"><span class="kz-lang">Go</span><span class="kz-file-icon" data-ext="go"></span><span class="kz-title">config.go</span></div><div class="kz-toolbar-right"><button class="kz-copy-btn" aria-label="Copy" data-tooltip="Copy" data-copied="Copied!" data-code="package configtype Server struct {	Host string	Port int	TLS  bool}"><svg class="kz-copy-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button><span class="kz-sr-announce" aria-live="polite"></span><button class="kz-wrap-btn" aria-pressed="false" aria-label="Enable word wrap" data-tooltip="Enable word wrap" data-enable="Enable word wrap" data-disable="Disable word wrap"><svg class="kz-wrap-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h15a3 3 0 110 6h-4m0 0l2-2m-2 2l2 2"/></svg><svg class="kz-wrap-off-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="kz-font-controls"><button class="kz-font-dec" aria-label="Decrease font size" data-tooltip="Decrease font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h12"/></svg></button><button class="kz-font-inc" aria-label="Increase font size" data-tooltip="Increase font size"><svg class="kz-font-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m-6-6h12"/></svg></button></div><button class="kz-fs-btn" aria-label="Fullscreen" data-tooltip="Fullscreen" aria-expanded="false"><svg class="kz-fs-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg><svg class="kz-fs-exit-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v5H4m5 0L4 4M15 4v5h5m-5 0l5-5M9 20v-5H4m5 0l-5 5M15 20v-5h5m-5 0l5 5"/></svg></button></div></div><pre data-language="go"><code><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">package</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">config</span></div></div><div class="kz-line"><div class="kz-code"></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#ba1f29;--sd:#ff7b72">type</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">Server</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#ba1f29;--sd:#ff7b72">struct</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#1f2328;--sd:#e6edf3">{</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">Host</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#ba1f29;--sd:#ff7b72">string</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">Port</span><span style="--sl:#595959;--sd:#8b919a"> </span><span style="--sl:#ba1f29;--sd:#ff7b72">int</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#1f2328;--sd:#e6edf3">TLS</span><span style="--sl:#595959;--sd:#8b919a">  </span><span style="--sl:#ba1f29;--sd:#ff7b72">bool</span></div></div><div class="kz-line"><div class="kz-code"><span style="--sl:#1f2328;--sd:#e6edf3">}</span></div></div></code></pre></figure>
+</div><figcaption>config.go</figcaption></figure></div>
+      <details class="recipe-disclosure">
+        <summary>How to build this</summary>
+        <div class="recipe-content" data-recipe-group>
+
+
+          <section class="recipe-panel" data-recipe-panel >
+            <h4>Go</h4>
+            <button class="copy-action copy-recipe" type="button" data-copy-label="Go">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+              <span>Copy Go</span>
+            </button>
+            <pre><code>figcaptionCallback := func(html string, info kazari.BlockInfo) string {
+	if info.Title == &#34;&#34; {
+		return html
+	}
+	return fmt.Sprintf(
+		&#34;&lt;figure&gt;%s&lt;figcaption&gt;%s&lt;/figcaption&gt;&lt;/figure&gt;&#34;,
+		html, info.Title,
+	)
+}
+
+engine := kazari.New(
+	kazari.WithHighlighter(hl),
+	kazari.WithPostRender(figcaptionCallback),
+)</code></pre>
           </section>
 
         </div>

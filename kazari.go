@@ -34,6 +34,8 @@ type Engine struct {
 	themeAdjustments *ThemeAdjustments
 	themeCustomizer  func(string, ThemeInfo) ThemeInfo
 
+	postRenders []func(string, BlockInfo) string
+
 	overrideMu    sync.RWMutex
 	overrideCache map[string]overrideEntry
 }
@@ -60,6 +62,7 @@ func New(opts ...Option) *Engine {
 		cfg:              b.cfg,
 		themeAdjustments: b.themeAdjustments,
 		themeCustomizer:  b.themeCustomizer,
+		postRenders:      b.postRenders,
 		overrideCache:    make(map[string]overrideEntry),
 	}
 
@@ -176,7 +179,7 @@ func (e *Engine) Render(code string, opts Options) (string, error) {
 		}
 	}
 
-	return e.renderResolved(code, resolved, spec)
+	return e.renderResolved(code, resolved, spec, "")
 }
 
 // RenderWithMeta parses a meta string and renders the code block.
@@ -189,10 +192,10 @@ func (e *Engine) RenderWithMeta(code string, metaStr string) (string, error) {
 	resolved.InlineMarkers = parsed.InlineMarkers
 	resolved.FocusLines = parsed.FocusLines
 	resolved.DiffLang = parsed.DiffLang
-	return e.renderResolved(code, resolved, parsed.Collapse)
+	return e.renderResolved(code, resolved, parsed.Collapse, metaStr)
 }
 
-func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock, collapseSpec *config.CollapseSpec) (string, error) {
+func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock, collapseSpec *config.CollapseSpec, rawMeta string) (string, error) {
 	if e.cfg.MermaidPassThrough && resolved.Lang == "mermaid" {
 		return renderMermaidBlock(code), nil
 	}
@@ -207,24 +210,43 @@ func (e *Engine) renderResolved(code string, resolved *config.ResolvedBlock, col
 		e.applyThemeOverride(resolved)
 	}
 
+	lineCount := strings.Count(code, "\n") + 1
+
+	var rendered string
 	if resolved.Lang == "ansi" {
 		lines := ansi.Parse(code)
-		return render.RenderBlock(lines, resolved, e.cfg), nil
+		rendered = render.RenderBlock(lines, resolved, e.cfg)
+	} else {
+		if resolved.Lang == "diff" && resolved.DiffLang != "" {
+			stripped, diffMarkers := diff.ProcessDiffBlock(code)
+			code = stripped
+			resolved.Lang = resolved.DiffLang
+			resolved.LineMarkers = append(resolved.LineMarkers, diffMarkers...)
+		}
+
+		lines, err := e.tokenize(code, resolved.Lang, resolved.Theme)
+		if err != nil {
+			return "", err
+		}
+		rendered = render.RenderBlock(lines, resolved, e.cfg)
 	}
 
-	if resolved.Lang == "diff" && resolved.DiffLang != "" {
-		stripped, diffMarkers := diff.ProcessDiffBlock(code)
-		code = stripped
-		resolved.Lang = resolved.DiffLang
-		resolved.LineMarkers = append(resolved.LineMarkers, diffMarkers...)
+	if len(e.postRenders) > 0 {
+		info := BlockInfo{
+			Lang:      resolved.Lang,
+			Title:     resolved.Title,
+			Frame:     Frame(resolved.Frame),
+			RawCode:   resolved.RawCode,
+			LineCount: lineCount,
+			Theme:     resolved.Theme,
+			Meta:      rawMeta,
+		}
+		for _, fn := range e.postRenders {
+			rendered = fn(rendered, info)
+		}
 	}
 
-	lines, err := e.tokenize(code, resolved.Lang, resolved.Theme)
-	if err != nil {
-		return "", err
-	}
-
-	return render.RenderBlock(lines, resolved, e.cfg), nil
+	return rendered, nil
 }
 
 func (e *Engine) preprocess(code string, resolved *config.ResolvedBlock) string {
