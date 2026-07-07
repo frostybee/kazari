@@ -48,6 +48,8 @@ func WithThemedSelectionColors(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.ThemedSelection = enabled }
 }
 
+// Deprecated: the "not-content" class is now always present on rendered
+// block wrappers. This option is a no-op kept for backward compatibility.
 func WithContentExclusion(enabled bool) Option {
 	return func(b *engineBuilder) { b.cfg.ContentExclusion = enabled }
 }

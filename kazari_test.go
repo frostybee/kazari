@@ -103,7 +103,7 @@ func TestRender_DualTheme(t *testing.T) {
 		t.Fatalf("Render() error: %v", err)
 	}
 
-	if !strings.Contains(html, `class="kazari-block"`) {
+	if !strings.Contains(html, `class="kazari-block not-content"`) {
 		t.Error("missing kazari-block wrapper")
 	}
 	if !strings.Contains(html, "--sl:#cf222e") {

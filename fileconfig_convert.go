@@ -78,6 +78,16 @@ func FileConfigToOptions(fc *FileConfig) ([]Option, error) {
 		opts = append(opts, WithMinify(*fc.Minify))
 	}
 
+	if fc.OutputPanel != nil {
+		opts = append(opts, WithOutputPanel(*fc.OutputPanel))
+	}
+	if fc.OutputDefaultCollapsed != nil {
+		opts = append(opts, WithOutputCollapsed(*fc.OutputDefaultCollapsed))
+	}
+	if fc.OutputSeparator != nil {
+		opts = append(opts, WithOutputSeparator(*fc.OutputSeparator))
+	}
+
 	if fc.TabWidth != nil {
 		opts = append(opts, WithTabWidth(*fc.TabWidth))
 	}

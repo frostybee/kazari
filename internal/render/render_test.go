@@ -611,7 +611,7 @@ func TestRenderBlock_ThemeOverrideWrapper(t *testing.T) {
 
 	out := RenderBlock(lines, r, cfg)
 
-	if !strings.Contains(out, `class="kazari-block kz-themed"`) {
+	if !strings.Contains(out, `class="kazari-block kz-themed not-content"`) {
 		t.Error("wrapper should carry the kz-themed class")
 	}
 	if !strings.Contains(out, `style="--kz-ovl-editor-bg:#282a36;--kz-ovl-editor-fg:#f8f8f2"`) {
@@ -630,7 +630,7 @@ func TestRenderBlock_ThemeOverrideWrapper_ComposesWithDataLinesAndCollapse(t *te
 
 	out := RenderBlock(lines, r, cfg)
 
-	if !strings.Contains(out, `class="kazari-block kz-themed kz-collapsed"`) {
+	if !strings.Contains(out, `class="kazari-block kz-themed kz-collapsed not-content"`) {
 		t.Errorf("wrapper classes should compose, got output start %q", out[:120])
 	}
 	if !strings.Contains(out, `data-lines="1"`) {
@@ -656,34 +656,20 @@ func TestRenderBlock_NoThemeOverride_NoThemedClass(t *testing.T) {
 	}
 }
 
-func TestRenderBlock_ContentExclusion_Enabled(t *testing.T) {
+func TestRenderBlock_NotContentClass_AlwaysPresent(t *testing.T) {
 	cfg := defaultCfg()
-	cfg.ContentExclusion = true
 	r := resolved()
 	lines := []TokenLine{simpleLine("hello", "#aaa")}
 
 	out := RenderBlock(lines, r, cfg)
 
 	if !strings.Contains(out, `class="kazari-block not-content"`) {
-		t.Error("wrapper should carry the not-content class when ContentExclusion is enabled")
+		t.Error("wrapper should always carry the not-content class")
 	}
 }
 
-func TestRenderBlock_ContentExclusion_Disabled(t *testing.T) {
+func TestRenderBlock_NotContentClass_ComposesWithOtherClasses(t *testing.T) {
 	cfg := defaultCfg()
-	r := resolved()
-	lines := []TokenLine{simpleLine("hello", "#aaa")}
-
-	out := RenderBlock(lines, r, cfg)
-
-	if strings.Contains(out, "not-content") {
-		t.Error("wrapper should not carry not-content when ContentExclusion is disabled")
-	}
-}
-
-func TestRenderBlock_ContentExclusion_ComposesWithOtherClasses(t *testing.T) {
-	cfg := defaultCfg()
-	cfg.ContentExclusion = true
 	r := resolved()
 	r.ThemeOverrideStyle = "--kz-ovl-editor-bg:#282a36"
 	r.CollapseThreshold = true

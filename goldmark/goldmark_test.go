@@ -72,7 +72,7 @@ func TestBasicFencedCodeBlock(t *testing.T) {
 	engine := newTestEngine()
 	html := renderMarkdown(t, engine, "```go\nfunc main() {}\n```\n", false)
 
-	if !strings.Contains(html, `class="kazari-block"`) {
+	if !strings.Contains(html, `class="kazari-block not-content"`) {
 		t.Error("missing kazari-block wrapper")
 	}
 	if !strings.Contains(html, `<figure`) {
@@ -120,7 +120,7 @@ func TestNoLanguage(t *testing.T) {
 	engine := newTestEngine()
 	html := renderMarkdown(t, engine, "```\nhello world\n```\n", false)
 
-	if !strings.Contains(html, `class="kazari-block"`) {
+	if !strings.Contains(html, `class="kazari-block not-content"`) {
 		t.Error("should still render with kazari-block wrapper")
 	}
 	if !strings.Contains(html, "hello world") {
@@ -132,7 +132,7 @@ func TestEmptyCodeBlock(t *testing.T) {
 	engine := newTestEngine()
 	html := renderMarkdown(t, engine, "```go\n```\n", false)
 
-	if !strings.Contains(html, `class="kazari-block"`) {
+	if !strings.Contains(html, `class="kazari-block not-content"`) {
 		t.Error("empty block should still render wrapper")
 	}
 }
@@ -142,7 +142,7 @@ func TestMultipleBlocks(t *testing.T) {
 	md := "```go\nfunc main() {}\n```\n\n```python\ndef main():\n    pass\n```\n"
 	html := renderMarkdown(t, engine, md, false)
 
-	count := strings.Count(html, `class="kazari-block"`)
+	count := strings.Count(html, `class="kazari-block not-content"`)
 	if count != 2 {
 		t.Errorf("expected 2 kazari-block blocks, got %d", count)
 	}
@@ -164,7 +164,7 @@ func TestCodeGroup_Basic(t *testing.T) {
 	md := ":::code-group\n\n```go title=\"main.go\"\nfunc main() {}\n```\n\n```python title=\"main.py\"\ndef main():\n    pass\n```\n\n:::\n"
 	html := renderMarkdown(t, engine, md, true)
 
-	if !strings.Contains(html, `class="kazari-block kz-group"`) {
+	if !strings.Contains(html, `class="kazari-block kz-group not-content"`) {
 		t.Error("missing kz-group wrapper")
 	}
 	if !strings.Contains(html, `role="tablist"`) {
@@ -209,7 +209,7 @@ func TestCodeGroup_SingleBlock(t *testing.T) {
 	md := ":::code-group\n\n```go title=\"main.go\"\nfunc main() {}\n```\n\n:::\n"
 	html := renderMarkdown(t, engine, md, true)
 
-	if !strings.Contains(html, `class="kazari-block kz-group"`) {
+	if !strings.Contains(html, `class="kazari-block kz-group not-content"`) {
 		t.Error("single-block group should still render as group")
 	}
 	if strings.Count(html, `role="tab"`) != 1 {
@@ -358,7 +358,7 @@ func TestCodeGroup_NoSync(t *testing.T) {
 	if strings.Contains(html, "data-sync") {
 		t.Error("data-sync should not be present without sync attribute")
 	}
-	if !strings.Contains(html, `class="kazari-block kz-group"`) {
+	if !strings.Contains(html, `class="kazari-block kz-group not-content"`) {
 		t.Error("code group should still render without sync")
 	}
 }

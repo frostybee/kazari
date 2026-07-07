@@ -230,7 +230,7 @@ type Config struct {
 	StyleReset         bool
 	ThemedScrollbars   bool
 	ThemedSelection    bool
-	ContentExclusion   bool
+	ContentExclusion   bool // Deprecated: not-content is now always present; this field is unused
 	Collapsible        *CollapsibleConfig
 	Defaults           BlockDefaults
 	LanguageDefaults   map[string]BlockDefaults

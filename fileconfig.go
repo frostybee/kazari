@@ -44,6 +44,9 @@ type FileConfig struct {
 	Collapsible              *CollapsibleFileConfig            `yaml:"collapsible" json:"collapsible"`
 	LanguageAliases          map[string]string                 `yaml:"languageAliases" json:"languageAliases"`
 	UIStrings                map[string]string                 `yaml:"uiStrings" json:"uiStrings"`
+	OutputPanel              *bool                             `yaml:"outputPanel" json:"outputPanel"`
+	OutputDefaultCollapsed   *bool                             `yaml:"outputDefaultCollapsed" json:"outputDefaultCollapsed"`
+	OutputSeparator          *string                           `yaml:"outputSeparator" json:"outputSeparator"`
 	StyleOverrides           map[string]any                    `yaml:"styleOverrides" json:"styleOverrides"`
 }
 
