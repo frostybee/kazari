@@ -20,6 +20,8 @@ func ThemeToggleCSS(cfg *config.Config, light, dark ThemeColors) string {
 	writeToggleVars(&sb, ".kazari-block[data-kz-theme=\"dark\"]", blockOverridableVars(dark, cfg), cfg)
 	writeToggleVars(&sb, ".kazari-block[data-kz-theme=\"light\"]", blockOverridableVars(light, cfg), cfg)
 
+	sb.WriteString(".kazari-block[data-kz-theme] { --kz-terminal-bg: var(--kz-editor-bg); --kz-terminal-titlebar-bg: var(--kz-toolbar-bg); }\n")
+
 	sb.WriteString(tokenSwitchRule(".kazari-block[data-kz-theme=\"dark\"]", "--sd", "--sdbg"))
 	sb.WriteString(tokenSwitchRule(".kazari-block[data-kz-theme=\"light\"]", "--sl", "--slbg"))
 
