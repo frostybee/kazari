@@ -155,8 +155,8 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 
 	if cfg.ThemedScrollbars {
 		vars = append(vars,
-			nv("--kz-scrollbar-width", "5px"),
-			nv("--kz-scrollbar-height", "5px"),
+			nv("--kz-scrollbar-width", "8px"),
+			nv("--kz-scrollbar-height", "8px"),
 			nv("--kz-scrollbar-track", "transparent"),
 		)
 	}
