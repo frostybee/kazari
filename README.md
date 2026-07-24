@@ -10,6 +10,12 @@
   <img src="https://img.shields.io/badge/Go-%E2%89%A51.25-007d9c" alt="Go Version">
 </p>
 
+<p align="center">
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="https://github.com/frostybee/kazari/releases">Releases</a> ·
+  <a href="https://pkg.go.dev/github.com/frostybee/kazari">API reference</a>
+</p>
+
 Kazari (飾り, "decoration") is a Go library that renders framed, syntax-highlighted HTML code blocks. It wraps [Nuri](https://github.com/frostybee/nuri) (a pure Go Shiki port) or [Chroma](https://github.com/alecthomas/chroma) for tokenization and adds the presentation layer on top: editor and terminal frames, line markers, copy buttons, collapsible sections, dual-theme support, and 90+ CSS variables for styling. Think [Expressive Code](https://expressive-code.com/), but for Go.
 
 Nuri and Chroma give you colored tokens, but not a finished code block. Kazari bridges that gap. Pass code and a meta string to `engine.Render()`, get back self-contained HTML. `engine.CSS()` and `engine.JS()` return the page-wide stylesheet and scripts to inject once. Everything renders server-side with no framework dependency.

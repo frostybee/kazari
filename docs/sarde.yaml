@@ -1,0 +1,52 @@
+site:
+  title: "Kazari"
+  description: "Framed, syntax-highlighted HTML code blocks for Go"
+  url: "https://frostybee.github.io"
+
+theme:
+  name: "default"
+  # preset: "ocean"        # Try: ocean, forest, rose, clean, minimal, docs, academic
+  # overrides:
+  #   primary: "#6366f1"
+
+collections:
+  docs:
+    sort: "order"
+    tabs: false
+    sidebar:
+      collapsed_by_default: true
+toc:
+  enabled: true
+  max_level: 4
+  min_level: 2
+markdown:
+  github_alerts: true
+  katex: true
+  mermaid: true
+  triple_colon_callouts: true
+  typographer: true
+  unsafe: false
+  codeblocks:
+    engine: nuri
+    light_theme: "github-light"
+    dark_theme: "github-dark-default"
+
+head:
+  custom_css:
+    - css/custom.css
+
+homepage:
+  hero:
+    title: "Kazari"
+    subtitle: "Framed, syntax-highlighted HTML code blocks with full CSS customization for Go."
+    background: gradient
+    cta:
+      label: "Get Started"
+      url: "/docs/getting-started"
+    secondary_cta:
+      label: "View Showcase"
+      url: "/demo/showcase.html"
+    image:
+      light: /images/kazari.svg
+      dark: /images/kazari.svg
+      alt: "Kazari"
