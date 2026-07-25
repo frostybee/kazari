@@ -40,10 +40,13 @@ jobs:
 
       - uses: actions/configure-pages@v5
 
+      # No build-args: docs/sarde.yaml already sets site.url and
+      # base_path: /kazari/. --baseURL overrides site.url rather than the path
+      # prefix, so passing it here would corrupt canonical links, OG tags, the
+      # sitemap, and the feeds.
       - uses: getsarde/action@v1
         with:
           path: docs
-          build-args: "--baseURL /kazari"
 
   deploy:
     needs: build
