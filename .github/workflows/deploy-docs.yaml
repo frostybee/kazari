@@ -32,11 +32,11 @@ jobs:
 
       - name: Copy demo output to docs
         run: |
-          mkdir -p docs/static/demo/assets
-          cp demo/site/*.html docs/static/demo/
-          cp demo/site/showcase.css docs/static/demo/
-          cp demo/site/showcase.js docs/static/demo/
-          cp demo/site/assets/* docs/static/demo/assets/
+          mkdir -p docs/public/demo/assets
+          cp demo/site/*.html docs/public/demo/
+          cp demo/site/showcase.css docs/public/demo/
+          cp demo/site/showcase.js docs/public/demo/
+          cp demo/site/assets/* docs/public/demo/assets/
 
       - uses: actions/configure-pages@v5
 
