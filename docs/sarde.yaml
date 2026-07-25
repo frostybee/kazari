@@ -2,7 +2,8 @@ site:
   title: "Kazari"
   description: "Framed, syntax-highlighted HTML code blocks for Go"
   url: "https://frostybee.github.io"
-
+build:
+  base_path: /kazari/
 theme:
   name: "default"
   # preset: "ocean"        # Try: ocean, forest, rose, clean, minimal, docs, academic
