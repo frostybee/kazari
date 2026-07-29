@@ -1,6 +1,7 @@
 ---
 title: "CSS Custom Properties"
 description: "How Kazari uses CSS custom properties for styling, and how cascade layers and style resets protect code blocks."
+tags: [css-variables, theming]
 sidebar:
   order: 1
 ---

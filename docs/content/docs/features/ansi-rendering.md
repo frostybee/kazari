@@ -1,6 +1,7 @@
 ---
 title: "ANSI Rendering"
 description: "Render terminal output with ANSI escape sequences as colored, styled code blocks."
+tags: [terminal, highlighter]
 sidebar:
   order: 12
 ---

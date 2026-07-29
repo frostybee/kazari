@@ -1,6 +1,7 @@
 ---
 title: "Links"
 description: "Add clickable hyperlinks inside code blocks using annotation syntax."
+tags: [line-annotations]
 sidebar:
   order: 14
 ---

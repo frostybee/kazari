@@ -1,6 +1,7 @@
 ---
 title: "Inline Markers"
 description: "Mark text and regex matches within lines using highlight, insertion, and deletion styles."
+tags: [line-annotations]
 sidebar:
   order: 5
 ---

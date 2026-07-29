@@ -1,6 +1,7 @@
 ---
 title: "Diff Highlighting"
 description: "Unified diff with full syntax highlighting in the original language."
+tags: [line-annotations, highlighter]
 sidebar:
   order: 11
 ---

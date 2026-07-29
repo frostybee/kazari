@@ -1,6 +1,7 @@
 ---
 title: "Word Wrap"
 description: "Wrap long lines while keeping wrapped continuations aligned with the code's indentation."
+tags: [client-side-js]
 sidebar:
   order: 7
 ---

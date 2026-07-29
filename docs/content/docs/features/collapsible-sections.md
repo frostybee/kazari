@@ -1,6 +1,7 @@
 ---
 title: "Collapsible Sections"
 description: "Collapse long code blocks or specific line ranges with threshold-based and range-based folding."
+tags: [client-side-js, accessibility]
 sidebar:
   order: 8
 ---

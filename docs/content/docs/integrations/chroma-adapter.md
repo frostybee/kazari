@@ -1,6 +1,7 @@
 ---
 title: "Chroma Adapter"
 description: "Connect Kazari to Chroma for Go-native syntax highlighting."
+tags: [highlighter, theming]
 sidebar:
   order: 2
 ---

@@ -1,6 +1,7 @@
 ---
 title: "Frames & Titles"
 description: "Editor frames, terminal frames, title bars, and auto-detection from language."
+tags: [terminal]
 sidebar:
   order: 1
 ---

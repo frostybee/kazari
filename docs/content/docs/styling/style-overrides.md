@@ -1,6 +1,7 @@
 ---
 title: "Style Overrides"
 description: "Programmatically set CSS custom property values from Go code."
+tags: [css-variables, theming]
 sidebar:
   order: 2
 ---

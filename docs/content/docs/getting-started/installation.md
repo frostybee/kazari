@@ -1,6 +1,7 @@
 ---
 title: "Quick Start"
 description: "Get started with Kazari: install, render a code block, and view it in the browser."
+tags: [markdown]
 sidebar:
   order: 2
 ---

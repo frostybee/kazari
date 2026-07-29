@@ -1,6 +1,7 @@
 ---
 title: "Themes & Dark Mode"
 description: "Configure light and dark themes, dark mode strategies, and per-block theme overrides."
+tags: [theming, css-variables, accessibility]
 sidebar:
   order: 3
 ---

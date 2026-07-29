@@ -1,6 +1,7 @@
 ---
 title: "Client-Side Extensibility"
 description: "Use Kazari's DOM structure, data attributes, and event delegation to extend code blocks with CSS and JavaScript."
+tags: [client-side-js, accessibility, css-variables]
 sidebar:
   order: 3
 ---

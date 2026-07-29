@@ -1,0 +1,59 @@
+# Controlled vocabulary for the docs taxonomy.
+#
+# Tags cover concerns that cut across the sidebar hierarchy, so they are not a
+# second copy of the section tree. A page keeps at most three, and a tag earns
+# its place only if it lands on at least three pages.
+#
+# sarde.yaml sets undefined_tags: error, so a tag used in front matter but
+# missing from this file fails the build. Add the term here first.
+#
+# Colors sit around the 600 weight so Sarde's color-mix tinting stays legible
+# against both the light and the dark page background. Icons are Lucide names.
+
+terminal:
+  label: "Terminal"
+  description: "Terminal frames, shell output, and ANSI escape sequences"
+  color: "#f97316"
+  icon: "terminal"
+
+client-side-js:
+  label: "Client Side JS"
+  description: "Features that need the script from Engine.JS() to behave at runtime"
+  color: "#ca8a04"
+  icon: "braces"
+
+theming:
+  label: "Theming"
+  description: "Light and dark themes, token colors, and theme switching"
+  color: "#8b5cf6"
+  icon: "palette"
+
+highlighter:
+  label: "Highlighter"
+  description: "The tokenizer boundary and the highlighter adapters behind it"
+  color: "#0891b2"
+  icon: "highlighter"
+
+markdown:
+  label: "Markdown"
+  description: "The Goldmark pipeline and Markdown authoring syntax"
+  color: "#059669"
+  icon: "file-text"
+
+accessibility:
+  label: "Accessibility"
+  description: "ARIA semantics, keyboard support, and reduced motion"
+  color: "#2563eb"
+  icon: "accessibility"
+
+css-variables:
+  label: "CSS Variables"
+  description: "Styling driven by the --kz-* custom properties"
+  color: "#db2777"
+  icon: "paintbrush"
+
+line-annotations:
+  label: "Line Annotations"
+  description: "Per line markers, numbering, focus, diffs, and inline links"
+  color: "#dc2626"
+  icon: "list-ordered"

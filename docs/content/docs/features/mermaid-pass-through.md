@@ -1,6 +1,7 @@
 ---
 title: "Mermaid Pass-through"
 description: "Pass Mermaid diagram source through unchanged for client-side rendering."
+tags: [markdown, client-side-js]
 sidebar:
   order: 13
 ---

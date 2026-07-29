@@ -1,6 +1,7 @@
 ---
 title: "Icons"
 description: "File icons in the title bar and language badges with optional icon slots."
+tags: [css-variables]
 sidebar:
   order: 15
 ---

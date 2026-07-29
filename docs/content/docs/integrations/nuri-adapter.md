@@ -1,6 +1,7 @@
 ---
 title: "Nuri Adapter"
 description: "Connect Kazari to Nuri for TextMate grammar-based syntax highlighting."
+tags: [highlighter, theming]
 sidebar:
   order: 1
 ---

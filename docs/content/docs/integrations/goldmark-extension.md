@@ -1,6 +1,7 @@
 ---
 title: "Goldmark Extension"
 description: "Wire Kazari into a Goldmark Markdown pipeline for fenced code blocks and code groups."
+tags: [markdown]
 sidebar:
   order: 3
 ---

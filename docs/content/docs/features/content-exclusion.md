@@ -1,6 +1,7 @@
 ---
 title: "Content Exclusion"
 description: "Prevent documentation-site prose styles from leaking into code blocks."
+tags: [css-variables]
 sidebar:
   order: 16
 ---

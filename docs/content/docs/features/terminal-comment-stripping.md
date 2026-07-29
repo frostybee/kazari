@@ -1,6 +1,7 @@
 ---
 title: "Terminal Comment Stripping"
 description: "Remove shell comments from the copy payload while keeping them visible in the code."
+tags: [terminal]
 sidebar:
   order: 17
 ---

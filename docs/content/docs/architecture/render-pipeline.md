@@ -1,6 +1,7 @@
 ---
 title: "Render Pipeline"
 description: "The complete call path from Render/RenderWithMeta through meta parsing, config cascade, preprocessing, language routing, tokenization, and HTML output."
+tags: [highlighter]
 sidebar:
   order: 2
 ---

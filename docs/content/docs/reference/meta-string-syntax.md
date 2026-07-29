@@ -1,6 +1,7 @@
 ---
 title: "Meta String Syntax"
 description: "Complete reference for every token in the markdown fence info string."
+tags: [line-annotations]
 sidebar:
   order: 4
 ---

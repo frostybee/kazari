@@ -1,6 +1,7 @@
 ---
 title: "Output Panel"
 description: "Separate command output from syntax-highlighted source code in a toggleable panel."
+tags: [terminal, client-side-js]
 sidebar:
   order: 10
 ---

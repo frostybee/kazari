@@ -1,6 +1,7 @@
 ---
 title: "Theme Gallery"
 description: "Visual reference of all 65 bundled syntax highlighting themes."
+tags: [theming, highlighter]
 sidebar:
   order: 4
 ---

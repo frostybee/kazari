@@ -1,6 +1,7 @@
 ---
 title: "Custom Highlighters"
 description: "Implement Kazari's Highlighter interface to use any syntax highlighting engine, or call Engine.Tokenize for raw token access."
+tags: [highlighter]
 sidebar:
   order: 2
 ---

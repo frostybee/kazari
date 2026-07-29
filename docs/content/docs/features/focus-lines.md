@@ -1,6 +1,7 @@
 ---
 title: "Focus Lines"
 description: "Dim all lines except the ones that matter."
+tags: [line-annotations]
 sidebar:
   order: 6
 ---

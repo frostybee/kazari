@@ -32,6 +32,15 @@ collections:
     tabs: false
     sidebar:
       collapsed_by_default: true
+taxonomies:
+  tags:
+    singular: tag
+    # Every tag must be declared in data/tags.yml. A tag that is only spelled in
+    # front matter fails the build instead of silently creating a term page with
+    # no label, color, or icon. This keeps the vocabulary from drifting as pages
+    # are added. Unlike plugins.enabled below, this map merges with the built-in
+    # defaults rather than replacing them.
+    undefined_tags: error
 toc:
   enabled: true
   max_level: 4

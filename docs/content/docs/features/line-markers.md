@@ -1,6 +1,7 @@
 ---
 title: "Line Markers"
 description: "Highlight, insert, and delete lines with colored backgrounds and optional labeled ranges."
+tags: [line-annotations]
 sidebar:
   order: 4
 ---

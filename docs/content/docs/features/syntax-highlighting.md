@@ -1,6 +1,7 @@
 ---
 title: "Syntax Highlighting"
 description: "Language-aware code coloring powered by a pluggable highlighter."
+tags: [highlighter]
 sidebar:
   order: 0
 ---

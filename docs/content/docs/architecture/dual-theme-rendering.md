@@ -1,6 +1,7 @@
 ---
 title: "Dual-Theme Rendering"
 description: "How Kazari bakes both light and dark token colors into HTML and switches themes with pure CSS."
+tags: [theming, css-variables]
 sidebar:
   order: 1
 ---

@@ -1,6 +1,7 @@
 ---
 title: "CSS Variables"
 description: "Complete reference for all --kz-* CSS custom properties."
+tags: [css-variables]
 sidebar:
   order: 5
 ---

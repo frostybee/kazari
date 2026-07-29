@@ -1,6 +1,7 @@
 ---
 title: "Code Groups"
 description: "Tabbed code block interface with synced selection across groups."
+tags: [markdown, client-side-js, accessibility]
 sidebar:
   order: 9
 ---

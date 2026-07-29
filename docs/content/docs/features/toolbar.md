@@ -1,6 +1,7 @@
 ---
 title: "Toolbar"
 description: "Copy, fullscreen, wrap toggle, and theme toggle buttons."
+tags: [client-side-js, accessibility]
 sidebar:
   order: 2
 ---

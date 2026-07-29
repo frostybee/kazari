@@ -1,6 +1,7 @@
 ---
 title: "Line Numbers"
 description: "Display line numbers with configurable start number and auto-width gutter."
+tags: [line-annotations, accessibility]
 sidebar:
   order: 3
 ---
