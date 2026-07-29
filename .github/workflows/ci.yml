@@ -1,10 +1,23 @@
 name: CI
 
+# Documentation only commits cannot change build, vet, or test results, so they
+# skip this workflow entirely. Note that demo/ is deliberately absent from these
+# lists even though deploy-docs.yaml builds from it: demo/ holds Go packages and
+# tests that go build, go vet, and go test all cover. GitHub Actions does not
+# support YAML anchors, so the two lists below are duplicated by necessity.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yaml"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yaml"
 
 jobs:
   test:

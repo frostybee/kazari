@@ -1,0 +1,92 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Kazari favicon variants</title>
+<style>
+  body { font: 14px system-ui, sans-serif; margin: 24px; background: #fafafa; color: #222; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  p.note { color: #666; margin: 0 0 20px; }
+  table { border-collapse: collapse; }
+  td, th { padding: 10px 14px; text-align: center; vertical-align: middle; }
+  th { font-weight: 600; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .04em; }
+  tr + tr { border-top: 1px solid #e4e4e4; }
+  td.name { text-align: left; font-weight: 600; white-space: nowrap; }
+  td.name code { display: block; font-weight: 400; font-size: 11px; color: #777; margin-top: 2px; }
+  .chrome-light { background: #fff; }
+  .chrome-dark  { background: #202124; }
+  svg { display: block; margin: 0 auto; }
+</style>
+
+<h1>Kazari favicon variants</h1>
+<p class="note">
+  Left group sits on a light tab bar (#fff), right group on a dark one (#202124).
+  16px is the size that actually matters. Tell me the variant number.
+</p>
+
+<table>
+  <tr>
+    <th></th>
+    <th colspan="3" class="chrome-light">Light chrome</th>
+    <th colspan="3" class="chrome-dark" style="color:#bbb">Dark chrome</th>
+  </tr>
+  <tr>
+    <th></th>
+    <th class="chrome-light">16</th><th class="chrome-light">32</th><th class="chrome-light">64</th>
+    <th class="chrome-dark" style="color:#bbb">16</th><th class="chrome-dark" style="color:#bbb">32</th><th class="chrome-dark" style="color:#bbb">64</th>
+  </tr>
+
+  <!-- Variants are emitted by the script below. -->
+</table>
+
+<script>
+const K = `<path d="M168 140v232" stroke="STEM"/>
+           <path d="M186 256L344 146" stroke="ARM1"/>
+           <path d="M186 256L344 366" stroke="ARM2"/>`;
+
+// tile: [from, to] or null for no panel. stem: colour. arms: "grad" or a colour.
+// grad: [start, mid, end] used when arms === "grad".
+const variants = [
+  { n: 1, label: "Mid periwinkle",   tile: ["#8A8FD0", "#6165A8"], stem: "#FFFFFF", arms: "grad", grad: ["#1FA8BC", "#4B32C3", "#F0455F"] },
+  { n: 2, label: "Brand violet",     tile: ["#6E56F0", "#4B32C3"], stem: "#FFFFFF", arms: "#FFFFFF" },
+  { n: 3, label: "Brand violet + gradient arms", tile: ["#6E56F0", "#4B32C3"], stem: "#FFFFFF", arms: "grad", grad: ["#5EE7F5", "#FFFFFF", "#FF9DB0"] },
+  { n: 4, label: "Mid slate blue",   tile: ["#5B6BA8", "#3E4A7A"], stem: "#FFFFFF", arms: "grad", grad: ["#43C6D9", "#B3A4FF", "#FF8FA3"] },
+  { n: 5, label: "No tile",          tile: null,                   stem: "#4B32C3", arms: "grad", grad: ["#1FA8BC", "#7C5CFC", "#F0455F"] },
+  { n: 6, label: "Dark navy (v1, you said too dark)",  tile: ["#4A4D80", "#2F3157"], stem: "#F5F3FF", arms: "grad", grad: ["#43C6D9", "#7C5CFC", "#FF6B81"] },
+  { n: 7, label: "Pale (current, you said too white)", tile: ["#F7F5FF", "#E4E0FA"], stem: "#2F3157", arms: "grad", grad: ["#1FA8BC", "#7C5CFC", "#F0455F"] },
+];
+
+function svgFor(v, size) {
+  const id = "g" + v.n + "_" + size;
+  let defs = "";
+  let tileFill = "none";
+  if (v.tile) {
+    defs += `<linearGradient id="t${id}" x1="16" y1="16" x2="496" y2="496" gradientUnits="userSpaceOnUse">
+               <stop stop-color="${v.tile[0]}"/><stop offset="1" stop-color="${v.tile[1]}"/></linearGradient>`;
+    tileFill = `url(#t${id})`;
+  }
+  let arm = v.arms;
+  if (v.arms === "grad") {
+    defs += `<linearGradient id="r${id}" x1="170" y1="140" x2="360" y2="380" gradientUnits="userSpaceOnUse">
+               <stop stop-color="${v.grad[0]}"/><stop offset="0.5" stop-color="${v.grad[1]}"/>
+               <stop offset="1" stop-color="${v.grad[2]}"/></linearGradient>`;
+    arm = `url(#r${id})`;
+  }
+  const k = K.replace("STEM", v.stem).replace("ARM1", arm).replace("ARM2", arm);
+  const rect = v.tile ? `<rect x="16" y="16" width="480" height="480" rx="112" fill="${tileFill}"/>` : "";
+  return `<svg width="${size}" height="${size}" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <defs>${defs}</defs>${rect}
+            <g fill="none" stroke-width="56" stroke-linecap="round">${k}</g></svg>`;
+}
+
+const table = document.querySelector("table");
+for (const v of variants) {
+  const tr = document.createElement("tr");
+  let cells = `<td class="name">${v.n}. ${v.label}<code>${v.tile ? v.tile.join(" → ") : "no panel"}</code></td>`;
+  for (const chrome of ["chrome-light", "chrome-dark"]) {
+    for (const size of [16, 32, 64]) {
+      cells += `<td class="${chrome}">${svgFor(v, size)}</td>`;
+    }
+  }
+  tr.innerHTML = cells;
+  table.appendChild(tr);
+}
+</script>

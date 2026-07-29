@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="kazari.svg" alt="Kazari" width="160">
+  <img src="brand/kazari-logo.svg" alt="Kazari" width="160">
 </p>
 
 <h1 align="center">Kazari</h1>

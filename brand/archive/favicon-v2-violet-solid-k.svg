@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Kazari</title>
+  <!-- ARCHIVED variant 2. Brand violet tile with a solid white K, no gradient.
+       Rejected: dropping the gradient loses the brand colour identity. -->
+  <defs>
+    <linearGradient id="tile" x1="16" y1="16" x2="496" y2="496" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6E56F0"/>
+      <stop offset="1" stop-color="#4B32C3"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#tile)"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="56" stroke-linecap="round">
+    <path d="M168 140v232"/>
+    <path d="M186 256L344 146"/>
+    <path d="M186 256L344 366"/>
+  </g>
+</svg>

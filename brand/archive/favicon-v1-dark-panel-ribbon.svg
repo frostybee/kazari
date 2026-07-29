@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Kazari</title>
+  <!-- ARCHIVED variant 1. Reuses the logo's folded ribbon path, scaled 1.95x
+       and centred. Rejected: the ribbon's interior notch is roughly 1.5px wide
+       at 16px, so it closes up and the K reads as a blob. The panel is also
+       near-black and disappears into dark browser chrome. -->
+  <defs>
+    <linearGradient id="panel" x1="16" y1="16" x2="496" y2="496" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#23243A"/>
+      <stop offset="1" stop-color="#171821"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="156" y1="154" x2="328" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#43C6D9"/>
+      <stop offset="0.5" stop-color="#7C5CFC"/>
+      <stop offset="1" stop-color="#FF6B81"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#panel)"/>
+  <g transform="translate(-175.9 -275.4) scale(1.95)">
+    <path d="M160 196v152" stroke="#F5F3FF" stroke-width="30" stroke-linecap="round"/>
+    <path d="M160 270l104-76 28 38-56 40 62 57-32 35-106-94z" fill="url(#ribbon)" stroke-linejoin="round"/>
+  </g>
+</svg>
