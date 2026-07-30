@@ -13,11 +13,12 @@ listed below.
 | Master | Copy to | Used by |
 |--------|---------|---------|
 | `kazari-logo.svg` | no copy needed | `README.md` header image, referenced here directly |
-| `kazari-logo.svg` | `docs/public/images/kazari.svg` | Docs site homepage hero |
+| `kazari-logo.svg` | `docs/public/images/kazari.svg` | Nothing at present. Kept because it is the only full logo the docs site can serve |
 | `kazari-favicon.svg` | `docs/public/favicon.svg` | Docs site favicon, via `site.favicon` in `docs/sarde.yaml` |
 | `kazari-favicon.svg` | `docs/public/favicon.svg` | Docs site header logo, via `site.logo` in `docs/sarde.yaml`. Same copy as the favicon, no second file. |
-| `hero-light.svg` | `docs/public/images/hero-light.svg` | Available to the docs site, currently unreferenced |
-| `hero-dark.svg` | `docs/public/images/hero-dark.svg` | Available to the docs site, currently unreferenced |
+| `hero-light.svg` | `docs/public/images/hero-light.svg` | Docs site homepage hero, light variant, via `homepage.hero.image.light` |
+| `hero-dark.svg` | `docs/public/images/hero-dark.svg` | Docs site homepage hero, dark variant, via `homepage.hero.image.dark` |
+| `kazari-logo.png` | `docs/public/images/kazari-logo.png` | Social card corner mark and watermark, via `social_cards.logo` in `docs/sarde.yaml`. Rasterized from `kazari-logo.svg` at 512 px, since cards composite raster images only; the panel's rounded corners were converted to an explicit path because the offline oksvg rasterizer drops `rx` on `rect` |
 
 `favicon-variants.html` is a standalone comparison page. Open it in a browser to
 see every favicon candidate rendered at 16, 32, and 64 pixels against both a light
@@ -88,6 +89,68 @@ browser chrome does the same job against both header themes.
 A dedicated header asset is only worth authoring if the header should carry more
 of the logo's character than a three-stroke K, and that means new artwork tuned
 for roughly 24 to 40 pixels, not a rescale of either existing file.
+
+## Why the heroes expand the logo instead of rescaling it
+
+The hero art used to be Sarde's template placeholder, a generic card with two
+button shapes and a checkmark, in the theme's default indigo. Nothing in it was
+Kazari. The homepage then pointed `image.light` and `image.dark` at
+`kazari.svg` instead, which put the same 512-unit square in both slots.
+
+Both are now `hero-light.svg` and `hero-dark.svg`, on a 400 by 300 landscape
+canvas. The hero slot is the one place with enough room for detail: Sarde renders
+it at `width: 100%` inside a flex column, capped at `20rem` only below the mobile
+breakpoint, so the art gets roughly 320 to 480 pixels. That is the opposite of
+the favicon problem. Nothing has to be simplified away, so nothing is.
+
+The illustration is therefore the logo's own subject at full size. The logo is a
+code window with a ribbon K; the hero is what that window contains once Kazari
+renders into it: an editor frame, a title bar with a file name and a copy button,
+a line number gutter, tokenized code, and one marked line with the violet gutter
+bar. The logo mark then rides the lower right corner, and it is the logo, not the
+favicon: the tile carries the logo's panel gradient and its 0.196 corner radius
+ratio, and the K is the logo's own `M160 196v152` stem and `M160 270l104-76...`
+folded ribbon, referenced verbatim and placed with
+
+    transform="translate(344 236) scale(0.28) translate(-221.5 -272.5)"
+
+The inner translate centres the mark's own bounding box, 145 to 298 by 181 to
+364 in logo coordinates. Because the ribbon gradient is `userSpaceOnUse` and is
+referenced from inside that group, its logo space coordinates still line up with
+the logo space path data, so the gradient needs no adjustment either.
+
+Do not substitute the favicon's three-stroke K here. Its notch argument is
+calibrated for 16 pixels; the mark tile renders at roughly 60 to 85, where the
+folded ribbon reads without trouble. The stem's `stroke-width="30"` lands at 8.4
+units, about 9 pixels.
+
+The two files share their geometry exactly, so the light and dark variants swap
+without the hero shifting. What differs is the code block surface and the token
+hues. The logo palette is tuned for a near-black panel, and its cyan, amber, and
+pink wash out on paper, so the light variant darkens them:
+
+| Role | Dark | Light |
+|------|------|-------|
+| Keyword | `#7C5CFC` | `#6B4EE6` |
+| String | `#43C6D9` | `#1B8B9E` |
+| Number | `#F7C85E` | `#A8760C` |
+| Identifier | `#C9CCE8` | `#3A3D57` |
+| Comment | `#565B7E` | `#8A8EA8` |
+| Punctuation | `#4A4E6E` | `#BCBFD6` |
+
+Three elements deliberately do not change between variants: the terminal dots,
+the violet line marker, and the logo mark, whose tile stays dark in both because
+the logo is dark panelled by nature. Each reads on either surface, and holding
+them fixed is what keeps the two files recognisable as one illustration.
+
+On the dark variant the mark tile and the frame share a fill, so a `#353650` rim
+and the plate beneath it are what lift the mark off the frame. The light variant
+needs neither, and omits the rim.
+
+Depth comes from an offset plate rather than a `filter`, so the art needs no
+filter support and stays resolution independent. The token colours are the brand
+palette cast into syntax roles; they are not sampled from any shipped Kazari
+theme, and they are not meant to track one.
 
 ## archive/
 

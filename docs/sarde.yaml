@@ -88,6 +88,16 @@ plugins:
     - scroll-to-top
     - keyboard-nav
   config:
+    social_cards:
+      # Brand palette from the Kazari logo: code-panel charcoal background,
+      # ribbon gradient cyan to pink. The PNG is rasterized from
+      # brand/kazari-logo.svg (cards cannot use SVG directly) and serves as
+      # both the corner mark and the watermark.
+      bg_color: "#171821"
+      accent_color: "#43C6D9"
+      accent_color_2: "#FF6B81"
+      logo: "/images/kazari-logo.png"
+      watermark: true
     scroll-to-top:
       showProgressRing: true
       showTooltip: true
@@ -109,6 +119,6 @@ homepage:
       label: "View Showcase"
       url: "/demo/showcase.html"
     image:
-      light: /images/kazari.svg
-      dark: /images/kazari.svg
-      alt: "Kazari"
+      light: /images/hero-light.svg
+      dark: /images/hero-dark.svg
+      alt: "A Kazari code block with a title bar, line numbers, syntax colored code and one highlighted line"

@@ -15,6 +15,10 @@ demo/chroma/showcase.js
 !kazari-block.png
 # brand/ holds the master brand assets, so raster exports there stay tracked.
 !brand/**/*.png
+# The social cards plugin rasterizes its logo and watermark from public/, and it
+# cannot read SVG. These two copies must survive a fresh clone or the deploy
+# build renders every card without a mark.
+!docs/public/images/*.png
 
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore

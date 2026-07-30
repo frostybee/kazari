@@ -1,19 +1,104 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
-  <rect x="60" y="40" width="280" height="200" rx="16" fill="#1e2433" stroke="#2d3548" stroke-width="1.5"/>
-  <rect x="80" y="70" width="120" height="10" rx="5" fill="#8b95a8"/>
-  <rect x="80" y="90" width="180" height="8" rx="4" fill="#3d4759"/>
-  <rect x="80" y="106" width="160" height="8" rx="4" fill="#3d4759"/>
-  <rect x="80" y="130" width="100" height="32" rx="8" fill="#818cf8"/>
-  <rect x="190" y="130" width="80" height="32" rx="8" fill="none" stroke="#818cf8" stroke-width="1.5"/>
-  <circle cx="300" cy="100" r="30" fill="#252d40" stroke="#818cf8" stroke-width="1.5"/>
-  <path d="M290 100 l8 8 l12-16" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="80" y="180" width="70" height="45" rx="8" fill="#252d40" stroke="#2d3548" stroke-width="1"/>
-  <rect x="160" y="180" width="70" height="45" rx="8" fill="#252d40" stroke="#2d3548" stroke-width="1"/>
-  <rect x="240" y="180" width="70" height="45" rx="8" fill="#252d40" stroke="#2d3548" stroke-width="1"/>
-  <rect x="90" y="192" width="50" height="6" rx="3" fill="#8b95a8"/>
-  <rect x="90" y="204" width="40" height="5" rx="2.5" fill="#3d4759"/>
-  <rect x="170" y="192" width="50" height="6" rx="3" fill="#8b95a8"/>
-  <rect x="170" y="204" width="40" height="5" rx="2.5" fill="#3d4759"/>
-  <rect x="250" y="192" width="50" height="6" rx="3" fill="#8b95a8"/>
-  <rect x="250" y="204" width="40" height="5" rx="2.5" fill="#3d4759"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-labelledby="kzHeroDarkTitle kzHeroDarkDesc">
+  <title id="kzHeroDarkTitle">Kazari</title>
+  <desc id="kzHeroDarkDesc">A framed code block with a title bar, line numbers, syntax colored code and one highlighted line, with the Kazari logo mark overlapping its lower right corner.</desc>
+  <!-- Dark hero. Built from kazari-logo.svg: the panel gradient, the divider
+       tone, the three terminal dot colours and the ribbon K are the logo's own
+       values. The subject is what the library produces, a framed and highlighted
+       code block, so the hero doubles as a product shot. The token colours below
+       are the brand palette cast into syntax roles, not any shipped Kazari
+       theme. -->
+  <defs>
+    <linearGradient id="kzPanelDark" x1="20" y1="26" x2="360" y2="254" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#23243A"/>
+      <stop offset="1" stop-color="#171821"/>
+    </linearGradient>
+    <linearGradient id="kzMarkPanelDark" x1="308" y1="200" x2="380" y2="272" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#23243A"/>
+      <stop offset="1" stop-color="#171821"/>
+    </linearGradient>
+    <!-- The logo's ribbon gradient, coordinates and stops unchanged. It is
+         referenced from inside the scaled group below, so these logo space
+         coordinates still line up with the logo space path data. -->
+    <linearGradient id="kzRibbonDark" x1="156" y1="154" x2="328" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#43C6D9"/>
+      <stop offset="0.5" stop-color="#7C5CFC"/>
+      <stop offset="1" stop-color="#FF6B81"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Offset plate rather than a filter, so the art needs no filter support and
+       stays resolution independent. -->
+  <rect x="26" y="34" width="340" height="228" rx="16" fill="#000000" opacity="0.22"/>
+  <rect x="20" y="26" width="340" height="228" rx="16" fill="url(#kzPanelDark)" stroke="#353650" stroke-width="1.5"/>
+
+  <!-- Title bar: divider, terminal dots, file name, copy button -->
+  <path d="M20 62h340" stroke="#353650" stroke-width="1.5"/>
+  <circle cx="40" cy="44" r="4.5" fill="#FF6B81"/>
+  <circle cx="56" cy="44" r="4.5" fill="#F7C85E"/>
+  <circle cx="72" cy="44" r="4.5" fill="#43C6D9"/>
+  <rect x="92" y="41" width="64" height="6" rx="3" fill="#9FA3C4"/>
+  <g fill="none" stroke="#6E7396" stroke-width="1.5">
+    <rect x="337" y="35" width="11" height="11" rx="3"/>
+    <rect x="331" y="41" width="11" height="11" rx="3" fill="#1D1E2E"/>
+  </g>
+
+  <!-- Line number gutter -->
+  <path d="M56 72v172" stroke="#353650" stroke-width="1.5"/>
+  <g fill="#4A4E6E">
+    <rect x="40" y="77.5" width="8" height="5" rx="2.5"/>
+    <rect x="40" y="101.5" width="8" height="5" rx="2.5"/>
+    <rect x="40" y="125.5" width="8" height="5" rx="2.5"/>
+    <rect x="40" y="149.5" width="8" height="5" rx="2.5"/>
+    <rect x="40" y="173.5" width="8" height="5" rx="2.5"/>
+    <rect x="40" y="197.5" width="8" height="5" rx="2.5"/>
+    <rect x="40" y="221.5" width="8" height="5" rx="2.5"/>
+  </g>
+
+  <!-- Marked line, the signature Kazari line marker: tinted band plus a solid
+       gutter edge bar in the brand violet. -->
+  <rect x="21" y="140" width="338" height="24" fill="#7C5CFC" opacity="0.14"/>
+  <rect x="21" y="140" width="3" height="24" fill="#7C5CFC"/>
+
+  <!-- Code tokens. Indents and widths vary so the block reads as tokenized code
+       rather than placeholder bars. -->
+  <g>
+    <rect x="72" y="76.5" width="22" height="7" rx="3.5" fill="#7C5CFC"/>
+    <rect x="100" y="76.5" width="52" height="7" rx="3.5" fill="#C9CCE8"/>
+    <rect x="158" y="76.5" width="12" height="7" rx="3.5" fill="#4A4E6E"/>
+    <rect x="176" y="76.5" width="30" height="7" rx="3.5" fill="#F7C85E"/>
+
+    <rect x="84" y="100.5" width="18" height="7" rx="3.5" fill="#7C5CFC"/>
+    <rect x="108" y="100.5" width="64" height="7" rx="3.5" fill="#43C6D9"/>
+
+    <rect x="84" y="124.5" width="40" height="7" rx="3.5" fill="#C9CCE8"/>
+    <rect x="130" y="124.5" width="14" height="7" rx="3.5" fill="#4A4E6E"/>
+    <rect x="150" y="124.5" width="56" height="7" rx="3.5" fill="#43C6D9"/>
+
+    <rect x="84" y="148.5" width="26" height="7" rx="3.5" fill="#7C5CFC"/>
+    <rect x="116" y="148.5" width="46" height="7" rx="3.5" fill="#C9CCE8"/>
+    <rect x="168" y="148.5" width="12" height="7" rx="3.5" fill="#565B7E"/>
+    <rect x="186" y="148.5" width="34" height="7" rx="3.5" fill="#F7C85E"/>
+
+    <rect x="96" y="172.5" width="58" height="7" rx="3.5" fill="#C9CCE8"/>
+    <rect x="162" y="172.5" width="12" height="7" rx="3.5" fill="#4A4E6E"/>
+    <rect x="182" y="172.5" width="44" height="7" rx="3.5" fill="#43C6D9"/>
+    <rect x="232" y="172.5" width="16" height="7" rx="3.5" fill="#4A4E6E"/>
+
+    <rect x="96" y="196.5" width="36" height="7" rx="3.5" fill="#FF6B81"/>
+    <rect x="140" y="196.5" width="50" height="7" rx="3.5" fill="#565B7E"/>
+
+    <rect x="72" y="220.5" width="14" height="7" rx="3.5" fill="#4A4E6E"/>
+  </g>
+
+  <!-- Logo mark, overlapping the frame corner for depth. The tile keeps the
+       logo's panel gradient and its 0.196 corner ratio, and the K is the logo's
+       own stem and folded ribbon path data, scaled in place. The mark tile and
+       the frame share a fill, so the rim and the plate below it are what lift
+       the mark off the frame. -->
+  <rect x="311" y="203" width="72" height="72" rx="14" fill="#000000" opacity="0.28"/>
+  <rect x="308" y="200" width="72" height="72" rx="14" fill="url(#kzMarkPanelDark)" stroke="#353650" stroke-width="1.5"/>
+  <g transform="translate(344 236) scale(0.28) translate(-221.5 -272.5)">
+    <path d="M160 196v152" fill="none" stroke="#F5F3FF" stroke-width="30" stroke-linecap="round"/>
+    <path d="M160 270l104-76 28 38-56 40 62 57-32 35-106-94z" fill="url(#kzRibbonDark)" stroke-linejoin="round"/>
+  </g>
 </svg>

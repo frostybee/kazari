@@ -11,6 +11,7 @@
 </p>
 
 <p align="center">
+  <a href="https://frostybee.github.io/kazari/"><strong>Documentation</strong></a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="https://github.com/frostybee/kazari/releases">Releases</a> ·
   <a href="https://pkg.go.dev/github.com/frostybee/kazari">API reference</a>
@@ -340,4 +341,4 @@ Kazari is licensed under the [MIT License](LICENSE). Kazari embeds CSS and JS pa
 
 ---
 
-Full API documentation: [pkg.go.dev/github.com/frostybee/kazari](https://pkg.go.dev/github.com/frostybee/kazari)
+Guides and reference: [frostybee.github.io/kazari](https://frostybee.github.io/kazari/) · Full API documentation: [pkg.go.dev/github.com/frostybee/kazari](https://pkg.go.dev/github.com/frostybee/kazari)
