@@ -24,10 +24,8 @@ func SkipReason(tokens []BufferedToken) string {
 	if len(tokens) == 0 {
 		return ""
 	}
-	for _, c := range classList(tokens[0].Attrs) {
-		if strings.HasPrefix(c, "kz-") || strings.HasPrefix(c, "kazari-") {
-			return SkipKzClass
-		}
+	if hasReservedClass(tokens[0].Attrs) {
+		return SkipKzClass
 	}
 	if v, ok := attrValue(tokens[0].Attrs, "data-kazari"); ok && v == "ignore" {
 		return SkipKazariIgnore
@@ -36,6 +34,17 @@ func SkipReason(tokens []BufferedToken) string {
 		return SkipMermaid
 	}
 	return ""
+}
+
+// hasReservedClass reports whether any class token uses Kazari's reserved
+// kz- or kazari- prefixes, marking the element as Kazari's own output.
+func hasReservedClass(attrs []html.Attribute) bool {
+	for _, c := range classList(attrs) {
+		if strings.HasPrefix(c, "kz-") || strings.HasPrefix(c, "kazari-") {
+			return true
+		}
+	}
+	return false
 }
 
 // isMermaid detects mermaid blocks in the shapes generators and mermaid
