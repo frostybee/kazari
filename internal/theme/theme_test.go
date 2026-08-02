@@ -75,12 +75,18 @@ func TestGenerateVars_CollapsibleEnabled(t *testing.T) {
 }
 
 func TestGenerateVars_CollapsibleNil(t *testing.T) {
+	// Collapse variable defaults ship on every engine because meta collapse
+	// ranges render kz-section markup without WithCollapsible. The section
+	// icon variables are the load bearing ones for that path.
 	cfg := testConfig()
 	cfg.Collapsible = nil
 	css := GenerateVars(cfg, lightColors, darkColors)
 
-	if strings.Contains(css, "--kz-collapse-btn-bg") {
-		t.Error("should not contain collapsible CSS variables when nil")
+	if !strings.Contains(css, "--kz-collapse-expand-icon") {
+		t.Error("collapse section variables must be present when Collapsible is nil")
+	}
+	if !strings.Contains(css, "--kz-collapse-btn-bg") {
+		t.Error("collapse variable defaults must be present when Collapsible is nil")
 	}
 }
 

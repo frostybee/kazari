@@ -63,19 +63,22 @@ func TestGenerate_FocusCSS(t *testing.T) {
 	}
 }
 
-func TestGenerate_CollapsibleConditional(t *testing.T) {
+func TestGenerate_CollapsibleAlwaysIncluded(t *testing.T) {
+	// A meta string collapse={ranges} token renders kz-section markup on
+	// any engine, so the collapse stylesheet is never gated on the
+	// Collapsible config.
 	cfg := defaultCfg()
 	light, dark := colors()
 	out := Generate(cfg, light, dark)
 
-	if strings.Contains(out, "kz-collapse-gradient") {
-		t.Error("collapsible CSS should not be included when Collapsible is nil")
+	if !strings.Contains(out, "kz-collapse-gradient") {
+		t.Error("collapsible CSS must be included when Collapsible is nil")
 	}
 
 	cfg.Collapsible = &config.CollapsibleConfig{LineThreshold: 10}
 	out = Generate(cfg, light, dark)
 	if !strings.Contains(out, "kz-collapse-gradient") {
-		t.Error("collapsible CSS should be included when Collapsible is set")
+		t.Error("collapsible CSS must be included when Collapsible is set")
 	}
 }
 

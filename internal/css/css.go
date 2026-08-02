@@ -83,9 +83,12 @@ func Generate(cfg *config.Config, light, dark theme.ThemeColors) string {
 	if cfg.WrapButton {
 		sb.WriteString(readCSS("wrap.css"))
 	}
-	if cfg.Collapsible != nil {
-		sb.WriteString(readCSS("collapsible.css"))
-	}
+	// Always included, never gated on cfg.Collapsible: a meta string
+	// collapse={ranges} token renders kz-section markup on any engine,
+	// with or without WithCollapsible. The collapsible JS stays gated
+	// because only threshold collapse needs it and threshold markup is
+	// suppressed when the config is nil.
+	sb.WriteString(readCSS("collapsible.css"))
 	if cfg.CodeGroups {
 		sb.WriteString(readCSS("codegroup.css"))
 	}

@@ -23,6 +23,8 @@ template sees them; values keep their case. Recognized keys:
     ins / del          inserted or deleted line ranges: ins="6-7" del="9"
     collapse           collapse="true" collapses the whole block, or give
                        ranges: collapse="4-9"
+    nocollapse         nocollapse="true" opts one block out of the config
+                       wide auto collapse threshold
     collapsestyle      collapsestyle="collapsible-start" or -end or -auto
     collapsethreshold  collapsethreshold="20"
     showlinenumbers    showlinenumbers="true" or "false"
@@ -40,7 +42,7 @@ supported by this stock template; extend it locally if you need them.
 */ -}}
 {{- $type := .Type -}}
 {{- $meta := $type -}}
-{{- $known := slice "title" "mark" "ins" "del" "collapse" "collapsestyle" "collapsethreshold" "showlinenumbers" "startlinenumber" "wrap" -}}
+{{- $known := slice "title" "mark" "ins" "del" "collapse" "nocollapse" "collapsestyle" "collapsethreshold" "showlinenumbers" "startlinenumber" "wrap" -}}
 {{- with .Attributes.title -}}{{- $meta = printf "%s title=%q" $meta (printf "%v" .) -}}{{- end -}}
 {{- with .Attributes.mark -}}{{- $meta = printf "%s {%s}" $meta (replace (printf "%v" .) " " ",") -}}{{- end -}}
 {{- with .Attributes.ins -}}{{- $meta = printf "%s ins={%s}" $meta (replace (printf "%v" .) " " ",") -}}{{- end -}}
@@ -51,6 +53,11 @@ supported by this stock template; extend it locally if you need them.
     {{- $meta = printf "%s collapse" $meta -}}
   {{- else -}}
     {{- $meta = printf "%s collapse={%s}" $meta (replace $v " " ",") -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Attributes.nocollapse -}}
+  {{- if eq (printf "%v" .) "true" -}}
+    {{- $meta = printf "%s nocollapse" $meta -}}
   {{- end -}}
 {{- end -}}
 {{- with .Attributes.collapsestyle -}}{{- $meta = printf "%s collapseStyle=%q" $meta (printf "%v" .) -}}{{- end -}}

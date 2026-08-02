@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`kazari process` CLI.** `kazari process [dir]` walks a folder of built HTML files and upgrades plain code blocks in place to framed, syntax-highlighted Kazari blocks with copy buttons, line numbers, and dual themes. It works on the output of any static site generator, including Hugo, Jekyll, Eleventy, mdBook, Sphinx, Zola, and Astro, with no Markdown pipeline integration. `--check` reports pending changes without writing and exits 1 when any exist.
+- **The `process` package.** The engine behind the CLI is importable as `github.com/frostybee/kazari/process`, so Go programs can run the same post-build upgrade without shelling out.
+- **Goldmark-parity source recovery.** Code recovered from built HTML, whether plain blocks or highlighted markup from Chroma, Rouge, Prism, or Pygments, renders byte-identical to the same source going through the Goldmark path. Hugo `hl_lines` classes translate to Kazari line markers.
+- **Hugo render hook.** A `render-codeblock.html` template, shipped at `integrations/hugo/render-codeblock.html`, stashes the full Kazari meta string in a `data-kz-meta` attribute so titles, markers, and collapse ranges survive the build instead of falling back to config defaults.
+- **Documented tier limits.** Meta-string-only features (focus lines, inline markers, labeled ranges, explicit collapse ranges, hybrid diff, per-block overrides) require the render hook; hook-less pipelines still get frames, copy buttons, line numbers, and dual themes with zero configuration.
+
+### Fixed
+
+- **Unstyled collapse sections without `WithCollapsible`.** A `collapse={N-M}` meta token renders a `<details>` section on any engine, but the collapse stylesheet and its `--kz-collapse-*` variable defaults, including the expand and collapse icons, were only emitted when `WithCollapsible` was configured. The section rendered with browser default styling and no icons. Both are now always part of `CSS()`. The collapse JavaScript stays conditional, since only threshold-based collapse needs it and threshold markup never renders without the config.
+
 ## [1.1.0] - 2026-07-24
 
 ### Added

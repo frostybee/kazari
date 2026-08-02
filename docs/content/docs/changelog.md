@@ -2,7 +2,7 @@
 title: "Changelog"
 description: "Release notes and version history for Kazari."
 sidebar:
-  order: 8
+  order: 9
 ---
 
 Every released version of Kazari and what changed in it. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

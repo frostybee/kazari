@@ -477,3 +477,7 @@ uiStrings:
   "copy.label": "Copy"
   "copy.success": "Copied!"
 ```
+
+## Process (CLI)
+
+The `process:` key configures the `kazari process` command (`skipUnlabeled`, `assetsBase`, `hashedAssets`, `concurrency`, `maxFileBytes`). `FileConfigToOptions` ignores it; the CLI reads it from the parsed config directly. See [CLI Configuration](/cli/configuration/#the-process-config-key) for the full field table.

@@ -101,30 +101,33 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 		{"--kz-ansi-bright-white", "#eeeeec"},
 	}
 
-	if cfg.Collapsible != nil {
-		vars = append(vars,
-			struct{ name, value string }{"--kz-collapse-btn-bg", "rgba(255,255,255,0.08)"},
-			struct{ name, value string }{"--kz-collapse-btn-fg", "rgba(255,255,255,0.7)"},
-			struct{ name, value string }{"--kz-collapse-btn-hover-bg", "rgba(255,255,255,0.15)"},
-			struct{ name, value string }{"--kz-collapse-gradient-start", "transparent"},
-			struct{ name, value string }{"--kz-collapse-gradient-end", "var(--kz-editor-bg)"},
-			struct{ name, value string }{"--kz-collapse-transition", "300ms ease"},
-			struct{ name, value string }{"--kz-collapse-closed-bg", "rgb(84 174 255 / 20%)"},
-			struct{ name, value string }{"--kz-collapse-closed-border", "rgb(84 174 255 / 50%)"},
-			struct{ name, value string }{"--kz-collapse-closed-border-width", "0"},
-			struct{ name, value string }{"--kz-collapse-closed-padding", "4px"},
-			struct{ name, value string }{"--kz-collapse-open-bg", "transparent"},
-			struct{ name, value string }{"--kz-collapse-open-bg-collapsible", "rgb(84 174 255 / 10%)"},
-			struct{ name, value string }{"--kz-collapse-open-border", "transparent"},
-			struct{ name, value string }{"--kz-collapse-open-border-width", "1px"},
-			struct{ name, value string }{"--kz-collapse-closed-fg", "currentColor"},
-			struct{ name, value string }{"--kz-collapse-closed-font-family", "inherit"},
-			struct{ name, value string }{"--kz-collapse-closed-font-size", "inherit"},
-			struct{ name, value string }{"--kz-collapse-closed-line-height", "inherit"},
-			struct{ name, value string }{"--kz-collapse-expand-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
-			struct{ name, value string }{"--kz-collapse-collapse-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
-		)
-	}
+	// Collapse variable defaults are never gated on cfg.Collapsible: a meta
+	// string collapse={ranges} token renders kz-section markup on any
+	// engine, and the section rules in collapsible.css resolve these
+	// variables with no fallbacks. Threshold only refinements elsewhere in
+	// this package stay gated on the config.
+	vars = append(vars,
+		struct{ name, value string }{"--kz-collapse-btn-bg", "rgba(255,255,255,0.08)"},
+		struct{ name, value string }{"--kz-collapse-btn-fg", "rgba(255,255,255,0.7)"},
+		struct{ name, value string }{"--kz-collapse-btn-hover-bg", "rgba(255,255,255,0.15)"},
+		struct{ name, value string }{"--kz-collapse-gradient-start", "transparent"},
+		struct{ name, value string }{"--kz-collapse-gradient-end", "var(--kz-editor-bg)"},
+		struct{ name, value string }{"--kz-collapse-transition", "300ms ease"},
+		struct{ name, value string }{"--kz-collapse-closed-bg", "rgb(84 174 255 / 20%)"},
+		struct{ name, value string }{"--kz-collapse-closed-border", "rgb(84 174 255 / 50%)"},
+		struct{ name, value string }{"--kz-collapse-closed-border-width", "0"},
+		struct{ name, value string }{"--kz-collapse-closed-padding", "4px"},
+		struct{ name, value string }{"--kz-collapse-open-bg", "transparent"},
+		struct{ name, value string }{"--kz-collapse-open-bg-collapsible", "rgb(84 174 255 / 10%)"},
+		struct{ name, value string }{"--kz-collapse-open-border", "transparent"},
+		struct{ name, value string }{"--kz-collapse-open-border-width", "1px"},
+		struct{ name, value string }{"--kz-collapse-closed-fg", "currentColor"},
+		struct{ name, value string }{"--kz-collapse-closed-font-family", "inherit"},
+		struct{ name, value string }{"--kz-collapse-closed-font-size", "inherit"},
+		struct{ name, value string }{"--kz-collapse-closed-line-height", "inherit"},
+		struct{ name, value string }{"--kz-collapse-expand-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
+		struct{ name, value string }{"--kz-collapse-collapse-icon", `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z'/%3E%3C/svg%3E")`},
+	)
 
 	if cfg.CodeGroups {
 		vars = append(vars,

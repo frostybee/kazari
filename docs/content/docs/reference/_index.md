@@ -2,7 +2,7 @@
 title: "Reference"
 description: "Lookup tables for the Kazari engine API, configuration options, meta string syntax, CSS variables, and exported types."
 sidebar:
-  order: 6
+  order: 7
   icon: book-open
 ---
 

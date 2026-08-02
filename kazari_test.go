@@ -1977,7 +1977,10 @@ func TestCSS_ContainsCollapsibleStyles(t *testing.T) {
 	}
 }
 
-func TestCSS_NoCollapsibleWhenDisabled(t *testing.T) {
+func TestCSS_CollapsibleAlwaysIncluded(t *testing.T) {
+	// A meta string collapse={ranges} token renders kz-section markup on
+	// any engine, so the collapse stylesheet must ship even when
+	// WithCollapsible was never set.
 	engine := New(
 		WithHighlighter(&mockHighlighter{themeInfo: ThemeInfo{FG: "#24292f", BG: "#ffffff"}}),
 		WithThemes("light-theme", ""),
@@ -1985,8 +1988,8 @@ func TestCSS_NoCollapsibleWhenDisabled(t *testing.T) {
 	)
 	css := engine.CSS()
 
-	if strings.Contains(css, "kz-collapse-gradient") {
-		t.Error("collapsible CSS should not be included when feature is disabled")
+	if !strings.Contains(css, "kz-section") {
+		t.Error("collapsible CSS must be included even without WithCollapsible")
 	}
 }
 

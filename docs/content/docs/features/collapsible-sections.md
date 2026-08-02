@@ -10,7 +10,7 @@ Collapsible sections reduce the visual footprint of long code blocks. Kazari sup
 
 ## Enabling collapsible sections
 
-Collapsible sections require `WithCollapsible` to be set on the engine. Without it, no collapse CSS or JS is emitted and collapse meta tokens have no effect.
+Range-based collapse works on any engine: a `collapse={N-M}` meta token renders a native `<details>` section, and the collapse stylesheet is always part of `CSS()`. `WithCollapsible` enables threshold-based auto-collapse, its JavaScript module, and the threshold defaults.
 
 ```go
 engine := kazari.New(
@@ -462,7 +462,7 @@ Ranges are sorted by start line before processing. First valid range wins on ove
 | `--kz-collapse-gradient-end` | `var(--kz-editor-bg)` | Gradient overlay end color |
 | `--kz-collapse-transition` | `300ms ease` | Transition timing for gradient |
 
-These variables are only emitted when `WithCollapsible` is configured. See the [CSS Variables](/reference/css-variables/) reference for the complete list.
+These variables are always part of `CSS()`. See the [CSS Variables](/reference/css-variables/) reference for the complete list.
 
 ## Interaction with other features
 
@@ -480,7 +480,7 @@ These variables are only emitted when `WithCollapsible` is configured. See the [
 
 ## Edge cases
 
-- `WithCollapsible` must be set for any collapse behavior. Without it, `collapse` meta tokens are parsed but have no effect.
+- `WithCollapsible` must be set for threshold-based collapse. Without it, the bare `collapse` meta token has no effect, while range-based `collapse={N-M}` still renders a collapsed section.
 - Both modes can coexist: a block can have threshold collapse and range-based collapse simultaneously. Range-based sections take precedence in the render loop for lines that fall within a collapse range.
 - `nocollapse` only suppresses threshold-based collapse. Range-based collapse (`collapse={N-M}`) still works on a `nocollapse` block.
 - Config file style names use camelCase (`collapsibleStart`), meta string uses kebab-case (`collapsible-start`).

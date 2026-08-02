@@ -192,7 +192,7 @@ Emitted when `WithTerminalDotStyle(DotsMinimal)` is configured.
 
 ## Collapsible sections
 
-Emitted when `WithCollapsible` is configured.
+Always emitted; range-based collapse can appear on any engine via the meta string.
 
 ### Button
 

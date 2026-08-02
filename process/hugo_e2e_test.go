@@ -147,6 +147,11 @@ func TestHugoE2E(t *testing.T) {
 	if string(css) != eng.CSS() {
 		t.Error("emitted kazari.css does not match Engine.CSS()")
 	}
+	// The default CLI engine must ship collapse section styling, since meta
+	// collapse ranges reach it through data-kz-meta without WithCollapsible.
+	if !bytes.Contains(css, []byte("kz-section")) {
+		t.Error("emitted kazari.css is missing collapse section styles")
+	}
 	js, err := os.ReadFile(filepath.Join(publicDir, "kazari.js"))
 	if err != nil {
 		t.Fatalf("read emitted js: %v", err)

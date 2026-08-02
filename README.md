@@ -68,6 +68,7 @@ Nuri and Chroma give you colored tokens, but not a finished code block. Kazari b
 - Mermaid pass-through
 - ANSI escape sequence rendering
 - i18n: en-US, fr-FR, ja-JP with per-string overrides
+- Post-build CLI: `kazari process ./public` upgrades code blocks in already-built HTML, no Markdown pipeline required
 
 ## Install
 
@@ -163,6 +164,18 @@ engine := kazari.New(
     kazari.WithThemes("github-light", "github-dark"),
 )
 ```
+
+### Post-build CLI
+
+Upgrade code blocks in already-built HTML, no Markdown pipeline integration required:
+
+```bash
+go install github.com/frostybee/kazari/cmd/kazari@latest
+kazari process ./public --check   # report pending changes, exit 1 if any
+kazari process ./public           # write the upgraded HTML in place
+```
+
+Works on the output of Hugo, Jekyll, Eleventy, mdBook, Sphinx, Zola, and hand-written sites. See the [CLI docs](https://frostybee.github.io/kazari/docs/cli/overview/) for render hooks and per-generator setup.
 
 ## Configuration
 

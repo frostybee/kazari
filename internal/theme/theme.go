@@ -93,8 +93,10 @@ func buildThemeVars(tc ThemeColors, cfg *config.Config) []struct{ name, value st
 	}
 
 	// Collapse section colors derived from the theme's fold background.
-	// Emitted after the static defaults, so they win the cascade.
-	if cfg.Collapsible != nil && tc.FoldBG != "" {
+	// Emitted after the static defaults, so they win the cascade. Not gated
+	// on cfg.Collapsible because meta collapse ranges render sections on
+	// any engine.
+	if tc.FoldBG != "" {
 		vars = append(vars,
 			nv("--kz-collapse-closed-bg", color.SetAlpha(tc.FoldBG, 0.2)),
 			nv("--kz-collapse-closed-border", color.SetAlpha(tc.FoldBG, 0.5)),

@@ -55,6 +55,8 @@ header:
   social: true
   theme_toggle: true
 markdown:
+  asides:
+    style: galaxy
   github_alerts: true
   katex: true
   mermaid: true

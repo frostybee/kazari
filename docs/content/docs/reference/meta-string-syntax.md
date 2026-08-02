@@ -8,6 +8,9 @@ sidebar:
 
 The meta string is the text after the opening triple backticks in a fenced code block. Kazari parses it into per-block options, markers, focus ranges, and collapse directives. Tokens are separated by whitespace.
 
+> [!NOTE]
+> Static site generators discard this text before HTML exists. Sites processed by the [CLI](/cli/overview/) need a per-block [render hook](/cli/render-hooks/) for meta string features to survive the build.
+
 ````
 ```go title="main.go" {3-5} showLineNumbers
 ````
