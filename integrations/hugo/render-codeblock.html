@@ -1,0 +1,92 @@
+{{- /*
+Kazari tier 2 render hook. Install at layouts/_markup/render-codeblock.html
+(Hugo 0.146+; on older Hugo use layouts/_default/_markup/render-codeblock.html).
+
+Bypasses Chroma entirely and emits a plain pre and code block carrying the
+full Kazari meta string in a data-kz-meta attribute. kazari process finds
+the attribute and passes its value verbatim to the engine, so per block
+features survive the build. Source recovery from the plain block still
+runs normally.
+
+AUTHORING CONVENTION: put every Kazari option in ONE brace group right
+after the language, as key="value" pairs only:
+
+    ```go {title="main.go" mark="3-5" collapse="10-20"}
+
+Hugo discards any info string text outside the braces, reads only the
+first brace group, and rejects bare tokens like {3-5}, so this is the only
+shape that survives. Hugo also lowercases attribute names before this
+template sees them; values keep their case. Recognized keys:
+
+    title              title="main.go"
+    mark               marked line ranges, comma separated: mark="3-5,9"
+    ins / del          inserted or deleted line ranges: ins="6-7" del="9"
+    collapse           collapse="true" collapses the whole block, or give
+                       ranges: collapse="4-9"
+    collapsestyle      collapsestyle="collapsible-start" or -end or -auto
+    collapsethreshold  collapsethreshold="20"
+    showlinenumbers    showlinenumbers="true" or "false"
+    startlinenumber    startlinenumber="5"
+    wrap               wrap="true" (the meta grammar has no per block off
+                       switch, so wrap="false" is a no-op)
+    hl_lines           Hugo native spelling for marked lines; both the
+                       string form hl_lines="2-4 7" and the bracket form
+                       hl_lines=[3,4] translate to Kazari mark ranges
+
+Any other lowercase key (theme, frame, lang, focus, add, rem) passes
+through unchanged as key="value", so future all lowercase Kazari meta keys
+work without editing this file. Inline text and regex markers are not
+supported by this stock template; extend it locally if you need them.
+*/ -}}
+{{- $type := .Type -}}
+{{- $meta := $type -}}
+{{- $known := slice "title" "mark" "ins" "del" "collapse" "collapsestyle" "collapsethreshold" "showlinenumbers" "startlinenumber" "wrap" -}}
+{{- with .Attributes.title -}}{{- $meta = printf "%s title=%q" $meta (printf "%v" .) -}}{{- end -}}
+{{- with .Attributes.mark -}}{{- $meta = printf "%s {%s}" $meta (replace (printf "%v" .) " " ",") -}}{{- end -}}
+{{- with .Attributes.ins -}}{{- $meta = printf "%s ins={%s}" $meta (replace (printf "%v" .) " " ",") -}}{{- end -}}
+{{- with .Attributes.del -}}{{- $meta = printf "%s del={%s}" $meta (replace (printf "%v" .) " " ",") -}}{{- end -}}
+{{- with .Attributes.collapse -}}
+  {{- $v := printf "%v" . -}}
+  {{- if eq $v "true" -}}
+    {{- $meta = printf "%s collapse" $meta -}}
+  {{- else -}}
+    {{- $meta = printf "%s collapse={%s}" $meta (replace $v " " ",") -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Attributes.collapsestyle -}}{{- $meta = printf "%s collapseStyle=%q" $meta (printf "%v" .) -}}{{- end -}}
+{{- with .Attributes.collapsethreshold -}}{{- $meta = printf "%s collapseThreshold=%v" $meta . -}}{{- end -}}
+{{- with .Attributes.showlinenumbers -}}
+  {{- if eq (printf "%v" .) "false" -}}
+    {{- $meta = printf "%s showLineNumbers=false" $meta -}}
+  {{- else -}}
+    {{- $meta = printf "%s showLineNumbers" $meta -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Attributes.startlinenumber -}}{{- $meta = printf "%s startLineNumber=%v" $meta . -}}{{- end -}}
+{{- with .Attributes.wrap -}}
+  {{- if eq (printf "%v" .) "true" -}}
+    {{- $meta = printf "%s wrap" $meta -}}
+  {{- end -}}
+{{- end -}}
+{{- range $key, $value := .Attributes -}}
+  {{- if not (in $known $key) -}}
+    {{- $meta = printf "%s %s=%q" $meta $key (printf "%v" $value) -}}
+  {{- end -}}
+{{- end -}}
+{{- $hl := or (index .Options "hl_Lines") (index .Options "hl_lines") -}}
+{{- with $hl -}}
+  {{- if eq (printf "%T" .) "string" -}}
+    {{- $meta = printf "%s {%s}" $meta (replace . " " ",") -}}
+  {{- else -}}
+    {{- range . -}}
+      {{- $s := add (index . 0) 1 -}}
+      {{- $e := add (index . 1) 1 -}}
+      {{- if eq $s $e -}}
+        {{- $meta = printf "%s {%d}" $meta $s -}}
+      {{- else -}}
+        {{- $meta = printf "%s {%d-%d}" $meta $s $e -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+<pre><code{{ if $type }} class="language-{{ $type }}"{{ end }}{{ if $meta }} data-kz-meta="{{ $meta }}"{{ end }}>{{ .Inner }}</code></pre>

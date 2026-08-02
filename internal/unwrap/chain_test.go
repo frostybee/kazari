@@ -51,6 +51,28 @@ func TestDataKzMeta_ShortCircuitsMetaSynthesis(t *testing.T) {
 	diffStrings(t, "code", region.Code, want.Code)
 }
 
+func TestDataKzMeta_MarkersShortCircuit(t *testing.T) {
+	tokens, want := loadFixture(t, "edge-data-kz-meta-markers")
+	region, _, ok := RunChain(BarePreChain, tokens)
+	if !ok {
+		t.Fatal("expected a chain match")
+	}
+	diffStrings(t, "meta", region.Meta, want.Meta)
+	diffStrings(t, "lang", region.Lang, want.Lang)
+	diffStrings(t, "code", region.Code, want.Code)
+}
+
+func TestDataKzMeta_CollapseShortCircuit(t *testing.T) {
+	tokens, want := loadFixture(t, "edge-data-kz-meta-collapse")
+	region, _, ok := RunChain(BarePreChain, tokens)
+	if !ok {
+		t.Fatal("expected a chain match")
+	}
+	diffStrings(t, "meta", region.Meta, want.Meta)
+	diffStrings(t, "lang", region.Lang, want.Lang)
+	diffStrings(t, "code", region.Code, want.Code)
+}
+
 func TestHTMLCommentInSpanSoup_Dropped(t *testing.T) {
 	tokens, want := loadFixture(t, "edge-html-comment-in-span-soup")
 	region, _, ok := RunChain(DivWrapperChain, tokens)

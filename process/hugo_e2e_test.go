@@ -36,6 +36,7 @@ func TestHugoE2E(t *testing.T) {
 	fixtureRoot := filepath.Join("testdata", "hugo-fixture")
 	runHugo(filepath.Join(fixtureRoot, "plain-site"), filepath.Join(publicDir, "plain"))
 	runHugo(filepath.Join(fixtureRoot, "chroma-site"), filepath.Join(publicDir, "chroma"))
+	runHugo(filepath.Join(fixtureRoot, "hook-site"), filepath.Join(publicDir, "hook"))
 
 	p := newProcessor(t, Config{})
 	result, err := p.Run(ctx, publicDir)
@@ -49,14 +50,17 @@ func TestHugoE2E(t *testing.T) {
 		}
 		rewritten += fr.BlocksRewritten
 	}
-	if rewritten < 3 {
-		t.Fatalf("BlocksRewritten total = %d, want at least 3 (one per authored page)", rewritten)
+	if rewritten < 7 {
+		t.Fatalf("BlocksRewritten total = %d, want at least 7 (one per authored page, two on the collapse page)", rewritten)
 	}
 
 	pages := []string{
 		filepath.Join(publicDir, "plain", "plain-block", "index.html"),
 		filepath.Join(publicDir, "chroma", "chroma-default", "index.html"),
 		filepath.Join(publicDir, "chroma", "hl-lines", "index.html"),
+		filepath.Join(publicDir, "hook", "title-and-markers", "index.html"),
+		filepath.Join(publicDir, "hook", "collapse", "index.html"),
+		filepath.Join(publicDir, "hook", "hl-lines-hook", "index.html"),
 	}
 	for _, page := range pages {
 		html, err := os.ReadFile(page)
@@ -79,6 +83,60 @@ func TestHugoE2E(t *testing.T) {
 	}
 	if !bytes.Contains(hlPage, []byte(`class="kz-line highlight mark"`)) {
 		t.Errorf("hl-lines page carries no marked line markup; hl_lines translation may have failed")
+	}
+
+	// Tier 2: title, mark, ins, and del survive purely through the render
+	// hook's data-kz-meta attribute, with no Chroma translation involved.
+	titleMarkersPage, err := os.ReadFile(pages[3])
+	if err != nil {
+		t.Fatalf("read title-and-markers page: %v", err)
+	}
+	for _, want := range []string{
+		`<span class="kz-title">main.go</span>`,
+		`class="kz-line highlight mark"`,
+		`class="kz-line highlight ins"`,
+		`class="kz-line highlight del"`,
+	} {
+		if !bytes.Contains(titleMarkersPage, []byte(want)) {
+			t.Errorf("title-and-markers page missing %q", want)
+		}
+	}
+
+	// Tier 2 collapse: the default style and the collapsible-start style
+	// both come from data-kz-meta, no threshold collapse involved.
+	collapsePage, err := os.ReadFile(pages[4])
+	if err != nil {
+		t.Fatalf("read collapse page: %v", err)
+	}
+	if !bytes.Contains(collapsePage, []byte(`<details class="kz-section">`)) {
+		t.Error("collapse page missing default style collapse markup")
+	}
+	if !bytes.Contains(collapsePage, []byte(`class="kz-section collapsible-start"`)) {
+		t.Error("collapse page missing collapsible-start style markup")
+	}
+
+	// Tier 2 hl_lines: the hook template's own string form translation to
+	// mark ranges, distinct from the Chroma hl class path covered above.
+	hookHLPage, err := os.ReadFile(pages[5])
+	if err != nil {
+		t.Fatalf("read hook hl-lines page: %v", err)
+	}
+	if !bytes.Contains(hookHLPage, []byte(`class="kz-line highlight mark"`)) {
+		t.Error("hook hl-lines page carries no marked line markup")
+	}
+
+	// The mermaid page proves the skip rule survives the hook: the hook
+	// still emits a plain language-mermaid block and the processor must
+	// leave it untouched rather than wrapping it in kazari markup.
+	mermaidPage, err := os.ReadFile(filepath.Join(publicDir, "hook", "mermaid", "index.html"))
+	if err != nil {
+		t.Fatalf("read mermaid page: %v", err)
+	}
+	if !bytes.Contains(mermaidPage, []byte("language-mermaid")) {
+		t.Error("mermaid page's plain block was altered; expected an untouched skip")
+	}
+	if bytes.Contains(mermaidPage, []byte(`class="kazari-block`)) {
+		t.Error("mermaid block was wrapped in kazari markup; skip rule did not fire through the hook")
 	}
 
 	eng := engine(t)

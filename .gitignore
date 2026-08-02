@@ -11,6 +11,10 @@ demo/chroma/showcase.js
 
 *-output.md
 
+# Hugo drops a lock file into any site it builds, including the test
+# fixture sites under process/testdata/hugo-fixture/.
+.hugo_build.lock
+
 *.png
 !kazari-block.png
 # brand/ holds the master brand assets, so raster exports there stay tracked.
