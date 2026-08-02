@@ -48,6 +48,20 @@ type FileConfig struct {
 	OutputDefaultCollapsed   *bool                             `yaml:"outputDefaultCollapsed" json:"outputDefaultCollapsed"`
 	OutputSeparator          *string                           `yaml:"outputSeparator" json:"outputSeparator"`
 	StyleOverrides           map[string]any                    `yaml:"styleOverrides" json:"styleOverrides"`
+	Process                  *ProcessFileConfig                `yaml:"process" json:"process"`
+}
+
+// ProcessFileConfig configures the post-build processor (the kazari process
+// command). It maps onto process.Config rather than engine options, so
+// FileConfigToOptions ignores it; the CLI reads it from the parsed
+// FileConfig directly. All fields are pointers so omitted keys are
+// distinguishable from zero values, matching the rest of the file config.
+type ProcessFileConfig struct {
+	SkipUnlabeled *bool   `yaml:"skipUnlabeled" json:"skipUnlabeled"`
+	AssetsBase    *string `yaml:"assetsBase" json:"assetsBase"`
+	HashedAssets  *bool   `yaml:"hashedAssets" json:"hashedAssets"`
+	Concurrency   *int    `yaml:"concurrency" json:"concurrency"`
+	MaxFileBytes  *int64  `yaml:"maxFileBytes" json:"maxFileBytes"`
 }
 
 type ThemesFileConfig struct {
@@ -202,6 +216,15 @@ func validateFileConfig(fc *FileConfig) error {
 		}
 		if fc.Collapsible.Style != nil {
 			v.Field("collapsible.style").Value(*fc.Collapsible.Style).OneOf("github", "collapsibleStart", "collapsibleEnd", "collapsibleAuto")
+		}
+	}
+
+	if fc.Process != nil {
+		if fc.Process.Concurrency != nil {
+			v.Field("process.concurrency").Value(*fc.Process.Concurrency).OmitNil().IntMin(1)
+		}
+		if fc.Process.MaxFileBytes != nil {
+			v.Field("process.maxFileBytes").Value(*fc.Process.MaxFileBytes).OmitNil().IntMin(1)
 		}
 	}
 
