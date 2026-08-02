@@ -1,0 +1,3 @@
+baseURL = "https://example.org/"
+title = "Kazari Chroma Fixture"
+disableKinds = ["taxonomy", "term", "rss", "sitemap"]

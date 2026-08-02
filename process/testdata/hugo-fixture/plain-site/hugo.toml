@@ -1,0 +1,7 @@
+baseURL = "https://example.org/"
+title = "Kazari Plain Fixture"
+disableKinds = ["taxonomy", "term", "rss", "sitemap"]
+
+[markup]
+  [markup.highlight]
+    codeFences = false
