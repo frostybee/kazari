@@ -45,12 +45,13 @@ jobs:
           hugo-version: latest
 
       - name: Build example Hugo site
+        env:
+          HUGO_RELATIVEURLS: "false"
+          HUGO_UGLYURLS: "false"
         run: |
           hugo --source examples/hugo \
                --destination "$GITHUB_WORKSPACE/examples/hugo/public" \
                --baseURL /kazari/examples/hugo/ \
-               --relativeURLs=false \
-               --uglyURLs=false \
                --minify
 
       - name: Process example site with Kazari
