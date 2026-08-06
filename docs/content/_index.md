@@ -1,6 +1,6 @@
 ---
 title: The Kazari Project
-description: "Framed, syntax-highlighted HTML code blocks for Go. Frames, markers, line numbers, code groups, and Goldmark integration."
+description: "Framed, syntax-highlighted HTML code blocks for Go. Frames, markers, line numbers, code groups, and Goldmark and Hugo integration."
 ---
 
 :::card-grid
