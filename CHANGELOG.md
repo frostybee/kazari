@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-06
+
 ### Added
 
 - **`kazari process` CLI.** `kazari process [dir]` walks a folder of built HTML files and upgrades plain code blocks in place to framed, syntax-highlighted Kazari blocks with copy buttons, line numbers, and dual themes. It works on the output of any static site generator, including Hugo, Jekyll, Eleventy, mdBook, Sphinx, Zola, and Astro, with no Markdown pipeline integration. `--check` reports pending changes without writing and exits 1 when any exist.
 - **The `process` package.** The engine behind the CLI is importable as `github.com/frostybee/kazari/process`, so Go programs can run the same post-build upgrade without shelling out.
 - **Goldmark-parity source recovery.** Code recovered from built HTML, whether plain blocks or highlighted markup from Chroma, Rouge, Prism, or Pygments, renders byte-identical to the same source going through the Goldmark path. Hugo `hl_lines` classes translate to Kazari line markers.
 - **Hugo render hook.** A `render-codeblock.html` template, shipped at `integrations/hugo/render-codeblock.html`, stashes the full Kazari meta string in a `data-kz-meta` attribute so per-block options survive the build instead of falling back to config defaults. It translates `title`, `mark` (plain and labeled), `ins`, `del`, `add`, `rem`, `focus`, `collapse`, `nocollapse`, `collapsestyle`, `collapsethreshold`, `showlinenumbers`, `startlinenumber`, `wrap`, `preserveindent`, `hangingindent`, `withoutput`, `outputcollapsed`, `outputlabel`, and both forms of Hugo's native `hl_lines`. Keys with no dedicated handler, such as `theme`, `frame`, and `lang`, pass through unchanged.
-- **Example Hugo site.** `examples/hugo` is a complete, runnable Hugo site demonstrating the render hook, an annotated config file, and a site-wide dark mode switch, across pages covering frames, annotations, collapse, themes, and the output panel. `cmd/kazari/example_site_test.go` builds it with a real Hugo binary and processes it through the CLI's own entry point.
+- **Example Hugo site.** `examples/hugo` is a complete, runnable Hugo site demonstrating the render hook, an annotated config file, and a site-wide dark mode switch, across pages covering frames, annotations, collapse, themes, and the output panel. A [live version](https://frostybee.github.io/kazari/examples/hugo/) is deployed alongside the documentation. `cmd/kazari/example_site_test.go` builds it with a real Hugo binary and processes it through the CLI's own entry point.
 - **Documented tier limits.** Meta-string-only features (focus lines, labeled ranges, explicit collapse ranges, hybrid diff, per-block overrides, output panel controls) require the render hook; hook-less pipelines still get frames, copy buttons, line numbers, and dual themes with zero configuration. Inline text markers and regex markers cannot be expressed in a Hugo fence at all, since Hugo parses only `key="value"` pairs inside the brace group.
 
 ### Fixed
@@ -94,7 +96,8 @@ The changelog is maintained by hand. To cut a release:
 4. Tag the release: `git tag -a vX.Y.Z -m "vX.Y.Z"` and push it with `git push origin vX.Y.Z`.
 5. Publish the GitHub release with the notes from this file: `gh release create vX.Y.Z --notes-file <section>`.
 
-[Unreleased]: https://github.com/frostybee/kazari/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/frostybee/kazari/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/frostybee/kazari/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/frostybee/kazari/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/frostybee/kazari/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/frostybee/kazari/releases/tag/v1.0.0

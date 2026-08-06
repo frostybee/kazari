@@ -132,4 +132,4 @@ The same summary line prints on every run: files scanned, blocks upgraded, block
 
 ## Try it
 
-[Hugo Integration](/cli/hugo-integration/) walks through building a complete example site and shows every feature above rendered, with a before and after comparison.
+Browse the [live example site](/examples/hugo/) to see every feature rendered, or follow the [Hugo Integration](/cli/hugo-integration/) guide to build and process it locally.

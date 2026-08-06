@@ -7,7 +7,7 @@ sidebar:
 
 The Kazari repository includes a complete Hugo site at `examples/hugo/` that exercises every feature the processor supports. Building it and processing it takes two commands. The result is a set of pages that can be opened straight from disk, with no server, and compared against the unprocessed build to see exactly what Kazari adds.
 
-This page walks through that example, then covers what to copy when adding Kazari to a real Hugo site.
+A [live version of the example site](/examples/hugo/) is deployed alongside these docs. This page walks through that example, then covers what to copy when adding Kazari to a real Hugo site.
 
 ## The example site
 
