@@ -18,8 +18,11 @@
   font-family: var(--kz-ui-font-family);
   color: var(--kz-lang-fg);
 }
+/* The row's 0.5rem flex gap already separates these, so the margin only
+   tops it up to 0.625rem, keeping the separator centered against the
+   0.625rem padding on its other side. */
 .kazari-block .kz-lang + .kz-title {
-  margin-left: 0.625rem;
+  margin-left: 0.125rem;
   padding-left: 0.625rem;
   border-left: 1px solid var(--kz-separator-color);
 }

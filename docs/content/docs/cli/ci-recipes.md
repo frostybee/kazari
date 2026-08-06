@@ -1,20 +1,24 @@
 ---
-title: "CI Recipes"
-description: "Run kazari process as the last step of a static site build."
+title: "Build Pipelines"
+description: "Add kazari process to a static site build pipeline."
 sidebar:
-  order: 4
+  order: 5
 ---
 
 Run `kazari process` after the static site generator writes its output directory and before the deploy step uploads it. The upgraded HTML replaces the generator's output in place; no deploy configuration changes.
 
 ## GitHub Actions: Hugo to GitHub Pages
 
+A single step between the Hugo build and the GitHub Pages upload is enough. The processor reads from `public/`, upgrades every code block, and writes the assets alongside the HTML.
+
 ```yaml
 - name: Build site
   run: hugo --minify
 
 - name: Enhance code blocks
-  run: go run github.com/frostybee/kazari/cmd/kazari@latest process ./public
+  run: >-
+    go run github.com/frostybee/kazari/cmd/kazari@latest
+    process --config kazari.config.yaml ./public
 
 - uses: actions/upload-pages-artifact@v4
   with:
@@ -25,32 +29,36 @@ The runner needs a Go toolchain; `actions/setup-go` provides one when the image 
 
 ## General pattern
 
-The recipe is generator-agnostic because the tool only consumes HTML:
+The processor only needs a directory of HTML files, so the same three-step shape works regardless of the generator or CI platform.
 
 1. Build the site with whatever generator the project uses.
-2. Run `go run github.com/frostybee/kazari/cmd/kazari@latest process <output-dir>`.
+2. Run `kazari process --config kazari.config.yaml <output-dir>`.
 3. Deploy the output directory as before.
 
 For Jekyll the output directory is `_site`, for Eleventy `_site` or `dist`, for mdBook `book`, for Sphinx `_build/html`, for Zola `public`.
 
 ## Pin a version
 
-Prefer a version tag over `@latest` in CI so builds stay reproducible:
+`@latest` pulls whatever version exists at build time, which can break a pipeline without a code change. Pinning to a version tag keeps builds reproducible.
 
 ```bash
-go run github.com/frostybee/kazari/cmd/kazari@v1.1.0 process ./public
+go run github.com/frostybee/kazari/cmd/kazari@v1.1.0 process --config kazari.config.yaml ./public
 ```
 
-## Verify a render hook installed correctly
+## Verify idempotency
 
-In a pull request workflow, a `--check` step fails the build when output would change, which catches a missing or misconfigured [render hook](/cli/render-hooks/) without writing anything:
+Processing the same output twice should produce no changes. Adding a `--check` step after the real run catches config drift or nondeterministic templates that would otherwise go unnoticed.
 
 ```yaml
-- name: Verify code blocks are processed
-  run: |
-    hugo --minify
-    go run github.com/frostybee/kazari/cmd/kazari@latest process ./public
-    go run github.com/frostybee/kazari/cmd/kazari@latest process --check ./public
+- name: Process code blocks
+  run: >-
+    go run github.com/frostybee/kazari/cmd/kazari@latest
+    process --config kazari.config.yaml ./public
+
+- name: Verify processing is stable
+  run: >-
+    go run github.com/frostybee/kazari/cmd/kazari@latest
+    process --check --config kazari.config.yaml ./public
 ```
 
-The second `process` run must exit 0: processing already-processed output is a no-op. Exit code 1 means something still changes on every run, which usually points at a config drift or a nondeterministic template.
+The second run must exit `0`. Exit code `1` means something still changes on every run, which usually points at a config drift or a nondeterministic template.

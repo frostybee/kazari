@@ -87,8 +87,10 @@ plugins:
     - redirects
     - llms_txt
     - social_cards
-    - scroll-to-top
-    - keyboard-nav
+    - scroll_to_top
+    - keyboard_nav
+    - reading_progress 
+    - telescope
   config:
     social_cards:
       # Brand palette from the Kazari logo: code-panel charcoal background,
@@ -100,14 +102,17 @@ plugins:
       accent_color_2: "#FF6B81"
       logo: "/images/kazari-logo.png"
       watermark: true
-    scroll-to-top:
-      showProgressRing: true
-      showTooltip: true
-    keyboard-nav:
+    scroll_to_top:
+      show_progress_ring: true
+      show_tooltip: true
+    keyboard_nav:
       # Keep arrow-key navigation, drop the on-load hint toast and the
       # chevron arrows pinned to the viewport edges.
       show_hint: false
       show_side_nav: true
+    reading_progress:
+      bar_height: 3.5
+      bar_color: "#9122f9"  
 
 homepage:
   hero:
@@ -117,9 +122,11 @@ homepage:
     cta:
       label: "Get Started"
       url: "/docs/getting-started"
+      icon: rocket
     secondary_cta:
       label: "View Showcase"
       url: "/demo/showcase.html"
+      icon: "briefcase"
     image:
       light: /images/hero-light.svg
       dark: /images/hero-dark.svg

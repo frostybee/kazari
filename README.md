@@ -177,6 +177,8 @@ kazari process ./public           # write the upgraded HTML in place
 
 Works on the output of Hugo, Jekyll, Eleventy, mdBook, Sphinx, Zola, and hand-written sites. See the [CLI docs](https://frostybee.github.io/kazari/docs/cli/overview/) for render hooks and per-generator setup.
 
+[`examples/hugo`](examples/hugo) is a runnable Hugo site showing the render hook, an annotated config file, and every per-block option the hook carries through the build.
+
 ## Configuration
 
 Kazari has three configuration layers. Each overrides the previous:

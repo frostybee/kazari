@@ -2,6 +2,6 @@
 title: "Architecture"
 description: "Internal design, rendering pipeline, and extension points."
 sidebar:
-  order: 8
+  order: 9
   icon: cpu
 ---

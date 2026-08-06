@@ -193,4 +193,4 @@ See the [Goldmark Extension](/integrations/goldmark-extension/) page for configu
 - [Features](/features/) covers every feature with meta string syntax, Go API, and CSS variables
 - [CSS Custom Properties](/styling/css-custom-properties/) shows how to customize colors, spacing, and fonts with `--kz-*` CSS variables
 - [File-Based Config](/reference/file-based-config/) sets engine options from a `kazari.config.yaml` file without writing Go code
-- [CLI](/cli/overview/) upgrades code blocks in HTML already built by another static site generator, with no Go integration required
+- [HTML Processor](/cli/overview/) upgrades code blocks in output already built by another static site generator, with no Go integration required

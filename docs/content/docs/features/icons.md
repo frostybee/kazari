@@ -147,7 +147,7 @@ File icon variables (emitted when `WithFileIcons(true)`, the default):
 | Variable | Default | Description |
 |---|---|---|
 | `--kz-file-icon-size` | `1rem` | Icon width and height |
-| `--kz-file-icon-margin` | `0 0.4rem 0 0` | Icon margin |
+| `--kz-file-icon-margin` | `0` | Icon margin, on top of the toolbar's own gap |
 | `--kz-file-icon-opacity` | `0.8` | Icon opacity |
 
 Language icon variables (emitted when `LangIconMode` is not `LangIconNone`):

@@ -1,0 +1,15 @@
+baseURL = "https://example.org/"
+title = "Kazari Hugo Example"
+
+# This demo is meant to be opened straight from disk, and relURL resolves
+# against the site root, so site.css and every nav link would come out as
+# /site.css and /basics/ and break under file://. relativeURLs rewrites
+# them relative to the page instead, and uglyURLs writes basics.html
+# rather than basics/index.html so a nav link opens a page and not a
+# directory listing. Kazari needs neither one; a deployed site drops both.
+relativeURLs = true
+uglyURLs = true
+
+# Nothing here needs taxonomies or feeds, and leaving them on only adds
+# output files for kazari process to walk.
+disableKinds = ["taxonomy", "term", "rss", "sitemap"]

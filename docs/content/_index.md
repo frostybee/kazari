@@ -21,4 +21,7 @@ description: "Framed, syntax-highlighted HTML code blocks for Go. Frames, marker
 
 :::link-card[Meta String Syntax](href="/docs/reference/meta-string-syntax" icon="code" description="All per-block options available in the fence info string.")
 :::
+
+:::link-card[HTML Processor](href="/docs/cli" icon="terminal" description="Upgrade plain code blocks in pre-built HTML files from any static site generator.")
+:::
 :::

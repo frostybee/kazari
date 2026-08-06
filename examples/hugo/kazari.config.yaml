@@ -1,0 +1,53 @@
+# Kazari config for the demo site. Only the keys this demo exercises are
+# listed. Every available key is documented in the configuration reference
+# at docs/content/docs/reference/configuration.md.
+
+# Both themes are baked into every block at build time. Switching between
+# them is pure CSS, so no JavaScript runs on theme change.
+themes:
+  light: github-light
+  dark: dracula
+
+# The site toggles a .dark class on <html>, so Kazari must key its dark
+# theme off the same selector. kind: selector means media queries are
+# ignored entirely and the class is the single source of truth. The
+# selector key is required whenever kind is selector or both.
+darkMode:
+  kind: selector
+  selector: ".dark"
+
+# Adds a per block theme button to every toolbar. It overrides one block
+# and leaves the rest of the page alone, which themes.md explains next to
+# the site wide button in the header.
+themeToggleButton: true
+
+# Opens every language badge with an icon slot, an empty
+# <span class="kz-lang-icon" data-lang="go"> at the far left of the
+# toolbar. Kazari ships no icon art; static/site.css fills the slot with
+# a background image per language.
+languageIconMode: iconAndText
+
+# The separate file icon next to the title is off so each block shows a
+# single icon. Turning this on adds <span class="kz-file-icon"
+# data-ext="go"> before any title with an extension, another empty slot
+# filled the same way.
+fileIcons: false
+
+# Line numbers on by default. Individual blocks opt out with
+# showlinenumbers="false" in the fence attributes.
+defaults:
+  lineNumbers: true
+
+# Any block longer than 18 lines collapses to a preview automatically.
+# nocollapse="true" opts a single block out. Blocks can also declare their
+# own ranges with collapse="4-9" regardless of this threshold.
+collapsible:
+  lineThreshold: 18
+  previewLines: 6
+
+# Required for withoutput="true" to do anything. Without it the
+# ---output--- separator stays literal text in the code.
+outputPanel: true
+
+# Turns @[label](url) inside code into a real link with an external icon.
+links: true

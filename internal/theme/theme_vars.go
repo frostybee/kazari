@@ -143,7 +143,7 @@ func buildStaticVars(cfg *config.Config) []struct{ name, value string } {
 	if cfg.FileIcons {
 		vars = append(vars,
 			nv("--kz-file-icon-size", "1rem"),
-			nv("--kz-file-icon-margin", "0 0.4rem 0 0"),
+			nv("--kz-file-icon-margin", "0"),
 			nv("--kz-file-icon-opacity", "0.8"),
 		)
 	}

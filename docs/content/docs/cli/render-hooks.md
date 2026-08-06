@@ -2,7 +2,7 @@
 title: "Render Hooks"
 description: "Install a one-file hook so per-block titles, markers, and collapse ranges survive the build."
 sidebar:
-  order: 3
+  order: 4
 ---
 
 A one-file render hook stashes a code block's full meta string in an HTML attribute, so `kazari process` recovers titles, line markers, and collapse ranges instead of falling back to config-only defaults. Everything in the [render hook feature list](/cli/overview/#what-needs-a-render-hook) becomes available.
@@ -13,7 +13,7 @@ Static site generators discard the fence info string before HTML exists. A fence
 
 ## Hugo
 
-Copy the canonical template from the Kazari repository at [`integrations/hugo/render-codeblock.html`](https://github.com/frostybee/kazari/blob/main/integrations/hugo/render-codeblock.html) into the site:
+Hugo supports render hooks natively, and a single template file is all it takes. Copy the canonical template from the Kazari repository at [`integrations/hugo/render-codeblock.html`](https://github.com/frostybee/kazari/blob/main/integrations/hugo/render-codeblock.html) into the site:
 
 | Hugo version | Install path |
 |---|---|
@@ -24,7 +24,7 @@ The hook replaces Chroma for every fence: it emits a plain block carrying the me
 
 ### Authoring convention
 
-Write every Kazari option in one brace group right after the language, as `key="value"` pairs only:
+Hugo imposes a specific fence syntax. It discards info string text outside the braces, reads only the first brace group, and rejects bare tokens. Write every Kazari option in one brace group right after the language, as `key="value"` pairs only:
 
 ````
 ```go {title="main.go" mark="3-5" collapse="10-20"}
@@ -32,30 +32,39 @@ Write every Kazari option in one brace group right after the language, as `key="
 
 This shape is the only one that survives, because Hugo discards info string text outside the braces, reads only the first brace group, and rejects bare tokens like `{3-5}` as a build error. Hugo also lowercases attribute names before the template sees them; values keep their case.
 
+:::note
+Two Kazari features cannot be expressed in a Hugo fence at all: inline text markers (`"text"`) and regex markers (`/regex/`). Hugo parses only `key="value"` pairs inside the brace group and drops bare tokens, so neither reaches the template. Extend it locally to add them.
+:::
+
 ### Recognized keys
+
+The hook recognizes the keys below and translates each into the format `kazari process` expects. Any lowercase key not listed here, such as `theme`, `frame`, or `lang`, passes through unchanged into the `data-kz-meta` attribute, so future Kazari meta keys work without editing the template.
 
 | Key | Example | Effect |
 |---|---|---|
 | `title` | `title="main.go"` | Frame title |
 | `mark` | `mark="3-5,9"` | Marked line ranges, comma separated |
+| `mark` (labeled) | `mark="'Setup':3-5"` | A labeled range. Use single quotes, since the value is already inside double quotes |
 | `ins` / `del` | `ins="6-7"` `del="9"` | Inserted or deleted line ranges |
+| `add` / `rem` | `add="6-7"` `rem="9"` | Accepted spellings of `ins` and `del` |
+| `focus` | `focus="4-6"` | Focused line ranges, dimming everything else |
 | `collapse` | `collapse="true"` or `collapse="4-9"` | Collapse the whole block, or the given ranges |
 | `nocollapse` | `nocollapse="true"` | Opt this block out of the config wide collapse threshold |
 | `collapsestyle` | `collapsestyle="collapsible-start"` | Collapse style: `-start`, `-end`, or `-auto` |
 | `collapsethreshold` | `collapsethreshold="20"` | Per-block auto-collapse threshold |
 | `showlinenumbers` | `showlinenumbers="true"` or `"false"` | Toggle line numbers |
 | `startlinenumber` | `startlinenumber="5"` | First displayed line number |
-| `wrap` | `wrap="true"` | Enable word wrap |
+| `wrap` | `wrap="true"` | Enable word wrap (`wrap="false"` is a no-op; the meta grammar has no per-block switch to turn wrap off) |
+| `preserveindent` | `preserveindent="false"` | Whether wrapped lines keep the original indent |
+| `hangingindent` | `hangingindent="4"` | Extra indent, in spaces, on wrapped lines |
+| `withoutput` | `withoutput="true"` | Split the fence at the output separator into a code panel and an output panel. Requires `outputPanel: true` in the config file; without it the separator stays literal text |
+| `outputcollapsed` | `outputcollapsed="true"` or `"false"` | Whether the output panel starts closed |
+| `outputlabel` | `outputlabel="Result"` | Label on the output panel's toggle |
 | `hl_lines` | `hl_lines="2-4 7"` or `hl_lines=[3,4]` | Hugo's native spelling; both forms translate to marked lines |
 
-> [!NOTE]
-> Any other lowercase key, such as `theme`, `frame`, `lang`, `focus`, `add`, or `rem`, passes through unchanged, so future lowercase Kazari meta keys work without editing the template.
+### A runnable example
 
-> [!NOTE]
-> Inline text markers (`"text"`) and regex markers (`/regex/`) are not supported by the stock template. Extend it locally to add them.
-
-> [!NOTE]
-> `wrap="false"` is a no-op. The meta grammar has no per-block switch that turns wrap off.
+Every key in the table above is exercised by a complete Hugo site shipped with Kazari. [Hugo Integration](/cli/hugo-integration/) has the commands and a page-by-page tour of what each one renders.
 
 ## Example: collapse specific lines
 
@@ -97,7 +106,7 @@ The section opens once and stays open. For a section the reader can close again,
 
 ### Length-based collapse without a hook
 
-Exact ranges need the hook, because the fence text that carries them never reaches the built HTML. Collapsing by length does not: it comes from the config file and applies to every block the processor touches. Put `kazari.config.yaml` at the project root and run the CLI from there, since discovery checks the target directory first and then the working directory:
+Exact ranges need the hook, because the fence text that carries them never reaches the built HTML. Collapsing by length does not: it comes from the config file and applies to every block the processor touches. Put `kazari.config.yaml` at the project root and run the Kazari processor from there, since discovery checks the target directory first and then the working directory:
 
 ```yaml
 collapsible:
@@ -110,8 +119,9 @@ Every block longer than 20 lines now collapses to an 8-line preview with an expa
 
 The two mechanisms combine. Keep the threshold for long blocks, then use the hook for per-block exceptions: `nocollapse="true"` leaves one long block fully expanded, and `collapse="5-9"` folds an exact range regardless of the block's length.
 
-> [!NOTE]
-> Threshold collapse needs the collapse JavaScript, which ships only when `collapsible` is configured. Range-based sections use native `<details>` elements and work with JavaScript disabled.
+:::note
+Threshold collapse needs the collapse JavaScript, which ships only when `collapsible` is configured. Range-based sections use native `<details>` elements and work with JavaScript disabled.
+:::
 
 ## Jekyll
 

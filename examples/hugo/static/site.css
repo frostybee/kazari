@@ -1,0 +1,177 @@
+/* Page chrome for the demo. Kazari styles the code blocks themselves and
+   this file never touches them, with one deliberate exception noted at the
+   bottom. */
+
+:root {
+  --page-bg: #ffffff;
+  --page-fg: #1f2328;
+  --page-muted: #57606a;
+  --page-border: #d0d7de;
+  --page-accent: #0969da;
+  --page-surface: #f6f8fa;
+}
+
+html.dark {
+  --page-bg: #16181d;
+  --page-fg: #e6e6e6;
+  --page-muted: #9aa3ad;
+  --page-border: #30363d;
+  --page-accent: #6ea8ff;
+  --page-surface: #1d2027;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--page-fg);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Transitions are declared on named page chrome selectors only. The
+   common theme toggle shortcut, a universal rule such as
+   *, *::before, *::after { transition: ... }, reaches every element
+   inside a code block and animates the token colours on every switch.
+   Kazari sets transition: none !important on .kazari-block and all its
+   descendants precisely to survive that, but naming the selectors here
+   means the reset never has to fire. */
+body,
+.site-header,
+.site-header a,
+#theme-toggle {
+  transition: background-color 120ms linear, color 120ms linear, border-color 120ms linear;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid var(--page-border);
+  background: var(--page-surface);
+}
+
+.site-brand {
+  font-weight: 600;
+  color: var(--page-fg);
+  text-decoration: none;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-inline-end: auto;
+}
+
+.site-nav a,
+.site-brand:hover {
+  color: var(--page-accent);
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  text-decoration: underline;
+}
+
+#theme-toggle {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--page-border);
+  border-radius: 6px;
+  background: var(--page-bg);
+  color: var(--page-fg);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+#theme-toggle:hover {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
+
+.site-main {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.25;
+}
+
+h2 {
+  margin-top: 2.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--page-border);
+  font-size: 1.25rem;
+}
+
+p code {
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: var(--page-surface);
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--page-accent);
+}
+
+/* Language icons. languageIconMode: iconAndText in kazari.config.yaml
+   makes every language badge open with <span class="kz-lang-icon"
+   data-lang="go"></span>, and Kazari ships no icon art, leaving the span
+   empty until a site fills it. Kazari's own rules sit in @layer kazari and
+   unlayered CSS beats any layer regardless of source order, so these win
+   without !important.
+
+   The slot is a sized, empty box: Kazari gives it a width and a height in
+   --kz-lang-icon-size, aligns the box itself, and already sets the
+   background sizing, so a background-image is all that is left to supply.
+   Filling the slot with ::before text instead puts a glyph inside the box,
+   and the glyph follows the toolbar font rather than the box, so it
+   overflows the slot and sits off the badge's baseline.
+
+   Everything without a rule of its own falls back to a generic code icon,
+   because the slot renders for every language and an unmatched one would
+   otherwise be an invisible box holding blank space in the toolbar. A real
+   site would extend this list; the demo covers only the languages its own
+   pages use. */
+.kz-lang-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23808080' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6L2 12l6 6M16 6l6 6-6 6'/%3E%3C/svg%3E");
+}
+
+.kz-lang-icon[data-lang="go"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2300ADD8' d='M1.811 10.231c-.047 0-.058-.023-.035-.059l.246-.315c.023-.035.081-.058.128-.058h4.172c.046 0 .058.035.035.07l-.199.303c-.023.036-.082.07-.117.07zM.047 11.306c-.047 0-.059-.023-.035-.058l.245-.316c.023-.035.082-.058.129-.058h5.328c.047 0 .07.035.058.07l-.093.28c-.012.047-.058.07-.105.07zm2.828 1.075c-.047 0-.059-.035-.035-.07l.163-.292c.023-.035.07-.07.117-.07h2.337c.047 0 .07.035.07.082l-.023.28c0 .047-.047.082-.082.082zM17.829 10.01c-.744.187-1.252.327-1.996.514-.187.047-.199.059-.363-.128-.187-.222-.327-.363-.585-.504-.773-.41-1.519-.292-2.209.129-.819.502-1.243 1.252-1.231 2.139.012.886.585 1.613 1.46 1.742.748.105 1.381-.128 1.89-.632.105-.117.199-.246.315-.398H13.21c-.269 0-.339-.164-.245-.385.164-.374.468-.992.644-1.299.047-.082.152-.222.339-.222h4.16c-.023.327-.023.643-.07.968-.117.82-.397 1.59-.852 2.291-.714 1.1-1.67 1.906-2.874 2.373-.992.386-2.022.456-3.062.21-1.007-.235-1.836-.82-2.454-1.648-.538-.714-.863-1.542-.956-2.443-.117-1.147.105-2.22.654-3.215.607-1.101 1.473-1.906 2.58-2.443.91-.444 1.882-.607 2.898-.514 1.007.093 1.906.456 2.664 1.112.468.398.827.877 1.097 1.43.058.094.023.14-.082.164z'/%3E%3Cpath fill='%2300ADD8' d='M21.348 17.263c-.924.047-1.79-.105-2.583-.584-.667-.398-1.112-.96-1.295-1.707-.246-1.018-.07-1.965.502-2.839.607-.933 1.449-1.53 2.501-1.835.897-.257 1.789-.269 2.651.07.758.292 1.295.82 1.588 1.577.386 1.007.328 1.988-.175 2.932-.398.737-.97 1.295-1.706 1.695-.526.281-1.089.456-1.695.514-.07 0-.14.012-.21.012-.024.011-.048.011-.071.011-.012-.011-.012-.011.012-.011zm2.373-4.137c-.012-.152-.035-.269-.07-.386-.234-.735-.852-1.147-1.612-1.077-.748.07-1.32.456-1.694 1.1-.316.538-.374 1.124-.188 1.718.187.574.7.96 1.296.984.467.012.886-.117 1.26-.386.584-.42.945-.97 1.008-1.706v-.247z'/%3E%3C/svg%3E");
+}
+
+.kz-lang-icon[data-lang="python"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%233776AB' d='M11.914 0C5.82 0 6.2 2.656 6.2 2.656l.007 2.752h5.814v.826H3.9S0 5.789 0 11.969c0 6.18 3.403 5.96 3.403 5.96h2.03v-2.868s-.109-3.402 3.346-3.402h5.766s3.24.052 3.24-3.133V3.19S18.28 0 11.913 0zM8.708 1.85a1.06 1.06 0 110 2.12 1.06 1.06 0 010-2.12z'/%3E%3Cpath fill='%23FFD43B' d='M12.086 24c6.094 0 5.714-2.656 5.714-2.656l-.007-2.752h-5.814v-.826H20.1S24 18.211 24 12.031c0-6.18-3.403-5.96-3.403-5.96h-2.03v2.868s.109 3.402-3.346 3.402H9.455s-3.24-.052-3.24 3.133v5.336S5.72 24 12.087 24zm3.206-1.85a1.06 1.06 0 110-2.12 1.06 1.06 0 010 2.12z'/%3E%3C/svg%3E");
+}
+
+.kz-lang-icon[data-lang="js"],
+.kz-lang-icon[data-lang="javascript"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect fill='%23F7DF1E' width='24' height='24' rx='2'/%3E%3Cpath fill='%23323330' d='M6.4 19.2l1.7-1c.3.6.6 1 1.3 1 .6 0 1-.2 1-1.1v-6h2.1v6c0 1.8-1.1 2.7-2.6 2.7-1.4 0-2.2-.7-2.7-1.6zm6.4-.2l1.7-1c.4.7.9 1.2 1.8 1.2.8 0 1.2-.4 1.2-.9 0-.6-.5-.9-1.4-1.3l-.5-.2c-1.4-.6-2.3-1.3-2.3-2.9 0-1.4 1.1-2.5 2.8-2.5 1.2 0 2.1.4 2.7 1.5l-1.5 1c-.3-.6-.7-.8-1.2-.8s-.8.3-.8.7c0 .5.3.7 1.1 1l.5.2c1.6.7 2.5 1.4 2.5 3 0 1.7-1.4 2.7-3.2 2.7-1.8 0-2.9-.8-3.5-1.9z'/%3E%3C/svg%3E");
+}
+
+.kz-lang-icon[data-lang="bash"],
+.kz-lang-icon[data-lang="sh"],
+.kz-lang-icon[data-lang="shell"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='3' fill='%234EAA25'/%3E%3Cpath d='M6 8.5L9.5 12 6 15.5' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12.5 15.5H18' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.kz-lang-icon[data-lang="yaml"],
+.kz-lang-icon[data-lang="yml"],
+.kz-lang-icon[data-lang="json"],
+.kz-lang-icon[data-lang="toml"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CB171E' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M3 7h6M15 7h6M3 12h10M19 12h2M3 17h4M13 17h8'/%3E%3Ccircle cx='12' cy='7' r='2.2'/%3E%3Ccircle cx='16' cy='12' r='2.2'/%3E%3Ccircle cx='10' cy='17' r='2.2'/%3E%3C/svg%3E");
+}

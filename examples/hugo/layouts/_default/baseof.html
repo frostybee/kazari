@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Title }} | {{ site.Title }}</title>
+<script>
+// Applies the stored theme before the first paint. Without this the page
+// renders light and then snaps to dark, and the flash is most visible on
+// large code blocks.
+(function () {
+  try {
+    var stored = localStorage.getItem("kazari-example-theme");
+    if (stored === "dark") document.documentElement.classList.add("dark");
+  } catch (e) {}
+})();
+</script>
+<link rel="stylesheet" href="{{ "site.css" | relURL }}">
+{{- /*
+No kazari.css link here on purpose. kazari process injects the stylesheet
+and script tags itself while rewriting the blocks, and their absence from
+this template is what makes the before and after visible: build with hugo
+alone and the pages carry no Kazari assets at all.
+*/ -}}
+</head>
+<body>
+<header class="site-header">
+  {{- /*
+  Every link here comes from the page itself rather than a literal path,
+  because relURL on a string like "basics/" would emit a directory even
+  though uglyURLs writes basics.html. RelPermalink tracks whatever URL
+  scheme hugo.toml asks for, so this nav keeps working if the demo ever
+  drops the settings that make the output browsable from disk.
+  */ -}}
+  <a class="site-brand" href="{{ site.Home.RelPermalink }}">Kazari Hugo Example</a>
+  <nav class="site-nav">
+    {{- range slice "/basics" "/annotations" "/collapse" "/themes" "/output" }}
+      {{- with site.GetPage . }}
+    <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      {{- end }}
+    {{- end }}
+  </nav>
+  <button id="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle dark mode">
+    <span class="theme-toggle-label">Dark</span>
+  </button>
+</header>
+<main class="site-main">
+{{ block "main" . }}{{ end }}
+</main>
+<script src="{{ "theme-toggle.js" | relURL }}"></script>
+</body>
+</html>

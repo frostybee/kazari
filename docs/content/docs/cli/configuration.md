@@ -2,12 +2,14 @@
 title: "Configuration"
 description: "Flags, the process config key, theme selection, and dark mode setup for kazari process."
 sidebar:
-  order: 2
+  order: 3
 ---
 
-Flags override the config file; the config file overrides built-in defaults. Most projects set the dark mode selector once and run with defaults for everything else.
+Running `kazari process` with no flags and no config file produces a working result: framed blocks, syntax highlighting, a copy button, and dual themes. This page covers the settings available when the defaults need adjusting. Most sites only configure the dark mode selector so Kazari's theme switching matches the site's own toggle.
 
 ## Flags
+
+Every flag has a config file equivalent, but flags take precedence when both are set. A flag that is not explicitly passed never overrides a config value with its zero default.
 
 | Flag | Default | Description |
 |---|---|---|
@@ -21,11 +23,11 @@ Flags override the config file; the config file overrides built-in defaults. Mos
 | `--concurrency` | `0` (CPU count) | Max files processed concurrently |
 | `--verbose` | `false` | Log per-file progress to stderr |
 
-The positional `[dir]` argument defaults to `.` and may appear before or after the flags. A flag overrides a config file value only when it is explicitly passed; an unset flag never clobbers a config value with its zero default.
+The positional `[dir]` argument defaults to `.` and may appear before or after the flags.
 
 ## Unknown theme names
 
-Theme names are validated against the bundled set before any work starts. A typo produces a suggestion:
+A typo in a theme name stops the run before any files are touched. The error message suggests the closest match:
 
 ```
 kazari: unknown theme "github-drak", did you mean "github-dark"? Run "kazari themes" to list all bundled themes.
@@ -35,7 +37,7 @@ kazari: unknown theme "github-drak", did you mean "github-dark"? Run "kazari the
 
 ## The process config key
 
-The `process:` block in `kazari.config.yaml` configures the CLI. All keys are optional.
+Settings specific to `kazari process` live under a `process:` block in `kazari.config.yaml`. These control file handling and asset output, not the appearance of code blocks. All keys are optional.
 
 ```yaml
 process:
@@ -54,10 +56,11 @@ process:
 | `concurrency` | `int` | `0` | Max files processed concurrently; zero means the CPU count |
 | `maxFileBytes` | `int64` | `33554432` | Files larger than this (32 MiB) are skipped and reported as errors |
 
-> [!NOTE]
-> The `process:` key affects only the `kazari process` command. The Goldmark extension and the library API ignore it.
+:::note
+The `process:` key affects only the `kazari process` command. The Goldmark extension and the library API ignore it.
+:::
 
-The same config file also carries the engine-level keys, including `themes:` and `darkMode:`, which the CLI applies when building its engine. See [File-Based Config](/reference/file-based-config/) for the full engine key reference.
+The same config file also carries the engine-level keys, including `themes:` and `darkMode:`, which the Kazari processor applies when building its engine. See [File-Based Config](/reference/file-based-config/) for the full engine key reference.
 
 ## Dark mode
 
@@ -104,16 +107,13 @@ This applies to every block the processor touches, with no changes to any Markdo
 
 ## Assets
 
-`kazari.css` and `kazari.js` are written once at the output root, only when their content differs from what is already on disk. Pages reference them with relative `../` paths built from each page's depth, which works unchanged under subpath hosting such as GitHub Pages project sites. A `?v=` query carrying an 8 character content hash busts caches when the stylesheet changes.
+The processor writes two files, `kazari.css` and `kazari.js`, at the output root and injects tags that load them into every page that gained a Kazari block. Both files are written only when their content differs from what is already on disk. Pages reference them with relative `../` paths built from each page's depth, which works unchanged under subpath hosting such as GitHub Pages project sites. A `?v=` query carrying an 8 character content hash busts caches when the stylesheet changes.
 
 `--assets-base` replaces the relative paths with a fixed prefix; a trailing slash on the prefix is normalized. `--hashed-assets` switches to content hashed filenames and drops the `?v=` query, since the hash lives in the name.
 
 Injected link and script tags carry a `data-kazari="assets"` attribute. Re-runs find those tags and update them in place, including after `--assets-base` or `--hashed-assets` changed, so tags never duplicate.
 
-> [!WARNING]
-> `--hashed-assets` does not clean up hashed files left behind by earlier runs. Stale `kazari-<oldhash>.css` files accumulate until removed manually.
+:::caution
+`--hashed-assets` does not clean up hashed files left behind by earlier runs. Stale `kazari-<oldhash>.css` files accumulate until removed manually.
+:::
 
-## Known limitation
-
-> [!NOTE]
-> Indentation that a generator replaced with non-breaking spaces decodes to U+00A0, not a regular space, and is preserved as-is. Normalizing would corrupt intentional non-breaking spaces inside string literals, so the processor does not attempt it.

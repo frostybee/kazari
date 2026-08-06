@@ -9,11 +9,19 @@ demo/nuri/showcase.js
 demo/chroma/showcase.css
 demo/chroma/showcase.js
 
-*-output.md
+# Named exactly rather than as *-output.md: the glob silently swallowed a
+# test fixture page and would catch any future doc or fixture whose name
+# happens to end that way.
+repomix-output.md
 
 # Hugo drops a lock file into any site it builds, including the test
 # fixture sites under process/testdata/hugo-fixture/.
 .hugo_build.lock
+
+# Build output from the example sites under examples/. The sources are
+# tracked; what hugo and kazari process produce from them is not.
+examples/**/public/
+examples/**/resources/
 
 *.png
 !kazari-block.png

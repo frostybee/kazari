@@ -3,6 +3,7 @@ package process
 import (
 	"bytes"
 	"context"
+	"html"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,6 +39,30 @@ func TestHugoE2E(t *testing.T) {
 	runHugo(filepath.Join(fixtureRoot, "chroma-site"), filepath.Join(publicDir, "chroma"))
 	runHugo(filepath.Join(fixtureRoot, "hook-site"), filepath.Join(publicDir, "hook"))
 
+	// The output panel keys are camelCase in the meta grammar and Hugo
+	// lowercases attribute names, so the hook template has to translate
+	// them. This engine leaves outputPanel off, and processing consumes the
+	// attribute, so the translation is asserted here on the raw Hugo output
+	// before the processor runs. The example site covers the rendered panel.
+	focusOutputBuilt, err := os.ReadFile(filepath.Join(publicDir, "hook", "focus-and-output-keys", "index.html"))
+	if err != nil {
+		t.Fatalf("read built focus-and-output-keys page: %v", err)
+	}
+	// Hugo's minifier unescapes the quote entities and reflows the attribute
+	// quoting, so compare against the unescaped text the processor's
+	// tokenizer will also see rather than against one particular spelling.
+	builtMeta := html.UnescapeString(string(focusOutputBuilt))
+	for _, want := range []string{
+		`focus={4-6}`,
+		`withOutput`,
+		`outputLabel="Result"`,
+		`outputCollapsed=false`,
+	} {
+		if !strings.Contains(builtMeta, want) {
+			t.Errorf("hook template emitted no %q in data-kz-meta", want)
+		}
+	}
+
 	p := newProcessor(t, Config{})
 	result, err := p.Run(ctx, publicDir)
 	if err != nil {
@@ -50,8 +75,8 @@ func TestHugoE2E(t *testing.T) {
 		}
 		rewritten += fr.BlocksRewritten
 	}
-	if rewritten < 7 {
-		t.Fatalf("BlocksRewritten total = %d, want at least 7 (one per authored page, two on the collapse page)", rewritten)
+	if rewritten < 9 {
+		t.Fatalf("BlocksRewritten total = %d, want at least 9 (one per authored page, two each on the collapse and focus-and-output-keys pages)", rewritten)
 	}
 
 	pages := []string{
@@ -61,6 +86,7 @@ func TestHugoE2E(t *testing.T) {
 		filepath.Join(publicDir, "hook", "title-and-markers", "index.html"),
 		filepath.Join(publicDir, "hook", "collapse", "index.html"),
 		filepath.Join(publicDir, "hook", "hl-lines-hook", "index.html"),
+		filepath.Join(publicDir, "hook", "focus-and-output-keys", "index.html"),
 	}
 	for _, page := range pages {
 		html, err := os.ReadFile(page)
@@ -123,6 +149,17 @@ func TestHugoE2E(t *testing.T) {
 	}
 	if !bytes.Contains(hookHLPage, []byte(`class="kz-line highlight mark"`)) {
 		t.Error("hook hl-lines page carries no marked line markup")
+	}
+
+	// Tier 2 focus: the hook's focus key must reach the engine as a brace
+	// group. Passed through quoted it parses as nothing and the focused
+	// lines vanish without any error, which is what this guards.
+	focusPage, err := os.ReadFile(pages[6])
+	if err != nil {
+		t.Fatalf("read focus-and-output-keys page: %v", err)
+	}
+	if !bytes.Contains(focusPage, []byte(`class="kz-line focused"`)) {
+		t.Error("focus-and-output-keys page carries no focused line markup")
 	}
 
 	// The mermaid page proves the skip rule survives the hook: the hook
