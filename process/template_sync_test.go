@@ -42,3 +42,21 @@ func TestHugoHookTemplateInSync(t *testing.T) {
 		})
 	}
 }
+
+// TestHugoExampleConfigInSync guards against drift between the canonical
+// kazari.config.yaml in the example site root and the copy served from
+// the static directory so users can view it on the deployed site.
+func TestHugoExampleConfigInSync(t *testing.T) {
+	canonical := filepath.Join("..", "examples", "hugo", "kazari.config.yaml")
+	staticCopy := filepath.Join("..", "examples", "hugo", "static", "kazari.config.yaml")
+
+	want, err := os.ReadFile(canonical)
+	if err != nil {
+		t.Fatalf("read canonical config: %v", err)
+	}
+	got, err := os.ReadFile(staticCopy)
+	if err != nil {
+		t.Fatalf("read static copy: %v", err)
+	}
+	diffParity(t, "kazari.config.yaml canonical vs static copy", string(got), string(want))
+}

@@ -25,6 +25,6 @@ description: "Framed, syntax-highlighted HTML code blocks for Go. Frames, marker
 :::link-card[HTML Processor](href="/docs/cli" icon="terminal" description="Upgrade plain code blocks in pre-built HTML files from any static site generator.")
 :::
 
-:::link-card[Live Example](href="/examples/hugo/" icon="eye" description="A complete Hugo site processed by Kazari, showing frames, annotations, collapse, themes, and the output panel.")
+:::link-card[Live Example](href="https://frostybee.github.io/kazari/examples/hugo/" icon="eye" description="A complete Hugo site processed by Kazari, showing frames, annotations, collapse, themes, and the output panel.")
 :::
 :::

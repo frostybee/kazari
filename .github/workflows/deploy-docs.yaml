@@ -55,7 +55,7 @@ jobs:
                --minify
 
       - name: Process example site with Kazari
-        run: go run ./cmd/kazari process examples/hugo/public
+        run: go run ./cmd/kazari process --config examples/hugo/kazari.config.yaml examples/hugo/public
 
       - name: Copy example site to docs output
         run: |
