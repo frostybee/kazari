@@ -58,7 +58,9 @@ jobs:
         run: go run ./cmd/kazari process examples/hugo/public
 
       - name: Copy example site to docs output
-        run: cp -r examples/hugo/public docs/public/examples/hugo
+        run: |
+          mkdir -p docs/public/examples/hugo
+          cp -r examples/hugo/public/* docs/public/examples/hugo/
 
       - uses: actions/configure-pages@v5
 
